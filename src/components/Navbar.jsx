@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 
 export default function Navbar() {
-  const { user, profile, logout } = useAuth();
+  const { user, profile,profileStage, logout } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef();
@@ -79,9 +79,9 @@ export default function Navbar() {
         >
           <NavLink to="/">Home</NavLink>
           {user ? (
-            profile ? (
+            profileStage!=="not-exists" ? (
               <>
-                <NavLink to="/members">Members</NavLink>
+                 {(profileStage==="devotee"||profileStage==="mentor") && ( <NavLink to="/members">Members</NavLink>)}
                 <NavLink to="/yatras">Yatras</NavLink>
                 <NavLink to="/profile">Profile</NavLink>
                 <button onClick={logout} className="logout-btn">
@@ -127,9 +127,9 @@ export default function Navbar() {
             </button>
 
             <NavLink to="/">Home</NavLink>
-            {profile ? (
+            {profileStage!=="not-exists" ? (
               <>
-              <NavLink to="/members">Members</NavLink>
+             {(profileStage==="devotee"||profileStage==="mentor") && ( <NavLink to="/members">Members</NavLink>)}
                 <NavLink to="/yatras">Yatras</NavLink>
                 <NavLink to="/profile">Profile</NavLink>
               </>

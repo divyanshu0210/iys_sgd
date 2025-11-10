@@ -9,12 +9,7 @@ export function AuthProvider({ children }) {
   const [profileStage, setProfileStage] = useState("not-exists"); // "not-exists", "guest", "approval", "devotee"
   const [loading, setLoading] = useState(true);
 
-  // const determineProfileStage = (data) => {
-  //   if (!data?.mobile) return "not-exists";
-  //   if (!data.mentor) return "guest";
-  //   if (data.mentor && !data.is_profile_approved) return "approval";
-  //   if (data.mentor && data.is_profile_approved) return "devotee";
-  // };
+ 
   const determineProfileStage = (data) => {
     if (!data.mobile) return "not-exists";
     if(data.user_type === "mentor") return "mentor";

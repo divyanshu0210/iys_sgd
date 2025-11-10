@@ -9,7 +9,6 @@ import Home from "./pages/Home";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import YatraList from "./pages/YatraList";
-import YatraRegister from "./pages/YatraRegister";
 import Profile from "./pages/Profile/Profile";
 import BasicProfile from "./pages/Profile/BasicProfile";
 
@@ -23,6 +22,8 @@ import PasswordChange from "./pages/Auth/PasswordChange";
 import PasswordChangeDone from "./pages/Auth/PasswordChangeDone";
 import VerificationEmailSent from "./pages/Auth/VerificationEmailSent";
 import Members from "./pages/Members/Members";
+import RoleProtectedRoute from "./components/RoleProtectedRoute";
+import YatraRegister from "./pages/Registration/YatraRegister";
 
 export default function App() {
   return (
@@ -72,12 +73,18 @@ export default function App() {
 
               <Route path="/complete-profile" element={<BasicProfile />} />
               <Route path="/yatras" element={<YatraList />} />
-              <Route path="/members" element={<Members />} />
               <Route
                 path="/yatra/:yatra_id/register"
                 element={<YatraRegister />}
               />
               <Route path="/profile" element={<Profile />} />
+            </Route>
+            <Route
+              element={
+                <RoleProtectedRoute allowedStatuses={["devotee", "mentor"]} />
+              }
+            >
+              <Route path="/members" element={<Members />} />
             </Route>
 
             {/* Email Verification (Public, but outside guards) */}
