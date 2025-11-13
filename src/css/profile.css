@@ -119,6 +119,7 @@ textarea:focus {
   font-weight: 700;
   box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
   width: 90%;
+  height: auto;
 }
 
 .cp-btn-primary:disabled {

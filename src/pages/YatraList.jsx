@@ -13,7 +13,7 @@ export default function YatraList() {
   const { profileStage } = useAuth();
 
   useEffect(() => {
-    API.get("/api/yatras/").then((res) => setYatras(res.data));
+    API.get("/yatras/list/").then((res) => setYatras(res.data));
   }, []);
 
   const formatDate = (dateString) => {

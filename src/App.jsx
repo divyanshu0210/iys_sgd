@@ -24,6 +24,7 @@ import VerificationEmailSent from "./pages/Auth/VerificationEmailSent";
 import Members from "./pages/Members/Members";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 import YatraRegister from "./pages/Registration/YatraRegister";
+import { YatraRegistrationProvider } from "./pages/Registration/context/YatraRegistrationContext";
 
 export default function App() {
   return (
@@ -75,7 +76,11 @@ export default function App() {
               <Route path="/yatras" element={<YatraList />} />
               <Route
                 path="/yatra/:yatra_id/register"
-                element={<YatraRegister />}
+                element={
+                  <YatraRegistrationProvider>
+                    <YatraRegister />
+                  </YatraRegistrationProvider>
+                }
               />
               <Route path="/profile" element={<Profile />} />
             </Route>

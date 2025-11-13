@@ -347,7 +347,7 @@
 }
 
 /* Badges */
-.badge-self, .badge-registered {
+.badge-self {
   font-size: 0.65rem;
   padding: 2px 6px;
   border-radius: 4px;
@@ -360,8 +360,30 @@
 }
 
 .badge-registered {
-  background: #3b82f6;
+  font-size: 0.85rem;       /* slightly bigger */
+  padding: 4px 12px;        /* horizontal padding for pill shape */
+  border-radius: 9999px;    /* pill-shaped */
+  font-weight: 600;
   color: white;
+  display: inline-block;
+  text-align: center;
+}
+
+/* Different colors for each status */
+.badge-registered.paid {
+  background: #047857; /* green for Confirmed */
+}
+
+.badge-registered.partial {
+  background: #f59e0b; /* orange for Incomplete */
+}
+
+.badge-registered.pending {
+  background: #b91c1c; /* red for Not Started */
+}
+
+.badge-registered.cancelled {
+  background: #6b7280; /* gray for Cancelled */
 }
 
 /* Pay Bar */
@@ -534,7 +556,7 @@
   font-size: 1rem;
 }
 
-.qr-section, .proof-form {
+.qr-section {
   text-align: center;
   padding: 1.5rem;
   background: white;
@@ -570,6 +592,53 @@
   margin-top: 2rem;
   display: flex;
   justify-content: space-between;
+}
+
+.warning-note {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-weight: 500;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.amount-due {
+  font-size: 0.85rem;
+  color: #dc2626;
+  margin-top: 4px;
+}
+
+.installment-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.btn-view-proof {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  margin-left: 8px;
+}
+
+.proof-item {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.proof-inputs {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.proof-inputs input {
+  flex: 1;
+  font-size: 0.9rem;
 }
 
 /* Responsive */
