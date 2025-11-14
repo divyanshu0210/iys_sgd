@@ -46,9 +46,9 @@ export default function YatraList() {
         width: "100%",
         maxWidth: "950px",
         marginBottom: "30px",
+        
       }}
     >
-            <h2 style={{fontSize:"1.2rem"}}>List of Events</h2>
       {yatras.length === 0 ? (
         <p>No yatras yet.</p>
       ) : (

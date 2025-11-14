@@ -319,4 +319,11 @@
     margin: 0px;
     padding: 0px;
   }
+
+  .tab-content h3 {
+  margin: 0.2px;
+  font-size: 0.9rem;
+  color: #1e293b;
+}
+
 }

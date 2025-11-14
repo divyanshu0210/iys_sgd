@@ -26,6 +26,7 @@ import { YatraRegistrationProvider } from "./pages/Registration/context/YatraReg
 import SignIn from "./pages/Auth/SignIn";
 import SignUp from "./pages/Auth/SignUp";
 import "./App.css"
+import CheckoutStep from "./pages/Registration/steps/CheckoutStep";
 
 export default function App() {
   return (
@@ -78,6 +79,9 @@ export default function App() {
                 }
               />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/checkout" element={ <YatraRegistrationProvider>
+                    <CheckoutStep />
+                  </YatraRegistrationProvider>} />
             </Route>
             <Route
               element={

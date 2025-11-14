@@ -221,3 +221,122 @@
 .btn-secondary:hover {
   background: #e2e8f0;
 }
+
+/* ================================================================= */
+/* =======================  MOBILE RESPONSIVE  ====================== */
+/* ================================================================= */
+
+@media (max-width: 768px) {
+  .modal-container {
+    width: 95%;
+    padding: 0.2rem 1.2rem;
+    /* padding-bottom: 10px; */
+    border-radius: 12px;
+  }
+
+  .modal-header{
+    margin: 20px  0px;
+  }
+
+  .modal-title {
+    font-size: 1rem;
+  }
+
+  .highlight {
+    font-size: 1rem;
+  }
+
+  .close-btn {
+    font-size: 1rem;
+    color: black;
+  }
+
+  .form-body {
+    gap: 1rem;
+  }
+
+  .form-section {
+    padding: 0.6rem 0.6rem;
+  }
+
+  .section-title {
+    font-size: 0.3rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .form-fields {
+    gap: 0.7rem;
+  }
+
+  .form-group-modern {
+    gap: 0.3rem;
+  }
+
+  .form-label {
+    font-size: 0.7rem;
+    margin: 0px;
+  }
+
+  .form-input {
+    padding: 0.45rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  input.form-input{
+    width: 78vw;
+  } select.form-input{
+    width: 78vw;
+  }
+  .radio-group-modern,
+  .checkbox-modern {
+    gap: 0.6rem;
+  }
+
+  .radio-label-modern {
+    font-size: 0.85rem;
+  }
+
+  .amount-banner {
+    font-size: 0.85rem;
+    padding: 0.6rem;
+  }
+
+  .installment-list {
+    gap: 0.5rem;
+  }
+
+  .installment-card {
+    padding: 0.1rem 0.6rem;
+  }
+
+  .installment-label {
+    padding: 0.5rem;
+    font-size: 0.65rem;
+  }
+
+  .installment-status {
+    font-size: 0.65rem;
+  }
+
+  .view-proof-link {
+    font-size: 0.65rem;
+  }
+
+  .info-banner {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  /* Buttons */
+  .form-actions-modern {
+    gap: 0.7rem;
+    margin-bottom: 15px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    font-size: 0.85rem;
+    padding: 0.55rem 1rem;
+    width: 100%;
+  }
+}

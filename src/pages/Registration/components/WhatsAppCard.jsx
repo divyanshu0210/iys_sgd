@@ -60,7 +60,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
   );
   const getButtonText = () => {
     if (isLoadingRegistration) return "Loading...";
-    if (profile.is_registered || hasExistingData) return "Edit";
+    if (profile.is_registered || hasExistingData) return "View";
     return "Register";
   };
   const unSelect = (profile) => {
@@ -124,7 +124,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
           form_fields: data.form_data || {},
           installments_selected,
           installments_paid,
-          installments_info:profile.installments_info,
+          installments_info: profile.installments_info,
           installments_details: processedInstallments,
           hasProof,
           registration_id: profile.registration_id,
@@ -152,70 +152,70 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
         className="whatsapp-card"
         style={{
           backgroundColor: hasSelectableInstallments ? "#f0fdf4" : "white",
-
           border: hasSelectableInstallments && "1px solid #22c55e",
           borderRadius: hasSelectableInstallments && "8px",
-          transition: "background-color 0.3s",
+          display: isEligibilityCard ? "flex" : "block",
         }}
       >
-        {!isEligibilityCard && hasSelectableInstallments && (
-          <input
-            type="checkbox"
-            checked={selected.includes(profileId)}
-            onChange={() => unSelect(profile)}
-            className="reg-checkbox"
-            title={hasPaid ? "Cannot edit after payment" : ""}
-          />
-        )}
-        <div className="whatsapp-avatar">
-          <img
-            src={profile.profile_picture_url || "/default-avatar.png"}
-            alt={profile.full_name}
-          />
-        </div>
-        <div className="whatsapp-info">
+        <div
+          className="whatsapp-card-with-register-btn"
+          style={{
+            backgroundColor: hasSelectableInstallments ? "#f0fdf4" : "white",
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
           <div
             className="whatsapp-name-line"
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: "8px",
+              // gap: "8px",
             }}
           >
+            {!isEligibilityCard && hasSelectableInstallments && (
+              <input
+                type="checkbox"
+                checked={selected.includes(profileId)}
+                onChange={() => unSelect(profile)}
+                className="reg-checkbox"
+                title={hasPaid ? "Cannot edit after payment" : ""}
+              />
+            )}
+
+            <div className="whatsapp-avatar">
+              <img
+                src={profile.profile_picture_url || "/default-avatar.png"}
+                alt={profile.full_name}
+              />
+            </div>
+
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <div
+              <div className="profileName"
                 style={{ display: "flex", alignItems: "center", gap: "8px" }}
               >
-                <strong>{profile.full_name}</strong>
+                <strong >{profile.full_name}</strong>
                 {profile.is_self && <span className="badge-self">You</span>}
               </div>
               <div className="whatsapp-memberid">
                 ID: {profile.member_id || "N/A"}
               </div>
             </div>
+          </div>
 
-            {!hasSelectableInstallments && (
-              <span
-                className={`badge-registered ${profile.registration_status}`}
-              >
-                {STATUS_LABELS[profile.registration_status] ||
-                  profile.registration_status}
-              </span>
-            )}
-
+          {!hasSelectableInstallments && (
+            <span className={`badge-registered ${profile.registration_status}`}>
+              {STATUS_LABELS[profile.registration_status] ||
+                profile.registration_status}
+            </span>
+          )}
+          <div className="installmet-edit">
             {/* === Installments List === */}
             {!isEligibilityCard &&
               !hasSelectableInstallments &&
               profile?.installments_info && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "6px",
-                    marginTop: "4px",
-                  }}
-                >
+                <div className="installments-div">
                   {profile.installments_info.map((inst) => {
                     let color;
                     switch (inst.tag) {
@@ -269,98 +269,98 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                   })}
                 </div>
               )}
+
+            <div className="installment-badge-collection">
+              {!isEligibilityCard &&
+                regData?.installments_selected
+                  ?.map((instLabel) =>
+                    selectableInstallments.find(
+                      (inst) => inst.label === instLabel
+                    )
+                  )
+                  .filter(Boolean)
+                  .map((inst) => (
+                    <InstallmentBadge key={inst.label} installment={inst} />
+                  ))}
+            </div>
+
+            {!isEligibilityCard && (
+              <button
+                onClick={() => toggleSelect(profile)}
+                className={`action-btn ${hasExistingData ? "edit" : "open"}`}
+                style={{ minWidth: "80px", maxHeight: "35px", color: "black" }}
+                disabled={isLoadingRegistration}
+              >
+                {getButtonText()}
+              </button>
+            )}
           </div>
         </div>
-        <div
-          className="whatsapp-action"
-          style={{
-            margin: "5px",
-            gap: "8px",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          {!isEligibilityCard &&
-            regData?.installments_selected
-              ?.map((instLabel) =>
-                selectableInstallments.find((inst) => inst.label === instLabel)
-              )
-              .filter(Boolean)
-              .map((inst) => (
-                <InstallmentBadge key={inst.label} installment={inst} />
-              ))}
-          {!isEligibilityCard && (
-            <button
-              onClick={() => toggleSelect(profile)}
-              className={`action-btn ${hasExistingData ? "edit" : "open"}`}
-              style={{ minWidth: "80px", color: "black" }}
-              disabled={isLoadingRegistration}
-            >
-              {getButtonText()}
-            </button>
-          )}
-          {isEligibilityCard && !profile.is_self && (
-            <button
-              onClick={() =>
-                handleEligibility(
-                  profileId,
-                  isApproved ? "unapprove" : "approve"
-                )
-              }
-              disabled={isLoading || profile.is_registered}
-              className={`action-btn ${isApproved ? "unapprove" : "approve"}`}
-            >
-              {isLoading
-                ? isApproved
-                  ? "Unapproving..."
-                  : "Approving..."
-                : isApproved
-                ? "Unapprove"
-                : "Approve"}
-            </button>
-          )}
-          {isEligibilityCard && profile.is_self && (
-            <>
-              {!profile.approved_by && !profile.is_approved && (
-                <button
-                  onClick={requestApproval}
-                  disabled={isSelfRequesting}
-                  className="action-btn request"
-                >
-                  {isSelfRequesting ? "Sending..." : "Request"}
-                </button>
-              )}
-              {profile.approved_by && !profile.is_approved && (
-                <button
-                  onClick={() =>
-                    window.confirm("Send again?") && requestApproval()
-                  }
-                  disabled={isSelfRequesting}
-                  className="action-btn pending"
-                >
-                  {isSelfRequesting ? "Sending..." : "Request Pending"}
-                </button>
-              )}
-              {profile.is_approved && (
-                <button
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Can't unapprove yourself. Contact your mentor to unapprove."
-                      )
-                    ) {
-                    }
-                  }}
-                  className="action-btn unapprove"
-                >
-                  Unapprove
-                </button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
 
+        {isEligibilityCard && (
+          <div>
+            {isEligibilityCard && !profile.is_self && (
+              <button
+                onClick={() =>
+                  handleEligibility(
+                    profileId,
+                    isApproved ? "unapprove" : "approve"
+                  )
+                }
+                disabled={isLoading || profile.is_registered}
+                className={`action-btn ${isApproved ? "unapprove" : "approve"}`}
+              >
+                {isLoading
+                  ? isApproved
+                    ? "Unapproving..."
+                    : "Approving..."
+                  : isApproved
+                  ? "Unapprove"
+                  : "Approve"}
+              </button>
+            )}
+            {isEligibilityCard && profile.is_self && (
+              <>
+                {!profile.approved_by && !profile.is_approved && (
+                  <button
+                    onClick={requestApproval}
+                    disabled={isSelfRequesting}
+                    className="action-btn request"
+                  >
+                    {isSelfRequesting ? "Sending..." : "Request"}
+                  </button>
+                )}
+                {profile.approved_by && !profile.is_approved && (
+                  <button
+                    onClick={() =>
+                      window.confirm("Send again?") && requestApproval()
+                    }
+                    disabled={isSelfRequesting}
+                    className="action-btn pending"
+                  >
+                    {isSelfRequesting ? "Sending..." : "Request Pending"}
+                  </button>
+                )}
+                {profile.is_approved && (
+                  <button
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Can't unapprove yourself. Contact your mentor to unapprove."
+                        )
+                      ) {
+                      }
+                    }}
+                    className="action-btn unapprove"
+                  >
+                    Unapprove
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
       {localShowForm && (
         <RegistrationFormModal profile={profile} onClose={handleModalClose} />
       )}

@@ -145,15 +145,17 @@ function RegistrationFormModal({ profile, onClose }) {
             {isReadOnly ? "View Registration" : "Register"} —{" "}
             <span className="highlight">{profile.full_name}</span>
           </h2>
-          <button className="close-btn" onClick={onClose}>
-            ✕
+          <button className="form-close-btn" onClick={onClose}>
+            X
           </button>
         </header>
 
-        {isReadOnly && (
+        {isReadOnly ?(
           <div className="info-banner">
             ⚠️ Form is read-only because proof has been submitted.
           </div>
+        ):(
+          <p className="info-banner"> Form can only be filled once..</p>
         )}
 
         <form className="form-body" onSubmit={handleSubmit}>
@@ -273,10 +275,14 @@ function RegistrationFormModal({ profile, onClose }) {
                         disabled={isPaid || hasProof}
                       />
                       <span>
-                        <strong>{label}</strong> — ₹{amount}
+                        <strong>{label}</strong>
+                        {!hasProof&&(
+                          
+                          <span>- ₹{amount}</span>
+                        ) }
                       </span>
                       {isPaid && (
-                        <span className="installment-status paid">✓ Paid</span>
+                        <span className="installment-status paid">Paid</span>
                       )}
                       {hasProof && (
                         <span
@@ -289,7 +295,6 @@ function RegistrationFormModal({ profile, onClose }) {
                         </span>
                       )}
                     </label>
-
                     {hasProof && (
                       <a
                         href={inst.proof}
@@ -297,7 +302,7 @@ function RegistrationFormModal({ profile, onClose }) {
                         rel="noopener noreferrer"
                         className="view-proof-link"
                       >
-                        View Proof
+                        View
                       </a>
                     )}
                   </div>

@@ -62,7 +62,7 @@ export default function Home() {
       )}
 
       <section style={{ marginTop: "2rem" }}>
-        {/* <h2 style={{fontSize:"1.2rem"}}>Latest Updates</h2> */}
+        <h2 style={{fontSize:"1.2rem"}}>Latest Updates</h2>
         <YatraList />
       </section>
 

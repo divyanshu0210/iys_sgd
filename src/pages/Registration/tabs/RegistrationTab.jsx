@@ -5,6 +5,7 @@ import WhatsAppCard from "../components/WhatsAppCard";
 import ReviewStep from "../steps/ReviewStep";
 import CheckoutStep from "../steps/CheckoutStep";
 import "../css/registrationTab.css"
+import { useNavigate } from "react-router-dom";
 
 const RegistrationTab = ({ title, note, filterFn, showBanner = false }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -47,7 +48,7 @@ const RegistrationTab = ({ title, note, filterFn, showBanner = false }) => {
         return (
           <ReviewStep
             onBack={() => setCurrentStep(1)}
-            onNext={() => setCurrentStep(3)}
+            // onNext={() => setCurrentStep(3)}
           />
         );
       case 3:
