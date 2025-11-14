@@ -1,15 +1,15 @@
 import "../css/members.css";
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
+import MemberActions from "./MemberActions";
+const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
 
-  
 export default function MemberDetailsCard({ m }) {
   const isPending = m.is_pending;
 
@@ -23,21 +23,15 @@ export default function MemberDetailsCard({ m }) {
       </div>
 
       <div className="member-info">
-        <p className="member-line name-line">
-          {m.full_name || "Unnamed"}
-          {isPending && (
-            <span
-              style={{
-                marginLeft: 8,
-                color: "#f39c12",
-                fontSize: "0.85rem",
-              }}
-            >
-              (Pending)
-            </span>
-          )}
-        </p>
+        <div className="member-name-row">
+          <div style={{ display: "flex" , flexDirection:"column"}}>
 
+          <p className="member-line name-line">{m.full_name || "Unnamed"}</p>
+             {isPending && <span className="pending-label">(Pending)</span>}
+          </div>
+          <MemberActions m={m} />
+        </div>
+     
         <p className="member-line">
           {m.user_type === "mentor"
             ? "Mentor"

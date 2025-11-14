@@ -234,7 +234,7 @@ export default function BasicProfile() {
     return <ProfileApprovalForm user={user} />;
   }
   return (
-    <div className="cp-page" style={{ paddingTop: "4rem" }}>
+    <div className="cp-page">
       <form className="cp-card" onSubmit={handleSubmit} noValidate>
         <h2 className="cp-title">Complete Your Profile To Continue</h2>
         <p style={{ textAlign: "center", color: "#555", marginBottom: "1rem" }}>
@@ -394,7 +394,7 @@ export default function BasicProfile() {
           {/* ---------- Photo Upload (unchanged) ---------- */}
           <div className="cp-field" style={{ alignSelf: "start" }}>
             <Label htmlFor="photo">Upload Profile Photo</Label>
-            <span style={{ fontSize: "0.8rem", color: "#888" }}>
+            <span style={{ fontSize: "0.7rem", color: "#888" }}>
               Max size: <b>1 MB</b>.
             </span>
             <div
@@ -405,7 +405,7 @@ export default function BasicProfile() {
               }}
             >
               <div
-                style={{ display: "flex", alignItems: "center", gap: "0.0rem" }}
+                style={{ display: "flex", alignItems: "center", gap: "1rem" }}
               >
                 <input
                   id="photo"

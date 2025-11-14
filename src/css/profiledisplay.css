@@ -3,7 +3,7 @@
   display: flex;
   min-height: 100vh;
   background: #f7f9fc;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #333;
 }
 
@@ -19,6 +19,8 @@
 }
 
 .profile-header {
+  padding: 1.5rem 1.2rem;
+  border-bottom: 1px solid #e2e8f0;
   text-align: center;
   margin-bottom: 2rem;
 }
@@ -52,19 +54,18 @@
   font-size: 0.95rem;
 }
 
-.member-info {
-  margin-top: 0.8rem;
+.profile-member-info {
+  /* margin-top: 0.8rem; */
   background: #f8f9fa;
   border-radius: 8px;
   padding: 0.6rem 0.8rem;
   text-align: left;
   font-size: 0.9rem;
   color: #444;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.member-info p {
+.profile-member-info p {
   margin: 0.3rem 0;
 }
 
@@ -73,72 +74,11 @@
   color: #007bff;
 }
 
-
-.vertical-tabs {
-  width: 100%;
-}
-
-.tab-button {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  color: #475569;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-}
-
-.tab-button:hover {
-  background: #f1f5f9;
-  color: #1e40af;
-}
-
-.tab-button.active {
-  background: #3b82f6;
-  color: white;
-  font-weight: 500;
-}
-
-.tab-button.active .tab-icon {
-  filter: brightness(0) invert(1);
-}
-
-.tab-icon {
-  margin-right: 0.75rem;
-  font-size: 1.1rem;
-}
-
-.tab-label {
-  flex: 1;
-}
-
 /* Right Content */
 .profile-content {
   flex: 1;
-  padding: 2rem;
+  padding: 1rem;
   max-width: 800px;
-}
-
-.tab-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-}
-
-.tab-content h3 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: #1e293b;
-  font-size: 1.4rem;
-  border-bottom: 2px solid #e0e7ff;
-  padding-bottom: 0.5rem;
 }
 
 .info-grid {
@@ -148,6 +88,7 @@
 
 .info-row {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   padding: 0.5rem 0;
   border-bottom: 1px dashed #e2e8f0;
@@ -271,11 +212,11 @@
   flex-direction: column;
   align-items: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  height: 100vh;               /* full viewport height */
-  overflow-y: auto;            /* scroll if tabs exceed */
+  height: 100vh;
+  overflow-y: auto;
 }
 
-/* ---- Keep full tab names on mobile ---- */
+
 @media (max-width: 768px) {
   .profile-page {
     flex-direction: column;
@@ -284,30 +225,25 @@
   .profile-sidebar {
     width: 100%;
     height: auto;
-    padding: 1.5rem;
+    /* padding: 1.5rem; */
     overflow-y: visible;
   }
 
-  .vertical-tabs {
-    display: flex;
-    /* flex-wrap:; */
-    gap: 0.5rem;
-    justify-content: center;
-  }
-
-  .tab-button {
-    flex: 1 1 120px;          /* keep full width, no truncation */
-    justify-content: center;
-    white-space: nowrap;      /* prevent label wrap */
-  }
-
-  .tab-label {
-    display: inline;          /* always visible */
+  .info-row{
+    flex-direction: row;
+    gap: 0.6rem;
+    padding: 5px;
   }
 }
 
 /* Compact horizontal header on mobile */
 @media (max-width: 768px) {
+  .profile-sidebar {
+    padding: 0.1rem;
+    align-items: "center";
+    justify-content: center;
+  }
+
   .profile-header {
     display: flex;
     align-items: center;
@@ -316,6 +252,7 @@
     margin-bottom: 1rem;
     padding: 0.5rem 0;
     width: 100%;
+    margin-bottom: 5px;
   }
 
   .avatar-container {
@@ -325,6 +262,7 @@
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
+    margin: 0px;
   }
 
   .profile-avatar {
@@ -336,84 +274,62 @@
   .profile-info-compact {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     flex: 1;
+    align-items: flex-start;
+    justify-content: flex-start;
   }
+
+    .profile-info-compact2 {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+  }
+
+
+  .profile-info-compact h2 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .profile-username {
+    font-size: 0.7rem;
+    color: #6b7280;
+    /* margin: 0.1rem 0 0.2rem; */
+  }
+
+  .profile-dates {
+    font-size: 0.85rem;
+  }
+
 
   .profile-name {
     font-size: 1rem;
     font-weight: 600;
-    margin: 0;
+    margin: 0px;
   }
 
-  .profile-username {
-    font-size: 0.8rem;
-    color: #6b7280;
-    margin: 0.1rem 0 0.2rem;
-  }
-
-  .member-info {
-    background: transparent;
-    box-shadow: none;
-    padding: 0;
-    margin: 0;
-    font-size: 0.8rem;
-    color: #555;
+  .profile-member-info {
     display: flex;
+    flex-direction: row;
     gap: 1rem;
+    padding: 2px;
   }
 
-  .member-info p {
+  
+
+  .profile-member-info p {
     margin: 0;
+    font-size: 10px;
   }
 
-  .profile-sidebar {
-    padding: 1rem;
-    align-items: flex-start;
+  .info-grid {
+    font-size: 0.75rem;
   }
 
-  .vertical-tabs {
-    width: 100%;
-    margin-top: 0.5rem;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .tab-button {
-    flex: 1 1 100px;
-    font-size: 0.85rem;
-    padding: 0.5rem;
-  }
-
-  .profile-content {
-    padding: 1rem;
+  .info-label {
+    width: 50vw;
   }
 }
-
-
-/* Responsive */
-/* @media (max-width: 768px) {
-  .profile-page {
-    flex-direction: column;
-  }
-  .profile-sidebar {
-    width: 100%;
-    padding: 1.5rem;
-  }
-  .vertical-tabs {
-    flex-direction: row;
-    overflow-x: auto;
-  }
-  .tab-button {
-    min-width: 120px;
-    justify-content: center;
-  }
-  .tab-label {
-    display: none;
-  }
-  .profile-content {
-    padding: 1.5rem;
-  }
-} */

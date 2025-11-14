@@ -6,8 +6,6 @@ import PublicOnlyRoute from "./components/PublicOnlyRoute";
 
 // Pages
 import Home from "./pages/Home";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
 import YatraList from "./pages/YatraList";
 import Profile from "./pages/Profile/Profile";
 import BasicProfile from "./pages/Profile/BasicProfile";
@@ -25,18 +23,15 @@ import Members from "./pages/Members/Members";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 import YatraRegister from "./pages/Registration/YatraRegister";
 import { YatraRegistrationProvider } from "./pages/Registration/context/YatraRegistrationContext";
+import SignIn from "./pages/Auth/SignIn";
+import SignUp from "./pages/Auth/SignUp";
+import "./App.css"
 
 export default function App() {
   return (
     <>
       <Navbar />
-      <main
-        style={{
-          minHeight: "calc(100vh - 64px)",
-          padding: "2rem 1rem",
-          backgroundColor: "#f8f9fa",
-        }}
-      >
+      <main      >
         <div
           style={{
             maxWidth: "1400px",

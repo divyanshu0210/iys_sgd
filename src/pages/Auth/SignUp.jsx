@@ -1,61 +1,66 @@
-// src/pages/SignIn.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import "../css/signIn.css";
-import { GoogleLogin } from "@react-oauth/google";
-import API from "../services/api";
-import GoogleBtn from "../components/GoogleBtn";
+import "../../css/signIn.css";
+import GoogleBtn from "../../components/GoogleBtn";
+import API from "../../services/api";
 
-export default function SignIn() {
+export default function SignUp() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const { login, profile, fetchProfile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null); // { type, msg }
 
-  // Email/Password Login
+  // Email/Password Sign Up
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.email || !form.password) return;
-
     setLoading(true);
     setStatus(null);
 
+    const formData = new FormData();
+    const username = form.email.split("@")[0]; // derive username from email
+    formData.append("username", username);
+    formData.append("email", form.email);
+    formData.append("password1", form.password);
+    formData.append("password2", form.password);
+
+    // username, email, password1, password2
     try {
-      await login(form.email, form.password);
-      setStatus({ type: "success", msg: "Signed in successfully!" });
-
-      const stage = await fetchProfile(); // refresh latest profile
-
-      setTimeout(() => {
-        if (stage !== "not-exists") {
-          navigate("/"); // ✅ any kind of profile exists
-        } else {
-          navigate("/complete-profile"); // ❌ no profile at all
-        }
-      }, 800);
+      await API.post("api/auth/register/", formData);
+      setStatus({
+        type: "success",
+        msg: "Verification email sent! Redirecting...",
+      });
+      setTimeout(() => navigate("/email-sent"), 1000);
     } catch (err) {
-      const msg = "Invalid Email or Password";
-      err.response?.data?.error ||
-        err.message ||
-        "Login failed. Please try again.";
+      const msg =
+        err.response?.data?.email?.[0] ||
+        err.response?.data?.password1?.[0] ||
+        err.response?.data?.password2?.[0] ||
+        err.response?.data?.username?.[0] ||
+        err.response?.data?.non_field_errors?.[0] ||
+        "Registration failed. Please try again.";
       setStatus({ type: "error", msg });
     } finally {
       setLoading(false);
     }
   };
 
+
   return (
     <div className="reg-page">
       <form className="reg-card" onSubmit={handleSubmit} noValidate>
-        <h2 className="reg-title">Sign In</h2>
+        <h2 className="reg-title">Create Account</h2>
 
         {/* Status */}
         {status && (
           <div
             className={`status-box ${
-              status.type === "success" ? "success" : "error"
+              status.type === "info"
+                ? "info"
+                : status.type === "success"
+                ? "success"
+                : "error"
             }`}
             style={{ marginBottom: "1rem" }}
           >
@@ -64,9 +69,8 @@ export default function SignIn() {
         )}
 
         <div className="reg-grid">
-          <div className="input-group">
+          <div className="input-group reg-field-full">
             <input
-              id="email"
               type="email"
               placeholder=" "
               value={form.email}
@@ -75,21 +79,20 @@ export default function SignIn() {
               disabled={loading}
               autoComplete="email"
             />
-            <label htmlFor="email">Email</label>
+            <label>Email</label>
           </div>
 
-          <div className="input-group">
+          <div className="input-group reg-field-full">
             <input
-              id="password"
               type="password"
               placeholder=" "
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
               disabled={loading}
-              autoComplete="current-password"
+              autoComplete="new-password"
             />
-            <label htmlFor="password">Password</label>
+            <label>Password</label>
           </div>
         </div>
 
@@ -99,25 +102,19 @@ export default function SignIn() {
             className="btn-primary"
             disabled={loading || !form.email || !form.password}
           >
-            {loading ? "Signing In..." : "Sign In"}
+            {loading ? "Sending..." : "Send Verification Email"}
           </button>
         </div>
 
-        <p style={{ textAlign: "center", margin: "0.5rem 0" }}>
-          <Link to="/password_reset" className="btn-link">
-            Forgot password?
-          </Link>
-        </p>
-
-        {/* Google Login */}
+        {/* Google Sign Up */}
         <div style={{ margin: "1.5rem 0", textAlign: "center" }}>
-          <GoogleBtn />
+          <GoogleBtn/>
         </div>
 
         <p style={{ textAlign: "center", fontSize: "0.9rem" }}>
-          New here?{" "}
-          <Link to="/signup" className="btn-link">
-            Create an account
+          Already have an account?{" "}
+          <Link to="/signin" className="btn-link">
+            Sign in
           </Link>
         </p>
       </form>

@@ -1,6 +1,6 @@
 // src/pages/EmailSent.jsx
 import { Link } from "react-router-dom";
-import "../../css/signIn.css"; // reuse same styling if you want
+import "../../css/signIn.css"; 
 
 export default function VerificationEmailSent() {
   return (

@@ -1,4 +1,4 @@
-/* registration.css — modern, responsive Sign-In form */
+/* signIn.css — Responsive Sign-In form */
 
 :root {
   --bg: #ffffff;
@@ -27,6 +27,7 @@
   padding: 24px;
   box-shadow: var(--card-shadow);
   border: 1px solid rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
 }
 
 .reg-title {
@@ -52,9 +53,9 @@
 
 .input-group input {
   width: 100%;
-  padding: 12px 12px 12px 14px;
+  padding: 14px 14px 14px 16px;
   border: 1.8px solid var(--input-border);
-  border-radius: 8px;
+  border-radius: 10px;
   outline: none;
   background: transparent;
   font-size: 1rem;
@@ -63,8 +64,8 @@
 
 .input-group label {
   position: absolute;
-  left: 14px;
-  top: 12px;
+  left: 16px;
+  top: 14px;
   color: #999;
   pointer-events: none;
   transition: all 0.2s ease;
@@ -89,10 +90,11 @@
   background: linear-gradient(180deg, var(--primary-500), var(--primary-700));
   color: #fff;
   border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 12px 18px;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: 700;
+  font-size: 1rem;
   width: 100%;
   box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -125,6 +127,7 @@
   padding: 10px 12px;
   border-radius: 8px;
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .status-box.success {
@@ -146,11 +149,66 @@
 
 /* Responsive */
 @media (max-width: 720px) {
+  .reg-page {
+    margin: 16px auto;
+    padding: 0 12px;
+  }
+
   .reg-card {
-    padding: 18px;
+    padding: 18px 16px;
+    border-radius: 10px;
+  }
+
+  .reg-title {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .input-group input {
+    font-size: 0.95rem;
+    padding: 12px 12px 12px 14px;
+    border-radius: 8px;
+  }
+
+  .input-group label {
+    left: 14px;
+    top: 12px;
+    font-size: 0.95rem;
   }
 
   .btn-primary {
-    width: 100%;
+    padding: 11px 16px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+
+  .status-box {
+    font-size: 0.9rem;
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .reg-card {
+    padding: 16px 14px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+  }
+
+  .reg-title {
+    font-size: 18px;
+  }
+
+  .input-group input {
+    font-size: 0.9rem;
+    padding: 10px 12px;
+  }
+
+  .btn-primary {
+    font-size: 0.9rem;
+    padding: 10px 14px;
+  }
+
+  .btn-link {
+    font-size: 0.9rem;
   }
 }

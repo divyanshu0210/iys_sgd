@@ -122,7 +122,7 @@ export default function Profile() {
             <h2 className="profile-name">{profile.full_name}</h2>
             <p className="profile-username">@{profile.email || "guest"}</p>
 
-            <div className="member-info">
+            <div className="profile-member-info">
               <p>
                 <strong>ID:</strong> {profile.member_id || "N/A"}
               </p>

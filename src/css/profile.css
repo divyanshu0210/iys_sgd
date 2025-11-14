@@ -14,12 +14,13 @@
 }
 
 .cp-page {
-  max-width: 980px;
-  margin:  auto;
-  padding: 0 16px;
+  /* max-width: 980px; */
+  margin: auto;
+  padding: 0px;
   background: transparent;
   color: #0f172a;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial;
 }
 
 .cp-card {
@@ -174,6 +175,17 @@ textarea:focus {
   justify-content: flex-end;
 }
 
+.cp-subtitle {
+  text-align: "center";
+  color: #555;
+  margin-bottom: 1rem;
+}
+.error-text{
+  color: var(--danger);
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
+
 /* responsive */
 @media (max-width: 720px) {
   .cp-grid {
@@ -181,7 +193,7 @@ textarea:focus {
   }
 
   .cp-card {
-    padding: 16px;
+    padding: 8px;
   }
 
   .cp-photo-preview {
@@ -197,5 +209,29 @@ textarea:focus {
   .cp-btn-primary,
   .cp-btn-ghost {
     width: 100%;
+  }
+}
+
+/* responsive */
+@media (max-width: 450px) {
+  .cp-grid {
+    grid-template-columns: 1fr;
+
+  }
+
+ .cp-field input {
+    width: 73vw !important;
+  }
+  input[type="text"],
+  input[type="date"],
+  input[type="tel"],
+  select,
+  textarea,
+  input[type="file"] {
+    width: 86vw;
+  }
+
+  .cp-subtitle{
+    font-size:0.7rem
   }
 }

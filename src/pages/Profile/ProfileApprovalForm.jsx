@@ -52,10 +52,10 @@ export default function ProfileApprovalForm({ onClose }) {
   };
 
   return (
-    <div className="cp-page" style={{ paddingTop: "4rem" }}>
+    <div className="cp-page" style={{ padding:0 ,margin:0 }}>
       <form className="cp-card" onSubmit={handleSubmit} noValidate>
-        <h2 className="cp-title">Get Profile Approved</h2>
-        <p style={{ textAlign: "center", color: "#555", marginBottom: "1rem" }}>
+        <p className="cp-title">Get Profile Approved</p>
+        <p className="cp-subtitle">
           To access Yatra Registration & all features,get profile approved by
           your mentor.
         </p>

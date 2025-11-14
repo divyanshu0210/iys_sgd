@@ -1,5 +1,5 @@
 // src/pages/components/CheckoutStep.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useYatraRegistration } from "../context/YatraRegistrationContext";
 import API from "../../../services/api";
 
@@ -19,6 +19,53 @@ const CheckoutStep = ({ onBack,setCurrentStep }) => {
     setRegistrations,
     setActiveTab,
   } = useYatraRegistration();
+
+   // 🧭 --- PREVENT accidental refresh or navigation ---
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue =
+        "Your payment data will be lost if you leave this page. Are you sure you want to exit?";
+    };
+
+    const handlePopState = (e) => {
+      const confirmLeave = window.confirm(
+        "You have unsaved payment data. Are you sure you want to go back?"
+      );
+      if (!confirmLeave) {
+        window.history.pushState(null, "", window.location.href);
+      }
+    };
+
+    // Warn if switching tabs inside the app
+    const handleTabSwitch = (e) => {
+      if (
+        e.target.closest(".tab-button") ||
+        e.target.closest(".nav-item") ||
+        e.target.closest(".sidebar-link")
+      ) {
+        const confirmLeave = window.confirm(
+          "You have unsaved payment data. Do you really want to leave Checkout?"
+        );
+        if (!confirmLeave) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+    document.addEventListener("click", handleTabSwitch, true);
+
+    // push state so back button triggers popstate handler
+    window.history.pushState(null, "", window.location.href);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+      document.removeEventListener("click", handleTabSwitch, true);
+    };
+  }, []);
 
   // ---- Calculate total and prepare registration_installments ----
 const registrationInstallments = selected

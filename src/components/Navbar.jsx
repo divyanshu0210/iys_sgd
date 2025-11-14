@@ -68,7 +68,7 @@ export default function Navbar() {
             textDecoration: "none",
           }}
         >
-          YatraApp
+          IYS Sri Govind Dham
         </Link>
 
         {/* Desktop or Always-visible Menu for non-logged users */}

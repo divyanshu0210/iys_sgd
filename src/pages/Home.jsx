@@ -28,8 +28,8 @@ export default function Home() {
   };
 
   return (
-    <div>
-      <h1>Welcome to YatraApp</h1>
+    <div style={{padding:"10px"}}>
+      <h2>Welcome to IYS Sri Govind Dham</h2>
 
       {/* ✅ Guest banner */}
       {profileStage === "guest" && (
@@ -62,7 +62,7 @@ export default function Home() {
       )}
 
       <section style={{ marginTop: "2rem" }}>
-        <h2>Latest Updates</h2>
+        {/* <h2 style={{fontSize:"1.2rem"}}>Latest Updates</h2> */}
         <YatraList />
       </section>
 

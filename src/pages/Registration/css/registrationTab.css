@@ -1,0 +1,414 @@
+
+/* Banner */
+.rt-banner {
+  background: #fff7f7;
+  border: 1px solid #fecaca;
+  padding: 10px;
+  color: #b91c1c;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+ 
+
+/* WhatsApp List */
+.whatsapp-list {
+  display: flex;
+  flex-direction: column;
+  background: #e5ddd5;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.whatsapp-card {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.2s;
+}
+
+.whatsapp-card:hover {
+  background: #f8fafc;
+}
+
+.whatsapp-avatar img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.whatsapp-info {
+  flex: 1;
+  margin-left: 12px;
+  min-width: 0;
+}
+
+.whatsapp-name-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.whatsapp-memberid {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 2px;
+}
+
+.whatsapp-action {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+.empty-msg {
+  color: #94a3b8;
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.95rem;
+}
+/* Buttons */
+.action-btn {
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 80px;
+  transition: opacity 0.2s;
+}
+
+.action-btn.approve {
+  background: #27ae60;
+}
+.action-btn.unapprove {
+  background: #e74c3c;
+}
+.action-btn.request {
+  background: #f39c12;
+}
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.reg-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #10b981;
+}
+
+/* Badges */
+.badge-self {
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.badge-self {
+  background: #fbbf24;
+  color: #451a03;
+}
+
+.badge-registered {
+  font-size: 0.85rem; /* slightly bigger */
+  padding: 4px 12px; /* horizontal padding for pill shape */
+  border-radius: 9999px; /* pill-shaped */
+  font-weight: 600;
+  color: white;
+  display: inline-block;
+  text-align: center;
+}
+
+/* Different colors for each status */
+.badge-registered.paid {
+  background: #047857; /* green for Confirmed */
+}
+
+.badge-registered.partial {
+  background: #f59e0b; /* orange for Incomplete */
+}
+
+.badge-registered.pending {
+  background: #b91c1c; /* red for Not Started */
+}
+
+.badge-registered.cancelled {
+  background: #6b7280; /* gray for Cancelled */
+}
+
+/* Pay Bar */
+.fixed-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  padding: 1rem;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.payment-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 0.95rem;
+}
+
+.btn-pay {
+  background: #10b981;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.btn-pay:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal h3 {
+  margin: 0 0 1rem;
+  color: #1e293b;
+}
+
+.modal p {
+  color: #475569;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.btn-close {
+  background: #e2e8f0;
+  color: #475569;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+/* members.css */
+.action-btn.pending {
+  background: #f39c12;
+  color: white;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+}
+/* 3-Step Flow */
+.step-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+.step-actions.fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 1rem;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+/* Review Table */
+.review-container,
+.checkout-container {
+  padding: 1rem 0;
+}
+.review-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+.review-table th,
+.review-table td {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
+}
+.review-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+.total-row {
+  text-align: right;
+  font-size: 1.1rem;
+  margin: 1rem 0;
+  padding: 0.5rem 0;
+  border-top: 2px solid #333;
+}
+
+/* Buttons */
+.btn-next,
+.btn-pay,
+.btn-back {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-next,
+.btn-pay {
+  background: #10b981;
+  color: white;
+}
+.btn-back {
+  background: #e2e8f0;
+  color: #475569;
+}
+.btn-edit {
+  background: #3b82f6;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: 4px;
+}
+
+/* Full Checkout Step */
+.checkout-full {
+  padding: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.checkout-summary {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.qr-section {
+  text-align: center;
+  padding: 1.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.qr-code {
+  width: 220px;
+  height: 220px;
+  margin: 1rem auto;
+  display: block;
+  border: 2px solid #ddd;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+}
+
+.proof-form .form-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+.proof-form input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.step-actions.bottom {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.warning-note {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-weight: 500;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.amount-due {
+  font-size: 0.85rem;
+  color: #dc2626;
+  margin-top: 4px;
+}
+
+.installment-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.btn-view-proof {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  margin-left: 8px;
+}
+
+.proof-item {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.proof-inputs {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.proof-inputs input {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
