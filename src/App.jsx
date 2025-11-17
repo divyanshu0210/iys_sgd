@@ -25,14 +25,15 @@ import YatraRegister from "./pages/Registration/YatraRegister";
 import { YatraRegistrationProvider } from "./pages/Registration/context/YatraRegistrationContext";
 import SignIn from "./pages/Auth/SignIn";
 import SignUp from "./pages/Auth/SignUp";
-import "./App.css"
+import "./App.css";
 import CheckoutStep from "./pages/Registration/steps/CheckoutStep";
+import YatraRegistrationLayout from "./pages/Registration/context/YatraRegistrationLayout";
 
 export default function App() {
   return (
     <>
       <Navbar />
-      <main      >
+      <main>
         <div
           style={{
             maxWidth: "1400px",
@@ -43,6 +44,7 @@ export default function App() {
           <Routes>
             {/* Public */}
             <Route path="/" element={<Home />} />
+
 
             {/* Public Only (Block if logged in) */}
             <Route element={<PublicOnlyRoute />}>
@@ -70,19 +72,16 @@ export default function App() {
 
               <Route path="/complete-profile" element={<BasicProfile />} />
               <Route path="/yatras" element={<YatraList />} />
-              <Route
-                path="/yatra/:yatra_id/register"
-                element={
-                  <YatraRegistrationProvider>
-                    <YatraRegister />
-                  </YatraRegistrationProvider>
-                }
-              />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/checkout" element={ <YatraRegistrationProvider>
-                    <CheckoutStep />
-                  </YatraRegistrationProvider>} />
+
+              <Route element={<YatraRegistrationLayout />}>
+                <Route
+                  path="/yatra/:yatra_id/register"
+                  element={<YatraRegister />}
+                />
+                <Route path="/checkout" element={<CheckoutStep />} />
+              </Route>
             </Route>
+            <Route path="/profile" element={<Profile />} />
             <Route
               element={
                 <RoleProtectedRoute allowedStatuses={["devotee", "mentor"]} />

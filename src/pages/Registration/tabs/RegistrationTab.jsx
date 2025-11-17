@@ -48,7 +48,7 @@ const RegistrationTab = ({ title, note, filterFn, showBanner = false }) => {
         return (
           <ReviewStep
             onBack={() => setCurrentStep(1)}
-            // onNext={() => setCurrentStep(3)}
+            onNext={() => setCurrentStep(3)}
           />
         );
       case 3:

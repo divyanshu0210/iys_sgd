@@ -20,7 +20,6 @@ export const YatraRegistrationProvider = ({ children }) => {
   const { yatra_id } = useParams();
   const { profile } = useAuth();
   const location = useLocation();
-  const yatra = location.state?.yatra || null;
 
   const [registerData, setRegisterData] = useState({ profiles: [], yatra: {} });
   const [eligibilityData, setEligibilityData] = useState({ profiles: [] });
@@ -31,6 +30,7 @@ export const YatraRegistrationProvider = ({ children }) => {
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const yatra = location.state?.yatra || registerData.yatra;;
 
   // Fetch registration data
   const fetchRegistrationData = async () => {

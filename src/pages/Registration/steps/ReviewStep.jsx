@@ -3,7 +3,7 @@ import { useYatraRegistration } from "../context/YatraRegistrationContext";
 import RegistrationFormModal from "./RegistrationFormModal";
 import { useState } from "react";
 
-const ReviewStep = ({ onBack }) => {
+const ReviewStep = ({ onBack ,onNext}) => {
   const [editingProfile, setEditingProfile] = useState(null);
   const navigate = useNavigate();
 
@@ -189,7 +189,8 @@ const ReviewStep = ({ onBack }) => {
             Back to Selection
           </button>
           <button
-            onClick={()=>{navigate('/checkout')}}
+            onClick={()=>{onNext()}}
+            // onClick={()=>{navigate('/checkout')}}
             className="btn-next"
             disabled={totalAmount === 0}
           >
