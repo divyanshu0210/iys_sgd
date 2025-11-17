@@ -1,6 +1,6 @@
 // src/pages/components/Sidebar.jsx
 import { useYatraRegistration } from "../context/YatraRegistrationContext";
-import "../../../css/profileDisplay.css";
+// import "../../../../css/profileDisplay.css";
 
 const Sidebar = () => {
   const { yatra, registerData, activeTab, setActiveTab, selected } =
