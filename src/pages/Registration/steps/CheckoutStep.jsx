@@ -257,6 +257,7 @@ const CheckoutStep = ({ onBack, setCurrentStep }) => {
   // 🔵 NEW: status of screenshot verification
   const [verificationStatus, setVerificationStatus] = useState("pending"); 
   const [verifying, setVerifying] = useState(false);
+  const [message, setMessage] = useState("");
 
   const {
     selected,
@@ -348,8 +349,8 @@ const CheckoutStep = ({ onBack, setCurrentStep }) => {
       );
 
       const data = await res.json();
-
-      if (data.success === true && data.matched === true) {
+      setMessage(data.message);
+      if (data.success === true) {
         setVerificationStatus("valid");
       } else {
         setVerificationStatus("invalid");
@@ -463,12 +464,12 @@ const CheckoutStep = ({ onBack, setCurrentStep }) => {
             />
 
             {/* Status Messages */}
-            {verifying && <p style={{ color: "blue" }}>⏳ Verifying screenshot…</p>}
+            {verifying && <p style={{ color: "blue" , fontSize:"12px"}}>⏳ Verifying screenshot…</p>}
             {verificationStatus === "valid" && (
-              <p style={{ color: "green" }}>✓ Screenshot Verified!</p>
+              <p style={{ color: "green" , fontSize:"12px"}}>{message}</p>
             )}
             {verificationStatus === "invalid" && (
-              <p style={{ color: "red" }}>❌ Invalid screenshot or amount mismatch.</p>
+              <p style={{ color: "red" , fontSize:"12px"}}>{message}</p>
             )}
           </div>
 

@@ -318,6 +318,12 @@
   border-radius: 4px;
 }
 
+.btn-next:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Full Checkout Step */
 .checkout-full {
   padding: 1rem;
@@ -472,7 +478,7 @@
     top: 5px;
     /* order: 0; */
   }
-  
+
   /* -------------------------------------------- */
   .step-actions.fixed {
     padding: 0.5rem;
