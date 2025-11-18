@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 
 export default function Navbar() {
-  const { user, profile,profileStage, logout } = useAuth();
+  const { user, profile, profileStage, logout } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef();
@@ -59,41 +59,51 @@ export default function Navbar() {
         }}
       >
         {/* Logo */}
-    <Link
-  to="/"
-  className={!user ? "logo-text" : ""}
-  style={{
-    fontWeight: 700,
-    fontSize: "1.4rem", // default larger size
-    color: "#fff",
-    textDecoration: "none",
-    transition: "font-size 0.2s",
-  }}
->
-  IYS <br></br>Sri Govind Dham
-</Link>
+        <Link
+          to="/"
+          className={ "logo-text"}
+          style={{
+            fontWeight: 700,
+            fontSize: "1.4rem", // default larger size
+            color: "#fff",
+            textDecoration: "none",
+            transition: "font-size 0.2s",
+          }}
+        >
+          IYS <br></br>Sri Govind Dham
+        </Link>
 
         {/* Desktop or Always-visible Menu for non-logged users */}
-        <div
-          className={`desktop-menu ${
-            !user ? "always-visible" : ""
-          }`}
-        >
+        <div className={`desktop-menu ${!user ? "always-visible" : ""}`}>
           <NavLink to="/">Home</NavLink>
           {user ? (
-            profileStage!=="not-exists" ? (
+            profileStage !== "not-exists" ? (
               <>
-                 {(profileStage==="devotee"||profileStage==="mentor") && ( <NavLink to="/members">Members</NavLink>)}
+                {(profileStage === "devotee" || profileStage === "mentor") && (
+                  <NavLink to="/members">Members</NavLink>
+                )}
                 <NavLink to="/yatras">Yatras</NavLink>
                 <NavLink to="/profile">Profile</NavLink>
-                <button onClick={()=>{logout();navigate('/')}} className="logout-btn">
+                <button
+                  onClick={() => {
+                    logout();
+                    navigate("/");
+                  }}
+                  className="logout-btn"
+                >
                   Logout
                 </button>
               </>
             ) : (
               <>
                 <NavLink to="/complete-profile">Profile</NavLink>
-                <button onClick={()=>{logout();navigate('/')}}  className="logout-btn">
+                <button
+                  onClick={() => {
+                    logout();
+                    navigate("/");
+                  }}
+                  className="logout-btn"
+                >
                   Logout
                 </button>
               </>
@@ -129,23 +139,32 @@ export default function Navbar() {
             </button>
 
             <NavLink to="/">Home</NavLink>
-            {profileStage!=="not-exists" ? (
+            {profileStage !== "not-exists" ? (
               <>
-             {(profileStage==="devotee"||profileStage==="mentor") && ( <NavLink to="/members">Members</NavLink>)}
+                {(profileStage === "devotee" || profileStage === "mentor") && (
+                  <NavLink to="/members">Members</NavLink>
+                )}
                 <NavLink to="/yatras">Yatras</NavLink>
                 <NavLink to="/profile">Profile</NavLink>
               </>
             ) : (
               <NavLink to="/complete-profile">Profile</NavLink>
             )}
-            <button onClick={()=>{logout();setIsMenuOpen(false);navigate('/')}} className="logout-btn">
+            <button
+              onClick={() => {
+                logout();
+                setIsMenuOpen(false);
+                navigate("/");
+              }}
+              className="logout-btn"
+            >
               Logout
             </button>
           </div>
         </div>
       )}
-<style>
-  {`
+      <style>
+        {`
     .desktop-menu {
       display: flex;
       gap: 10px;
@@ -249,7 +268,7 @@ export default function Navbar() {
       .mobile-menu { display: none !important; }
     }
   `}
-</style>
+      </style>
     </nav>
   );
 }
