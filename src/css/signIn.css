@@ -60,6 +60,7 @@
   background: transparent;
   font-size: 1rem;
   transition: all 0.2s ease;
+  color: black;
 }
 
 .input-group label {

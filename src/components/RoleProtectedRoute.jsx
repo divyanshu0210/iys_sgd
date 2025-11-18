@@ -2,19 +2,13 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
+import FullPageLoader from "./FullPageLoader";
 
 export default function RoleProtectedRoute({ allowedStatuses }) {
   const { user, profileStage,loading } = useAuth();
 
 
-  if (loading) {
-    return (
-      <div style={{ textAlign: "center", padding: "4rem" }}>
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
+   if (loading) return <FullPageLoader />;
   // If no user logged in, redirect to signin
   if (!user) {
     return <Navigate to="/signin" replace />;

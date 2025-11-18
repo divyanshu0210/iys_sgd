@@ -59,17 +59,19 @@ export default function Navbar() {
         }}
       >
         {/* Logo */}
-        <Link
-          to="/"
-          style={{
-            fontWeight: 700,
-            fontSize: "1.2rem",
-            color: "#fff",
-            textDecoration: "none",
-          }}
-        >
-          IYS Sri Govind Dham
-        </Link>
+    <Link
+  to="/"
+  className={!user ? "logo-text" : ""}
+  style={{
+    fontWeight: 700,
+    fontSize: "1.4rem", // default larger size
+    color: "#fff",
+    textDecoration: "none",
+    transition: "font-size 0.2s",
+  }}
+>
+  IYS <br></br>Sri Govind Dham
+</Link>
 
         {/* Desktop or Always-visible Menu for non-logged users */}
         <div
@@ -84,14 +86,14 @@ export default function Navbar() {
                  {(profileStage==="devotee"||profileStage==="mentor") && ( <NavLink to="/members">Members</NavLink>)}
                 <NavLink to="/yatras">Yatras</NavLink>
                 <NavLink to="/profile">Profile</NavLink>
-                <button onClick={logout} className="logout-btn">
+                <button onClick={()=>{logout();navigate('/')}} className="logout-btn">
                   Logout
                 </button>
               </>
             ) : (
               <>
                 <NavLink to="/complete-profile">Profile</NavLink>
-                <button onClick={logout} className="logout-btn">
+                <button onClick={()=>{logout();navigate('/')}}  className="logout-btn">
                   Logout
                 </button>
               </>
@@ -136,111 +138,118 @@ export default function Navbar() {
             ) : (
               <NavLink to="/complete-profile">Profile</NavLink>
             )}
-            <button onClick={()=>{logout();setIsMenuOpen(false);}} className="logout-btn">
+            <button onClick={()=>{logout();setIsMenuOpen(false);navigate('/')}} className="logout-btn">
               Logout
             </button>
           </div>
         </div>
       )}
+<style>
+  {`
+    .desktop-menu {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
 
-      <style>
-        {`
-          .desktop-menu {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-          }
+    .logout-btn {
+      background: #e63946;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
 
-          .logout-btn {
-            background: #e63946;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 14px;
-            cursor: pointer;
-            font-weight: 600;
-          }
+    .mobile-only {
+      display: none;
+    }
 
-          .mobile-only {
-            display: none;
-          }
+    .bar {
+      width: 25px;
+      height: 3px;
+      background-color: #fff;
+      margin: 4px 0;
+    }
 
-          .bar {
-            width: 25px;
-            height: 3px;
-            background-color: #fff;
-            margin: 4px 0;
-          }
+    /* Overlay & Mobile Menu - unchanged */
+    .overlay {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0, 0.4);
+      display: flex;
+      justify-content: flex-end;
+      z-index: 2000;
+    }
 
-          /* Overlay background */
-          .overlay {
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            background: rgba(0, 0, 0, 0.4);
-            display: flex;
-            justify-content: flex-end;
-            z-index: 2000;
-          }
+    .mobile-menu {
+      width: 260px;
+      background: #2c3e50;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 10px;
+      transform: translateX(0);
+      animation: slideIn 0.3s ease forwards;
+      box-shadow: -4px 0 12px rgba(0,0,0,0.3);
+    }
 
-          /* Slide-in mobile menu */
-          .mobile-menu {
-            width: 260px;
-            background: #2c3e50;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            gap: 10px;
-            transform: translateX(0);
-            animation: slideIn 0.3s ease forwards;
-            box-shadow: -4px 0 12px rgba(0,0,0,0.3);
-          }
+    .close-btn {
+      align-self: flex-end;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
 
-          .close-btn {
-            align-self: flex-end;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 1.5rem;
-            cursor: pointer;
-            margin-bottom: 10px;
-          }
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to   { transform: translateX(0); }
+    }
 
-          @keyframes slideIn {
-            from {
-              transform: translateX(100%);
-            }
-            to {
-              transform: translateX(0);
-            }
-          }
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .desktop-menu {
+        display: none;
+      }
 
-          /* Responsive behavior */
-          @media (max-width: 768px) {
-            .desktop-menu {
-              display: none;
-            }
+      /* When NOT logged in → show links inline, smaller */
+      .desktop-menu.always-visible {
+        display: flex !important;
+        gap: 8px;
+        font-size: 0.875rem; /* 14px */
+      }
 
-            /* Before login - always visible nav (not hidden on small screens) */
-            .always-visible {
-              display: flex !important;
-              gap: 10px;
-            }
+      /* Reduce logo size only when not signed in */
+      .logo-text {
+        font-size: 0.7rem !important;
+        font-weight: 600;
+      }
 
-            /* Show hamburger only when logged in */
-            .mobile-only {
-              display: block;
-            }
-          }
+      /* Smaller padding on links when in always-visible mode */
+      .desktop-menu.always-visible a {
+        padding: 6px 10px !important;
+        font-size: 0.8rem;
+      }
 
-          @media (min-width: 769px) {
-            .mobile-menu { display: none !important; }
-          }
-        `}
-      </style>
+      .mobile-only {
+        display: block;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .mobile-menu { display: none !important; }
+    }
+  `}
+</style>
     </nav>
   );
 }

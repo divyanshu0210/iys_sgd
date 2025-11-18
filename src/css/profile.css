@@ -71,6 +71,7 @@ input[type="date"],
 input[type="tel"],
 select,
 textarea,
+checkbox,
 input[type="file"] {
   padding: 10px 12px;
   border-radius: 8px;
@@ -79,6 +80,7 @@ input[type="file"] {
   outline: none;
   background: white;
   transition: box-shadow 120ms ease, border-color 120ms ease;
+  color: black;
 }
 
 input:focus,
@@ -86,6 +88,7 @@ select:focus,
 textarea:focus {
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.12);
   border-color: var(--primary-500);
+  color: black;
 }
 
 .cp-photo-preview-wrap {
@@ -193,7 +196,7 @@ textarea:focus {
   }
 
   .cp-card {
-    padding: 8px;
+    padding: 15px;
   }
 
   .cp-photo-preview {

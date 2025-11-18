@@ -29,9 +29,11 @@ export default function SignUp() {
       await API.post("api/auth/register/", formData);
       setStatus({
         type: "success",
-        msg: "Verification email sent! Redirecting...",
+        // msg: "Verification email sent! Redirecting...",
+        msg: "Signup Successful....",
       });
-      setTimeout(() => navigate("/email-sent"), 1000);
+      // setTimeout(() => navigate("/email-sent"), 1000);
+      setTimeout(() => navigate("/signin"), 1000);
     } catch (err) {
       const msg =
         err.response?.data?.email?.[0] ||
@@ -50,7 +52,7 @@ export default function SignUp() {
   return (
     <div className="reg-page">
       <form className="reg-card" onSubmit={handleSubmit} noValidate>
-        <h2 className="reg-title">Create Account</h2>
+        <h2 className="reg-title">Sign Up</h2>
 
         {/* Status */}
         {status && (
@@ -102,7 +104,8 @@ export default function SignUp() {
             className="btn-primary"
             disabled={loading || !form.email || !form.password}
           >
-            {loading ? "Sending..." : "Send Verification Email"}
+            {loading ? "Creating..." : "Create Account"}
+            {/* {loading ? "Sending..." : "Send Verification Email"} */}
           </button>
         </div>
 
