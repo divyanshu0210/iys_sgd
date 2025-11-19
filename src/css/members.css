@@ -147,6 +147,7 @@
   background: none;
   cursor: pointer;
   font-size: 0.95rem;
+  color: black;
 }
 
 .action-item:hover {

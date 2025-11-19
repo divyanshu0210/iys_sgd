@@ -288,7 +288,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
               <button
                 onClick={() => toggleSelect(profile)}
                 className={`action-btn ${hasExistingData ? "edit" : "open"}`}
-                style={{ minWidth: "80px", maxHeight: "35px", color: "black" }}
+                style={{ minWidth: "80px", maxHeight: "35px", color: "black",backgroundColor:"white" }}
                 disabled={isLoadingRegistration}
               >
                 {getButtonText()}
