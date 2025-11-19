@@ -512,13 +512,14 @@
   .qr-section {
     padding: 1rem;
     margin-bottom: 0.75rem;
+     padding-top: 0px;
   }
 
   .qr-code {
     width: 180px; /* smaller QR */
     height: 180px;
     margin: 0.75rem auto;
-    padding: 6px;
+    padding: 0px;
   }
 
   .proof-form .form-group {

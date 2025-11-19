@@ -26,6 +26,8 @@ export const YatraRegistrationProvider = ({ children }) => {
   const [selected, setSelected] = useState([]);
   const [registrations, setRegistrations] = useState({});
   const [activeTab, setActiveTab] = useState("registered");
+  const [currentStep, setCurrentStep] = useState(1);
+
   const [loading, setLoading] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
@@ -161,6 +163,7 @@ export const YatraRegistrationProvider = ({ children }) => {
     setShowForm,
     initialLoading,
     setInitialLoading,
+    currentStep, setCurrentStep,
   };
 
   return (

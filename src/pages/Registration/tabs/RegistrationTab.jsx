@@ -8,8 +8,7 @@ import "../css/registrationTab.css";
 import FullPageLoader from "../../../components/FullPageLoader";
 
 const RegistrationTab = ({ title, note, filterFn, showBanner = false }) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const { registerData, selected,loading, initialLoading } = useYatraRegistration();
+  const { registerData, selected,loading, initialLoading ,currentStep, setCurrentStep} = useYatraRegistration();
 
   const profiles = registerData.profiles?.filter(filterFn) || [];
 

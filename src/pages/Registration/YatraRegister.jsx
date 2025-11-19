@@ -18,6 +18,7 @@ export default function YatraRegister() {
     fetchRegistrationData,
     fetchEligibilityData,
     setInitialLoading,
+    currentStep,
     registerData,
     eligibilityData,
   } = useYatraRegistration();
@@ -61,7 +62,10 @@ export default function YatraRegister() {
 
   return (
     <div className="profile-page">
+      {!(currentStep===3) &&(
+
       <Sidebar />
+      )}
 
       <div className="profile-content">{renderActiveTab()}</div>
 

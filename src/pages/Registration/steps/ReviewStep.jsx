@@ -179,14 +179,14 @@ const ReviewStep = ({ onBack ,onNext}) => {
             );
           })}
         </div>
-
+{/* 
         <div className="total-row">
           <strong>Total Amount: ₹{totalAmount}</strong>
-        </div>
+        </div> */}
 
-        <div className="step-actions">
+        <div className="step-actions fixed" >
           <button onClick={onBack} className="btn-back">
-            Back to Selection
+            Back
           </button>
           <button
             onClick={()=>{onNext()}}
@@ -194,7 +194,7 @@ const ReviewStep = ({ onBack ,onNext}) => {
             className="btn-next"
             disabled={totalAmount === 0}
           >
-            Proceed to Pay
+            Proceed to Pay  <span>(Total ₹{totalAmount})</span>
           </button>
         </div>
       </div>
