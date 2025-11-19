@@ -5,15 +5,33 @@ import { useAuth } from "../context/AuthContext";
 import Modal from "../components/Modal";
 import ProfileApprovalForm from "./Profile/ProfileApprovalForm";
 
+function ShimmerBox() {
+  return (
+    <div
+      style={{
+        height: "140px",
+        borderRadius: "12px",
+        background: "linear-gradient(90deg, #f8f8f8 0%, #ececec 50%, #f8f8f8 100%)",
+        backgroundSize: "200% 100%",
+        animation: "shimmer 1.4s infinite",
+      }}
+    />
+  );
+}
+
 export default function YatraList() {
   const [yatras, setYatras] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [openApprovalModal, setOpenApprovalModal] = useState(false);
   const [openPendingModal, setOpenPendingModal] = useState(false);
 
   const { profileStage } = useAuth();
 
   useEffect(() => {
-    API.get("/yatras/list/").then((res) => setYatras(res.data));
+    API.get("/yatras/list/")
+      .then((res) => setYatras(res.data))
+      .finally(() => setLoading(false));
   }, []);
 
   const formatDate = (dateString) => {
@@ -33,23 +51,27 @@ export default function YatraList() {
       e.preventDefault();
       setOpenPendingModal(true);
     }
-    // ✅ If "devotee", normal navigation continues
   };
 
   return (
     <div
       style={{
-        padding:"10px",
+        padding: "10px",
         display: "grid",
         gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
         gap: "16px",
         width: "100%",
         maxWidth: "950px",
         marginBottom: "30px",
-        
       }}
     >
-      {yatras.length === 0 ? (
+      {/* 🔵 Show 2 shimmers while loading */}
+      {loading ? (
+        <>
+          <ShimmerBox />
+          <ShimmerBox />  
+        </>
+      ) : yatras.length === 0 ? (
         <p>No yatras yet.</p>
       ) : (
         yatras.map((y) => {
@@ -144,15 +166,9 @@ export default function YatraList() {
         <ProfileApprovalForm onClose={() => setOpenApprovalModal(false)} />
       </Modal>
 
-      {/* Approval Pending → Show Info Message */}
+      {/* Approval Pending → Show Info */}
       <Modal open={openPendingModal} onClose={() => setOpenPendingModal(false)}>
-        <div
-          style={{
-            textAlign: "center",
-            padding: "20px",
-            // maxWidth: 400,
-          }}
-        >
+        <div style={{ textAlign: "center", padding: "20px" }}>
           <h3 style={{ color: "#1E3A8A", marginBottom: 12 }}>
             Approval Pending
           </h3>

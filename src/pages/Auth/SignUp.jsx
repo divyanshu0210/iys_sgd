@@ -3,12 +3,13 @@ import { useNavigate, Link } from "react-router-dom";
 import "../../css/signIn.css";
 import GoogleBtn from "../../components/GoogleBtn";
 import API from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 export default function SignUp() {
   const [form, setForm] = useState({ email: "", password: "" });
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null); // { type, msg }
+  const {loading, setLoading}= useAuth();
 
   // Email/Password Sign Up
   const handleSubmit = async (e) => {

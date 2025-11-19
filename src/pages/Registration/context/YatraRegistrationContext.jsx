@@ -31,6 +31,7 @@ export const YatraRegistrationProvider = ({ children }) => {
   const [modalMessage, setModalMessage] = useState("");
   const [showForm, setShowForm] = useState(false);
   const yatra = location.state?.yatra || registerData.yatra;;
+ const [initialLoading, setInitialLoading] = useState(true);
 
   // Fetch registration data
   const fetchRegistrationData = async () => {
@@ -53,6 +54,7 @@ export const YatraRegistrationProvider = ({ children }) => {
     } catch (err) {
       console.error("Failed to load eligibility data", err);
     }
+     
   };
 
   // Helper functions
@@ -157,6 +159,8 @@ export const YatraRegistrationProvider = ({ children }) => {
     requestApproval,
     showForm,
     setShowForm,
+    initialLoading,
+    setInitialLoading,
   };
 
   return (

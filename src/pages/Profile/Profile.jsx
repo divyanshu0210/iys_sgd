@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import API from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import "../../css/profiledisplay.css";
+import FullPageLoader from "../../components/FullPageLoader";
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, profile: profileGlobal } = useAuth();
   const [profile, setProfile] = useState(null);
   const [activeTab, setActiveTab] = useState("basic");
 
@@ -12,8 +13,6 @@ export default function Profile() {
   useEffect(() => {
     API.get(`/api/profile/`).then((res) => setProfile(res.data));
   }, []);
-
-  if (!profile) return <div className="loading">Loading profile...</div>;
 
   const tabs = [
     { id: "basic", label: "Basic Info" },
@@ -41,13 +40,22 @@ export default function Profile() {
         <InfoRow label="Aadhar Card No" value={profile.aadhar_card_no} />
 
         {/* 🔹 Show Initiation details only if initiated */}
-        <InfoRow label="Initiated" value={profile.is_initiated ? "Yes" : "No"} />
+        <InfoRow
+          label="Initiated"
+          value={profile.is_initiated ? "Yes" : "No"}
+        />
         {profile.is_initiated && (
           <>
             <InfoRow label="Initiated Name" value={profile.initiated_name} />
-            <InfoRow label="Spiritual Master" value={profile.spiritual_master} />
+            <InfoRow
+              label="Spiritual Master"
+              value={profile.spiritual_master}
+            />
             <InfoRow label="Initiation Date" value={profile.initiation_date} />
-            <InfoRow label="Initiation Place" value={profile.initiation_place} />
+            <InfoRow
+              label="Initiation Place"
+              value={profile.initiation_place}
+            />
           </>
         )}
       </div>
@@ -109,29 +117,33 @@ export default function Profile() {
     <div className="profile-page">
       {/* Left Sidebar */}
       <div className="profile-sidebar">
+          {profile && (
         <div className="profile-header">
-          <div className="avatar-container">
-            <img
-              src={profile.profile_picture_url || "/default-avatar.png"}
-              alt="Profile"
-              className="profile-avatar"
-            />
-          </div>
+            <>
+              <div className="avatar-container">
+                <img
+                  src={profile?.profile_picture_url || "/default-avatar.png"}
+                  alt="Profile"
+                  className="profile-avatar"
+                />
+              </div>
 
-          <div className="profile-info-compact">
-            <h2 className="profile-name">{profile.full_name}</h2>
-            <p className="profile-username">@{profile.email || "guest"}</p>
+              <div className="profile-info-compact">
+                <h2 className="profile-name">{profile?.full_name}</h2>
+                <p className="profile-username">{profile?.email || "guest"}</p>
 
-            <div className="profile-member-info">
-              <p>
-                <strong>ID:</strong> {profile.member_id || "N/A"}
-              </p>
-              <p>
-                <strong>Type:</strong> {profile.user_type || "Member"}
-              </p>
-            </div>
-          </div>
+                <div className="profile-member-info">
+                  <p>
+                    <strong>ID:</strong> {profile?.member_id || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Type:</strong> {profile?.user_type || "Member"}
+                  </p>
+                </div>
+              </div>
+            </>
         </div>
+          )}
 
         <nav className="vertical-tabs">
           {tabs.map((tab) => (
@@ -145,13 +157,15 @@ export default function Profile() {
           ))}
         </nav>
       </div>
-
-      {/* Right Content Area */}
-      <div className="profile-content">
-        {activeTab === "basic" && renderBasicInfo()}
-        {activeTab === "devotional" && renderDevotionalInfo()}
-        {activeTab === "other" && renderOtherInfo()}
-      </div>
+      {!profile ? (
+        <FullPageLoader />
+      ) : (
+        <div className="profile-content">
+          {activeTab === "basic" && renderBasicInfo()}
+          {activeTab === "devotional" && renderDevotionalInfo()}
+          {activeTab === "other" && renderOtherInfo()}
+        </div>
+      )}
     </div>
   );
 }

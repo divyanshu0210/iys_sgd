@@ -104,6 +104,7 @@ export function AuthProvider({ children }) {
         login,
         logout,
         loading,
+        setLoading,
         profile,
         setProfile,
         fetchProfile,

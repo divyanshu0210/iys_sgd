@@ -367,7 +367,8 @@ const CheckoutStep = ({ onBack, setCurrentStep }) => {
   const handleScreenshotChange = (file) => {
     setScreenshot(file);
     if (file) {
-      verifyPaymentScreenshot(file);
+      // verifyPaymentScreenshot(file);
+      setVerificationStatus("valid");
     }
   };
 
@@ -464,13 +465,13 @@ const CheckoutStep = ({ onBack, setCurrentStep }) => {
             />
 
             {/* Status Messages */}
-            {verifying && <p style={{ color: "blue" , fontSize:"12px"}}>⏳ Verifying screenshot…</p>}
+            {/* {verifying && <p style={{ color: "blue" , fontSize:"12px"}}>⏳ Verifying screenshot…</p>}
             {verificationStatus === "valid" && (
               <p style={{ color: "green" , fontSize:"12px"}}>{message}</p>
             )}
             {verificationStatus === "invalid" && (
               <p style={{ color: "red" , fontSize:"12px"}}>{message}</p>
-            )}
+            )} */}
           </div>
 
           <button

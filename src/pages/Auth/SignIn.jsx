@@ -8,9 +8,8 @@ import { useAuth } from "../../context/AuthContext";
 
 export default function SignIn() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const { login, profile, fetchProfile } = useAuth();
+  const { login, profile, fetchProfile ,loading, setLoading} = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null); // { type, msg }
 
   // Email/Password Login
@@ -24,7 +23,6 @@ export default function SignIn() {
     try {
       await login(form.email, form.password);
       setStatus({ type: "success", msg: "Signed in successfully!" });
-
       const stage = await fetchProfile(); // refresh latest profile
 
       setTimeout(() => {

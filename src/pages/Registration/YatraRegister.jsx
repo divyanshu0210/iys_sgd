@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useYatraRegistration } from "./context/YatraRegistrationContext";
 import "../../css/members.css";
@@ -18,18 +17,34 @@ export default function YatraRegister() {
     setShowModal,
     fetchRegistrationData,
     fetchEligibilityData,
+    setInitialLoading,
     registerData,
-    eligibilityData
+    eligibilityData,
   } = useYatraRegistration();
 
   // Fetch data on mount and tab change
+  // useEffect(() => {
+  //   fetchRegistrationData();
+
+  //   if (activeTab === "approve") {
+  //     fetchEligibilityData();
+  //   }
+  // }, [yatra_id, activeTab]);
   useEffect(() => {
-    fetchRegistrationData();
-    
-    if (activeTab === "approve") {
-      fetchEligibilityData();
-    }
-  }, [yatra_id, activeTab]);
+    const loadAll = async () => {
+      setInitialLoading(true);
+
+      try {
+        await Promise.all([fetchRegistrationData(), fetchEligibilityData()]);
+      } catch (e) {
+        console.error(e);
+      }
+
+      setInitialLoading(false);
+    };
+
+    loadAll();
+  }, [yatra_id]);
 
   const renderActiveTab = () => {
     switch (activeTab) {
@@ -47,12 +62,10 @@ export default function YatraRegister() {
   return (
     <div className="profile-page">
       <Sidebar />
-      
-      <div className="profile-content">
-        {renderActiveTab()}
-      </div>
 
-      <AlertModal 
+      <div className="profile-content">{renderActiveTab()}</div>
+
+      <AlertModal
         show={showModal}
         message={modalMessage}
         onClose={() => setShowModal(false)}

@@ -1,8 +1,8 @@
 // src/App.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
-import PublicOnlyRoute from "./components/PublicOnlyRoute";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import PublicOnlyRoute from "./routes/PublicOnlyRoute";
 
 // Pages
 import Home from "./pages/Home";
@@ -20,7 +20,7 @@ import PasswordChange from "./pages/Auth/PasswordChange";
 import PasswordChangeDone from "./pages/Auth/PasswordChangeDone";
 import VerificationEmailSent from "./pages/Auth/VerificationEmailSent";
 import Members from "./pages/Members/Members";
-import RoleProtectedRoute from "./components/RoleProtectedRoute";
+import RoleProtectedRoute from "./routes/RoleProtectedRoute";
 import YatraRegister from "./pages/Registration/YatraRegister";
 import { YatraRegistrationProvider } from "./pages/Registration/context/YatraRegistrationContext";
 import SignIn from "./pages/Auth/SignIn";
@@ -28,10 +28,15 @@ import SignUp from "./pages/Auth/SignUp";
 import "./App.css";
 import CheckoutStep from "./pages/Registration/steps/CheckoutStep";
 import YatraRegistrationLayout from "./pages/Registration/context/YatraRegistrationLayout";
+import FullPageLoader from "./components/FullPageLoader";
+import AppRoutes from "./routes/AppRoutes";
+import { useAuth } from "./context/AuthContext";
 
 export default function App() {
+  const {loading } = useAuth();
   return (
     <>
+     {loading&&( <FullPageLoader />)}
       <Navbar />
       <main>
         <div
@@ -41,62 +46,7 @@ export default function App() {
             width: "100%",
           }}
         >
-          <Routes>
-            {/* Public */}
-            <Route path="/" element={<Home />} />
-
-
-            {/* Public Only (Block if logged in) */}
-            <Route element={<PublicOnlyRoute />}>
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/password_reset" element={<PasswordReset />} />
-              <Route
-                path="/password_reset_done"
-                element={<PasswordResetDone />}
-              />
-              <Route
-                path="/password-reset-confirm/:uidb64/:token"
-                element={<PasswordResetConfirm />}
-              />
-              <Route
-                path="/password_reset_complete"
-                element={<PasswordResetComplete />}
-              />
-            </Route>
-
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-              {/* <Route path="/password_change" element={<PasswordChange />} />
-              <Route path="/password_change_done" element={<PasswordChangeDone />} /> */}
-
-              <Route path="/complete-profile" element={<BasicProfile />} />
-              <Route path="/yatras" element={<YatraList />} />
-
-              <Route element={<YatraRegistrationLayout />}>
-                <Route
-                  path="/yatra/:yatra_id/register"
-                  element={<YatraRegister />}
-                />
-                <Route path="/checkout" element={<CheckoutStep />} />
-              </Route>
-            </Route>
-            <Route path="/profile" element={<Profile />} />
-            <Route
-              element={
-                <RoleProtectedRoute allowedStatuses={["devotee", "mentor"]} />
-              }
-            >
-              <Route path="/members" element={<Members />} />
-            </Route>
-
-            {/* Email Verification (Public, but outside guards) */}
-            <Route path="/email-verified" element={<VerifyEmail />} />
-            <Route path="/email-sent" element={<VerificationEmailSent />} />
-
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <AppRoutes />
         </div>
       </main>
     </>

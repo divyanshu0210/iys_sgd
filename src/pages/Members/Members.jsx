@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import API from "../../services/api";
 import MemberCard from "../../components/MemberCard";
 import "../../css/members.css";
+import FullPageLoader from "../../components/FullPageLoader";
 
 export default function Members() {
   const [data, setData] = useState(null);
@@ -55,8 +56,6 @@ export default function Members() {
 
   const members = getMembersForTab();
 
-
-
   const totalMentees = data?.approved_mentees?.length || 0;
   const pendingCount = data?.pending_requests?.length || 0;
   const totalAll = totalMentees + pendingCount;
@@ -66,14 +65,6 @@ export default function Members() {
     { id: "devotee", label: `Devotees (${totalMentees + 1})` },
     { id: "guest", label: `Member Requests (${pendingCount})` },
   ];
-
-  if (loading) {
-    return (
-      <div className="profile-page">
-        <p>Loading members...</p>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -99,15 +90,17 @@ export default function Members() {
             {activeTab === "guest" && "Pending Requests"}
           </h3>
 
-          {members.length === 0 ? (
-            <p>No members found.</p>
-          ) : (
-            <div className="members-list">
-              {members.map((m) => (
+          <div className="members-list" style={{ position: "relative" }}>
+            {loading && <FullPageLoader small />}
+
+            {!loading && members.length === 0 && <p>No members found.</p>}
+
+            {!loading &&
+              members.length > 0 &&
+              members.map((m) => (
                 <MemberCard key={m.id || m.member_id} m={m} />
               ))}
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </>

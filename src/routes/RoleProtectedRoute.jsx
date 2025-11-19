@@ -2,13 +2,16 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
-import FullPageLoader from "./FullPageLoader";
+import FullPageLoader from "../components/FullPageLoader";
 
 export default function RoleProtectedRoute({ allowedStatuses }) {
   const { user, profileStage,loading } = useAuth();
 
 
-   if (loading) return <FullPageLoader />;
+  if (loading) {
+    return <FullPageLoader />;
+  }
+
   // If no user logged in, redirect to signin
   if (!user) {
     return <Navigate to="/signin" replace />;
