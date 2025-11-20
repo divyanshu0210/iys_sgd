@@ -1,44 +1,63 @@
-import React from "react";
+import React, { useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import FullPageLoader from "./FullPageLoader";
 
-const GoogleBtn = () => {
+const GoogleBtn = ({ setStatus }) => {
   const navigate = useNavigate();
-  const { setUser, fetchProfile } = useAuth();
+  const { setUser, fetchProfile ,setLoading} = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
+      setGoogleLoading(true);
+      setStatus(""); 
+
       try {
-        console.log("Google access token:", tokenResponse.access_token);
         const res = await API.post("/api/auth/registration/social/login/", {
           provider: "google",
           access_token: tokenResponse.access_token,
         });
 
+        // Save tokens
         localStorage.setItem("userToken", res.data.key);
         localStorage.setItem("accessToken", tokenResponse.access_token);
         setUser(res.data.key);
-        const stage = await fetchProfile(); // refresh latest profile
+
+        const stage = await fetchProfile();
 
         setTimeout(() => {
           if (stage !== "not-exists") {
-            navigate("/"); // ✅ any kind of profile exists
+            navigate("/");
           } else {
-            navigate("/complete-profile"); // ❌ no profile at all
+            navigate("/complete-profile");
           }
         }, 800);
       } catch (err) {
         console.error("Google login error:", err.response?.data || err.message);
+
+        // Check backend error message
+        const backendMsg =
+          err.response?.data?.detail ||
+          err.response?.data?.non_field_errors?.[0] ||
+          "Google login failed. Please try again.";
+
+        setStatus({ type: "error", msg: backendMsg });
+      } finally {
+        setGoogleLoading(false);
       }
     },
+
     onError: () => {
-      console.error("Google login failed");
+      setStatus("Google login failed. Please try again.");
     },
   });
 
   return (
+    <>
+    {googleLoading&&<FullPageLoader/>}
     <div
       style={{
         display: "flex",
@@ -70,6 +89,7 @@ const GoogleBtn = () => {
 
       <button
         onClick={() => login()}
+        disabled={googleLoading}
         style={{
           display: "flex",
           alignItems: "center",
@@ -81,16 +101,11 @@ const GoogleBtn = () => {
           fontWeight: "500",
           fontSize: "16px",
           padding: "10px 20px",
-          cursor: "pointer",
+          cursor: googleLoading ? "not-allowed" : "pointer",
+          opacity: googleLoading ? 0.7 : 1,
           boxShadow:
             "0 1px 3px rgba(60,64,67,0.3), 0 1px 1px rgba(60,64,67,0.15)",
           transition: "background-color 0.2s, box-shadow 0.2s",
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.backgroundColor = "#f7f8f8";
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.backgroundColor = "#ffffff";
         }}
       >
         <img
@@ -104,9 +119,11 @@ const GoogleBtn = () => {
             marginRight: "10px",
           }}
         />
-        Continue with Google
+        {googleLoading ? "Connecting..." : "Continue with Google"}
       </button>
     </div>
+    </>
+
   );
 };
 

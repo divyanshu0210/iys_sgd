@@ -5,6 +5,7 @@ import "../../css/profile.css";
 import API from "../../services/api";
 import { INITIATION_PLACES, SPIRITUAL_MASTERS } from "./data";
 import ProfileApprovalForm from "./ProfileApprovalForm.jsx";
+import FullPageLoader from "../../components/FullPageLoader.jsx";
 
 const MAX_PHOTO_SIZE = 1 * 1024 * 1024; // 1MB
 
@@ -234,6 +235,8 @@ export default function BasicProfile() {
     return <ProfileApprovalForm user={user} />;
   }
   return (
+    <>
+     {submitting&&<FullPageLoader/>}
     <div className="cp-page">
       <form className="cp-card" onSubmit={handleSubmit} noValidate>
         <h2 className="cp-title">Complete Your Profile To Continue</h2>
@@ -573,5 +576,7 @@ export default function BasicProfile() {
         </div>
       </form>
     </div>
+    </>
+
   );
 }

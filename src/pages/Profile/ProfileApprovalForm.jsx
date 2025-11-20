@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../../css/profile.css";
 import API from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import FullPageLoader from "../../components/FullPageLoader";
 
 export default function ProfileApprovalForm({ onClose }) {
   const { fetchProfile } = useAuth();
@@ -52,6 +53,8 @@ export default function ProfileApprovalForm({ onClose }) {
   };
 
   return (
+    <>
+    {submitting&&<FullPageLoader/>}
     <div className="cp-page" style={{ padding:0 ,margin:0 }}>
       <form className="cp-card" onSubmit={handleSubmit} noValidate>
         <p className="cp-title">Get Profile Approved</p>
@@ -106,5 +109,7 @@ export default function ProfileApprovalForm({ onClose }) {
         </div>
       </form>
     </div>
+    </>
+
   );
 }

@@ -22,7 +22,7 @@ export default function Modal({ open, onClose, children }) {
         style={{
           background: "#fff",
           borderRadius: "10px",
-          padding: "1.5rem",
+          padding: "0.5rem",
           width: "90%",
           maxWidth: "600px",
           position: "relative",
@@ -38,9 +38,10 @@ export default function Modal({ open, onClose, children }) {
             background: "transparent",
             fontSize: "1.2rem",
             cursor: "pointer",
+            
           }}
         >
-          ✕
+          <span style={{color:"black"}}>✕</span>
         </button>
         {children}
       </div>

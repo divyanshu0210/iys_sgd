@@ -11,13 +11,14 @@ function ShimmerBox() {
       style={{
         height: "140px",
         borderRadius: "12px",
-        background: "linear-gradient(90deg, #f8f8f8 0%, #ececec 50%, #f8f8f8 100%)",
+        background: "linear-gradient(90deg, #e6e8eb 0%, #f5f6f8 50%, #e9ebee 100%)",
         backgroundSize: "200% 100%",
         animation: "shimmer 1.4s infinite",
       }}
     />
   );
 }
+
 
 export default function YatraList() {
   const [yatras, setYatras] = useState([]);

@@ -45,7 +45,9 @@ export default function SignIn() {
 
   return (
     <div className="reg-page">
-      <form className="reg-card" onSubmit={handleSubmit} noValidate>
+      <div className="reg-card">
+
+      <form  onSubmit={handleSubmit} noValidate>
         <h2 className="reg-title">Sign In</h2>
 
         {/* Status */}
@@ -100,6 +102,8 @@ export default function SignIn() {
           </button>
         </div>
 
+      </form>
+      
         <p style={{ textAlign: "center", margin: "0.5rem 0" }}>
           <Link to="/password_reset" className="btn-link">
             Forgot password?
@@ -108,16 +112,17 @@ export default function SignIn() {
 
         {/* Google Login */}
         <div style={{ margin: "1.5rem 0", textAlign: "center" }}>
-          <GoogleBtn />
+          <GoogleBtn setStatus={setStatus} />
         </div>
 
         <p style={{ textAlign: "center", fontSize: "0.9rem" }}>
           New here?{" "}
           <Link to="/signup" className="btn-link">
-            Create an account
+            Create account
           </Link>
         </p>
-      </form>
+      </div>
+
     </div>
   );
 }

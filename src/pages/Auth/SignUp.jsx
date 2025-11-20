@@ -110,12 +110,8 @@ export default function SignUp() {
           </button>
         </div>
 
-        {/* Google Sign Up */}
-        <div style={{ margin: "1.5rem 0", textAlign: "center" }}>
-          <GoogleBtn/>
-        </div>
-
-        <p style={{ textAlign: "center", fontSize: "0.9rem" }}>
+  
+        <p style={{ margin: "1.5rem 0", textAlign: "center", fontSize: "0.9rem" }}>
           Already have an account?{" "}
           <Link to="/signin" className="btn-link">
             Sign in
