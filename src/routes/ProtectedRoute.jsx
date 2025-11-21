@@ -1,9 +1,10 @@
 // src/components/ProtectedRoute.jsx
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import FullPageLoader from "../components/FullPageLoader";
 
 export default function ProtectedRoute({ children }) {
-  const { user } = useAuth();
+  const { user,loading } = useAuth();
 
-   return user ? <Outlet /> : <Navigate to="/signin" replace />;
+   return user || loading? <Outlet /> : <Navigate to="/signin" replace />;
 }

@@ -1,5 +1,5 @@
 // src/context/YatraRegistrationContext.jsx
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import API from "../../../services/api";
 import { useAuth } from "../../../context/AuthContext";
@@ -16,27 +16,36 @@ export const useYatraRegistration = () => {
   return context;
 };
 
+export const STORAGE_KEY = "yatra_checkout_session";
+
+
 export const YatraRegistrationProvider = ({ children }) => {
   const { yatra_id } = useParams();
   const { profile } = useAuth();
   const location = useLocation();
 
+  //Local storage management
+  console.log("From yatra context");
   const [registerData, setRegisterData] = useState({ profiles: [], yatra: {} });
   const [eligibilityData, setEligibilityData] = useState({ profiles: [] });
-  const [selected, setSelected] = useState([]);
-  const [registrations, setRegistrations] = useState({});
   const [activeTab, setActiveTab] = useState("registered");
   const [currentStep, setCurrentStep] = useState(1);
+  
+  const [selected, setSelected] = useState([]);
+  const [registrations, setRegistrations] = useState({});
 
   const [loading, setLoading] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const yatra = location.state?.yatra || registerData.yatra;;
- const [initialLoading, setInitialLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const yatra = location.state?.yatra || registerData.yatra;
+
+
 
   // Fetch registration data
-  const fetchRegistrationData = async () => {
+  const fetchRegistrationData = async (loading = false) => {
+    loading && setInitialLoading(true);
     try {
       console.log("Fetching registration data for yatra_id:", yatra_id);
       const regRes = await API.get(`/yatras/${yatra_id}/register/`);
@@ -44,6 +53,8 @@ export const YatraRegistrationProvider = ({ children }) => {
     } catch (err) {
       console.error("Failed to load registration data", err);
       alert("Failed to load resister data");
+    } finally {
+      loading && setInitialLoading(false);
     }
   };
 
@@ -56,7 +67,6 @@ export const YatraRegistrationProvider = ({ children }) => {
     } catch (err) {
       console.error("Failed to load eligibility data", err);
     }
-     
   };
 
   // Helper functions
@@ -84,7 +94,7 @@ export const YatraRegistrationProvider = ({ children }) => {
     const key = `${profileId}-${action}`;
     setLoading((prev) => ({ ...prev, [key]: true }));
     try {
-        if (action === "unapprove" && registrations[profileId]) {
+      if (action === "unapprove" && registrations[profileId]) {
         alert(
           "Cannot unapprove — this profile has already started registration or registered."
         );
@@ -111,9 +121,9 @@ export const YatraRegistrationProvider = ({ children }) => {
   const requestApproval = async () => {
     setLoading((prev) => ({ ...prev, selfRequest: true }));
     try {
-        if (registrations[profile.id]) {
+      if (registrations[profile.id]) {
         alert(
-           "Cannot unapprove — this profile has already started registration or registered."
+          "Cannot unapprove — this profile has already started registration or registered."
         );
         return;
       }
@@ -130,7 +140,6 @@ export const YatraRegistrationProvider = ({ children }) => {
       setLoading((prev) => ({ ...prev, selfRequest: false }));
     }
   };
-
 
   const value = {
     yatra_id,
@@ -163,7 +172,8 @@ export const YatraRegistrationProvider = ({ children }) => {
     setShowForm,
     initialLoading,
     setInitialLoading,
-    currentStep, setCurrentStep,
+    currentStep,
+    setCurrentStep,
   };
 
   return (

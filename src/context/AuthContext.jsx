@@ -8,11 +8,11 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [profileStage, setProfileStage] = useState("not-exists"); // "not-exists", "guest", "approval", "devotee"
   const [loading, setLoading] = useState(true);
+  const [isNavigationLocked, setIsNavigationLocked] = useState(false);
 
- 
   const determineProfileStage = (data) => {
     if (!data.mobile) return "not-exists";
-    if(data.user_type === "mentor") return "mentor";
+    if (data.user_type === "mentor") return "mentor";
     if (data.mobile && !data.mentor) return "guest";
     if (data.mentor && !data.is_profile_approved) return "approval";
     if (data.mentor && data.is_profile_approved) return "devotee";
@@ -20,7 +20,6 @@ export function AuthProvider({ children }) {
   };
   // ✅ Fetch profile from API and return success status
   const fetchProfile = async () => {
-    setLoading(true);
     try {
       const res = await API.get("api/profile/");
       const data = res.data;
@@ -33,14 +32,13 @@ export function AuthProvider({ children }) {
       setProfile(null);
       setProfileStage("not-exists");
       return "not-exists";
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   // ✅ Run once on mount
   useEffect(() => {
     const initializeAuth = async () => {
+      setLoading(true)
       const token = localStorage.getItem("userToken");
       console.log("AuthProvider mounted, token:", token);
 
@@ -52,8 +50,8 @@ export function AuthProvider({ children }) {
         setUser(null);
         setProfile(null);
         setProfileStage("not-exists");
-        setLoading(false);
       }
+      setLoading(false);
     };
 
     initializeAuth();
@@ -110,6 +108,8 @@ export function AuthProvider({ children }) {
         fetchProfile,
         profileStage,
         setProfileStage,
+        isNavigationLocked,
+        setIsNavigationLocked,
       }}
     >
       {children}

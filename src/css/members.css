@@ -176,6 +176,7 @@
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  z-index: 400;
 }
 
 .vertical-tabs {
@@ -251,8 +252,6 @@
   margin-bottom: 0.5rem;
 }
 
-
-
 /* Responsive */
 @media (max-width: 768px) {
   .profile-page {
@@ -264,6 +263,8 @@
     border-radius: 5px;
     overflow-y: visible;
     margin-bottom: 10px;
+    position: sticky;
+    top: 55px;
   }
 
   .vertical-tabs {
@@ -322,9 +323,8 @@
   }
 
   .tab-content h3 {
-  margin: 0.2px;
-  font-size: 0.9rem;
-  color: #1e293b;
-}
-
+    margin: 0.2px;
+    font-size: 0.9rem;
+    color: #1e293b;
+  }
 }

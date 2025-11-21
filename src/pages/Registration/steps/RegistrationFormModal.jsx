@@ -160,6 +160,7 @@ function RegistrationFormModal({ profile, onClose }) {
 
         <form className="form-body" onSubmit={handleSubmit}>
           {/* --- Dynamic Fields --- */}
+          {(yatra.form_fields || []).length > 0 && (  
           <div className="form-section">
             <h3 className="section-title">Personal Details</h3>
             <div className="form-fields">
@@ -228,6 +229,7 @@ function RegistrationFormModal({ profile, onClose }) {
               ))}
             </div>
           </div>
+          )}
 
           {/* --- Installments Section --- */}
           <div className="form-section">

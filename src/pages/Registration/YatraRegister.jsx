@@ -23,14 +23,6 @@ export default function YatraRegister() {
     eligibilityData,
   } = useYatraRegistration();
 
-  // Fetch data on mount and tab change
-  // useEffect(() => {
-  //   fetchRegistrationData();
-
-  //   if (activeTab === "approve") {
-  //     fetchEligibilityData();
-  //   }
-  // }, [yatra_id, activeTab]);
   useEffect(() => {
     const loadAll = async () => {
       setInitialLoading(true);
@@ -62,11 +54,7 @@ export default function YatraRegister() {
 
   return (
     <div className="profile-page">
-      {!(currentStep===3) &&(
-
       <Sidebar />
-      )}
-
       <div className="profile-content">{renderActiveTab()}</div>
 
       <AlertModal

@@ -492,6 +492,7 @@
   .whatsapp-list {
     gap: 0.5rem;
     background: #fdf6ee94;
+    margin-bottom: 50px;
   }
 }
 
@@ -562,6 +563,7 @@
   .checkout-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch; /* smooth iOS scroll */
+    margin-bottom:50px;
   }
 
   .review-table {

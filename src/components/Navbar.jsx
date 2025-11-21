@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 
 export default function Navbar() {
-  const { user, profile, profileStage, logout } = useAuth();
+  const { user, profile, profileStage, logout, isNavigationLocked } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef();
@@ -23,7 +23,14 @@ export default function Navbar() {
   const NavLink = ({ to, children }) => (
     <Link
       to={to}
-      onClick={() => setIsMenuOpen(false)}
+      onClick={(e) => {
+        if (isNavigationLocked) {
+          e.preventDefault();
+          alert("Please complete or cancel the payment before leaving.");
+        } else {
+          setIsMenuOpen(false);
+        }
+      }}
       style={{
         color: "#fff",
         textDecoration: "none",
@@ -61,7 +68,13 @@ export default function Navbar() {
         {/* Logo */}
         <Link
           to="/"
-          className={ "logo-text"}
+          className={"logo-text"}
+          onClick={(e) => {
+            if (isNavigationLocked) {
+              e.preventDefault();
+              alert("Please complete or cancel the payment before leaving.");
+            }
+          }}
           style={{
             fontWeight: 700,
             fontSize: "1.4rem", // default larger size
@@ -86,6 +99,12 @@ export default function Navbar() {
                 <NavLink to="/profile">Profile</NavLink>
                 <button
                   onClick={() => {
+                    if (isNavigationLocked) {
+                      alert(
+                        "Please complete or cancel the payment before logging out."
+                      );
+                      return;
+                    }
                     logout();
                     navigate("/");
                   }}
@@ -99,6 +118,12 @@ export default function Navbar() {
                 <NavLink to="/complete-profile">Profile</NavLink>
                 <button
                   onClick={() => {
+                    if (isNavigationLocked) {
+                      alert(
+                        "Please complete or cancel the payment before logging out."
+                      );
+                      return;
+                    }
                     logout();
                     navigate("/");
                   }}
@@ -120,7 +145,14 @@ export default function Navbar() {
         {user && (
           <div
             className="mobile-only"
-            onClick={() => setIsMenuOpen(true)}
+            onClick={(e) => {
+              if (isNavigationLocked) {
+                e.preventDefault();
+                alert("Please complete or cancel the payment before leaving.");
+              } else {
+                setIsMenuOpen(false);
+              }
+            }}
             style={{ cursor: "pointer" }}
           >
             <div className="bar"></div>
@@ -152,6 +184,12 @@ export default function Navbar() {
             )}
             <button
               onClick={() => {
+                if (isNavigationLocked) {
+                  alert(
+                    "Please complete or cancel the payment before logging out."
+                  );
+                  return;
+                }
                 logout();
                 setIsMenuOpen(false);
                 navigate("/");

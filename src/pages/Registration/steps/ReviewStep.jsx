@@ -1,9 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { useYatraRegistration } from "../context/YatraRegistrationContext";
+import {
+  STORAGE_KEY,
+  useYatraRegistration,
+} from "../context/YatraRegistrationContext";
 import RegistrationFormModal from "./RegistrationFormModal";
 import { useState } from "react";
 
-const ReviewStep = ({ onBack ,onNext}) => {
+const ReviewStep = ({ onBack, onNext }) => {
   const [editingProfile, setEditingProfile] = useState(null);
   const navigate = useNavigate();
 
@@ -13,6 +16,8 @@ const ReviewStep = ({ onBack ,onNext}) => {
     registerData,
     getInstallmentAmount,
     hasPaidInstallments,
+    yatra,
+    yatra_id,
   } = useYatraRegistration();
 
   // Build registration_installments object for backend
@@ -27,6 +32,20 @@ const ReviewStep = ({ onBack ,onNext}) => {
       totalAmount += regData.amount || 0;
     }
   });
+
+  const handleProceedToCheckout = () => {
+    const checkoutData = {
+      selected, // array of profile ids
+      registrations, // full registration object per profile
+      yatra,
+      registerData,
+      yatra_id,
+      savedAt: Date.now(),
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(checkoutData));
+    navigate("../checkout");
+  };
 
   return (
     <>
@@ -124,7 +143,9 @@ const ReviewStep = ({ onBack ,onNext}) => {
               <div key={id} className="review-mobile-card">
                 <div className="mobile-card-header">
                   <strong>{profile.full_name || "Unknown"}</strong>
-                  <span className="mobile-card-id">ID: {profile.member_id}</span>
+                  <span className="mobile-card-id">
+                    ID: {profile.member_id}
+                  </span>
                 </div>
 
                 {/* Form fields */}
@@ -146,9 +167,7 @@ const ReviewStep = ({ onBack ,onNext}) => {
                         const inst = data.installments_info?.find(
                           (i) => i.label === label
                         );
-                        return (
-                          inst && ["due"].includes(inst.tag.toLowerCase())
-                        );
+                        return inst && ["due"].includes(inst.tag.toLowerCase());
                       })
                       .map((instLabel) => (
                         <span
@@ -179,22 +198,28 @@ const ReviewStep = ({ onBack ,onNext}) => {
             );
           })}
         </div>
-{/* 
+        {/* 
         <div className="total-row">
           <strong>Total Amount: ₹{totalAmount}</strong>
         </div> */}
 
-        <div className="step-actions fixed" >
-          <button onClick={onBack} className="btn-back">
+        <div className="step-actions fixed">
+          <button
+            onClick={() => {
+              setCurrentStep(1);
+            }}
+            className="btn-back"
+          >
             Back
           </button>
           <button
-            onClick={()=>{onNext()}}
-            // onClick={()=>{navigate('/checkout')}}
+            onClick={() => {
+              handleProceedToCheckout();
+            }}
             className="btn-next"
             disabled={totalAmount === 0}
           >
-            Proceed to Pay  <span>(Total ₹{totalAmount})</span>
+            Proceed to Pay <span>(Total ₹{totalAmount})</span>
           </button>
         </div>
       </div>

@@ -1,301 +1,111 @@
-// // src/pages/components/CheckoutStep.jsx
-// import { useEffect, useState } from "react";
-// import { useYatraRegistration } from "../context/YatraRegistrationContext";
-// import API from "../../../services/api";
-
-// const CheckoutStep = ({ onBack, setCurrentStep }) => {
-//   const [transactionId, setTransactionId] = useState("");
-//   const [screenshot, setScreenshot] = useState(null);
-//   const [loadingCheckout, setLoadingCheckout] = useState(false);
-
-//     const [loading, setLoading] = useState(false);
-
-//   const {
-//     selected,
-//     registrations,
-//     yatra,
-//     registerData,
-//     yatra_id,
-//     fetchRegistrationData,
-//     setSelected,
-//     setRegistrations,
-//     setActiveTab,
-//   } = useYatraRegistration();
-
-//   // 🧭 --- PREVENT accidental refresh or navigation ---
-//   useEffect(() => {
-
-//     //     if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
-//     //   window.location.href = "/yatra";
-//     //   return;
-//     // }
-
-//     const handleBeforeUnload = (e) => {
-//       e.preventDefault();
-//       e.returnValue =
-//         "Your payment data will be lost if you leave this page. Are you sure you want to exit?";
-//     };
-
-//     const handlePopState = (e) => {
-//       const confirmLeave = window.confirm(
-//         "You have unsaved payment data. Are you sure you want to go back?"
-//       );
-//       if (confirmLeave) {
-//         // ⬅️ user confirmed → redirect to /yatra
-//         window.location.href = `/yatras`;
-//         // window.location.href = `/yatra/${yatra_id}/register`;
-//       }
-//     };
-
-//     window.addEventListener("beforeunload", handleBeforeUnload);
-//     window.addEventListener("popstate", handlePopState);
-
-//     // push state so back button triggers popstate handler
-//     window.history.pushState(null, "", window.location.href);
-  
-
-//     return () => {
-//       window.removeEventListener("beforeunload", handleBeforeUnload);
-//       window.removeEventListener("popstate", handlePopState);
-//     };
-//   }, []);
-
-//   // ---- Calculate total and prepare registration_installments ----
-//   const registrationInstallments = selected
-//     .map((profileId) => {
-//       const regData = registrations[profileId];
-//       if (regData?.installments_selected?.length > 0) {
-//         // keep only selected installments that are still due or pending
-//         const dueOrPending = regData.installments_selected.filter((label) => {
-//           const inst = regData.installments_info?.find(
-//             (i) => i.label === label
-//           );
-//           return inst && ["due"].includes(inst.tag.toLowerCase());
-//         });
-
-//         if (dueOrPending.length > 0) {
-//           return {
-//             profile_id: profileId,
-//             installments: dueOrPending,
-//           };
-//         }
-//       }
-//       return null;
-//     })
-//     .filter(Boolean);
-
-//   const totalAmount = selected.reduce((sum, profileId) => {
-//     const regData = registrations[profileId];
-//     return sum + (regData?.amount || 0);
-//   }, 0);
-
-//   const upiId = (yatra || registerData.yatra)?.payment_upi_id || "";
-//   const qrUrl = `${API.defaults.baseURL}payments/qr/?amount=${totalAmount}&upi_id=${upiId}&note=Yatra+Payment`;
-
-//   // ---- STEP 1: Submit batch proof (create payment entry) ----
-//   const submitBatchProof = async () => {
-//     const payload = {
-//       registration_installments: registrationInstallments,
-//       transaction_id: transactionId,
-//       total_amount: totalAmount,
-//     };
-
-//     const res = await API.post(
-//       `/payments/${yatra_id}/batch-payment-proof/`,
-//       payload
-//     );
-//     return res.data.payment_id;
-//   };
-
-//   // ---- STEP 2: Upload screenshot ----
-//   const uploadScreenshot = async (paymentId) => {
-//     const formData = new FormData();
-//     formData.append("screenshot", screenshot);
-
-//     await API.post(`/payments/${paymentId}/upload-screenshot/`, formData, {
-//       headers: { "Content-Type": "multipart/form-data" },
-//     });
-//   };
-
-//   // ---- Master handler ----
-//   const handleSubmitProof = async (e) => {
-//     e.preventDefault();
-
-//     if (!transactionId || !screenshot) {
-//       alert("Please fill all fields.");
-//       return;
-//     }
-//     if (registrationInstallments.length === 0) {
-//       alert("No installments selected for payment.");
-//       return;
-//     }
-
-//     setLoadingCheckout(true);
-//     try {
-//       // Step A: Register devotees
-//       await API.post(`/yatras/${yatra_id}/register/`, registrations);
-
-//       // Step B: Create batch payment (get payment_id)
-//       const paymentId = await submitBatchProof();
-
-//       // Step C: Upload screenshot for that payment
-//       await uploadScreenshot(paymentId);
-
-//       alert("✅ All registrations and payment proof submitted successfully!");
-//       setCurrentStep(1);
-//       setSelected([]);
-//       setRegistrations({});
-//       setTransactionId("");
-//       setScreenshot(null);
-//       fetchRegistrationData();
-//       setActiveTab("registered");
-//     } catch (err) {
-//       console.error("Checkout error:", err);
-//       alert(
-//         err.response?.data?.error ||
-//           "Submission failed. Please check details & try again."
-//       );
-//     } finally {
-//       setLoadingCheckout(false);
-//     }
-//   };
-
-//   return (
-//     <div className="checkout-full">
-//       <h3>Step 3: Checkout & Payment</h3>
-
-//       <div className="checkout-summary">
-//         <p>
-//           <strong>Yatra:</strong> {(yatra || registerData.yatra)?.title}
-//         </p>
-//         <p>
-//           <strong>Devotees:</strong> {selected.length}
-//         </p>
-//         <p>
-//           <strong>Total Amount:</strong> ₹{totalAmount}
-//         </p>
-//       </div>
-
-//       <div className="payment-flow">
-//         <div className="qr-section">
-//           <h4>Scan & Pay</h4>
-//           <img src={qrUrl} alt="UPI QR" className="qr-code" />
-//           <p>
-//             <strong>Amount to Pay:</strong> ₹{totalAmount}
-//           </p>
-
-//           <form onSubmit={handleSubmitProof} className="proof-form">
-//             <div className="form-group">
-//               <label>Transaction ID *</label>
-//               <input
-//                 type="text"
-//                 value={transactionId}
-//                 onChange={(e) => setTransactionId(e.target.value)}
-//                 placeholder="e.g., T241108123456789"
-//                 required
-//               />
-//             </div>
-
-//             <div className="form-group">
-//               <label>Payment Screenshot *</label>
-//               <input
-//                 type="file"
-//                 accept="image/*"
-//                 onChange={(e) => setScreenshot(e.target.files[0])}
-//                 required
-//               />
-//               {screenshot && (
-//                 <div
-//                   style={{
-//                     marginTop: "8px",
-//                     fontSize: "14px",
-//                     color: "#047857",
-//                   }}
-//                 >
-//                   ✓ File selected: {screenshot.name}
-//                 </div>
-//               )}
-//             </div>
-
-//             <div className="step-actions">
-//               <div></div>
-//               {/* <button
-//                 onClick={onBack}
-//                 className="btn-back"
-//                 type="button"
-//                 disabled={loadingCheckout}
-//               >
-//                 Back to Review
-//               </button> */}
-
-//               <button
-//                 type="submit"
-//                 disabled={loadingCheckout || !screenshot || !transactionId}
-//                 className="btn-next"
-//               >
-//                 {loadingCheckout ? "Submitting..." : "Submit All & Pay"}
-//               </button>
-//             </div>
-//           </form>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default CheckoutStep;
-// src/pages/components/CheckoutStep.jsx
 import { useEffect, useState } from "react";
-import { useYatraRegistration } from "../context/YatraRegistrationContext";
+import {
+  STORAGE_KEY,
+  useYatraRegistration,
+} from "../context/YatraRegistrationContext";
 import API from "../../../services/api";
+import { useAuth } from "../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import FullPageLoader from "../../../components/FullPageLoader";
 
-const CheckoutStep = ({ onBack, setCurrentStep }) => {
-  const [transactionId, setTransactionId] = useState("");
+const CheckoutStep = () => {
+  const { setIsNavigationLocked } = useAuth();
+  const navigate = useNavigate();
   const [screenshot, setScreenshot] = useState(null);
+  const [transactionId, setTransactionId] = useState("");
+
   const [loadingCheckout, setLoadingCheckout] = useState(false);
 
   // 🔵 NEW: status of screenshot verification
-  const [verificationStatus, setVerificationStatus] = useState("pending"); 
+  const [verificationStatus, setVerificationStatus] = useState("pending");
   const [verifying, setVerifying] = useState(false);
   const [message, setMessage] = useState("");
 
+  // Data loaded from localStorage
+  const [checkoutData, setCheckoutData] = useState(null);
+
   const {
-    selected,
-    registrations,
-    yatra,
-    registerData,
-    yatra_id,
     fetchRegistrationData,
     setSelected,
     setRegistrations,
     setActiveTab,
+    setCurrentStep,
+    currentStep,
   } = useYatraRegistration();
 
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      e.preventDefault();
-      e.returnValue =
-        "Your payment data will be lost if you leave this page. Are you sure you want to exit?";
-    };
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      alert("No checkout session found. Redirecting back...");
+      navigate(-1);
+      return;
+    }
 
+    try {
+      const data = JSON.parse(raw);
+      setCheckoutData(data);
+    } catch (err) {
+      console.error("Failed to parse checkout session", err);
+      alert("Invalid session data.");
+      navigate(-1);
+    }
+  }, []);
+
+  //lock navigation
+  useEffect(() => {
+    // Only block if there is actual data (selected profiles, etc.)
+    if (!checkoutData || checkoutData?.selected.length === 0) return;
+    setIsNavigationLocked(true);
+
+    const blockMessage =
+      "You have unsaved payment data. Are you sure you want to leave?";
+
+    // 1. Block browser back/forward navigation
     const handlePopState = (e) => {
-      const confirmLeave = window.confirm(
-        "You have unsaved payment data. Are you sure you want to go back?"
-      );
+      // Ask user
+      const confirmLeave = window.confirm(blockMessage);
+
       if (confirmLeave) {
-        window.location.href = `/yatras`;
+        // Allow navigation: go back one more time to actually leave
+        clearCheckoutSession();
+      } else {
+        // Stay: push the current state back (restore the URL)
+        window.history.pushState(null, "", window.location.href);
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    // 2. Block page refresh/close
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = blockMessage; // Some browsers require this
+      return blockMessage;
+    };
+
+    // Add initial history entry only if not already blocked
+    if (window.history.state !== "blocker") {
+      window.history.pushState("blocker", "", window.location.href);
+    }
+
     window.addEventListener("popstate", handlePopState);
-    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      setIsNavigationLocked(false);
     };
-  }, []);
+  }, [checkoutData, setIsNavigationLocked]);
+
+  if (!checkoutData) {
+    return (
+      <div className="checkout-full">
+        <p>Loading checkout details...</p>
+      </div>
+    );
+  }
+
+  const { selected, registrations, yatra, registerData, yatra_id } =
+    checkoutData;
 
   // ---- Calculate total
   const registrationInstallments = selected
@@ -412,83 +222,107 @@ const CheckoutStep = ({ onBack, setCurrentStep }) => {
       const paymentId = await submitBatchProof();
       await uploadScreenshot(paymentId);
 
+      // Success → Clear everything
+      clearCheckoutSession();
+
       alert("✅ Payment proof submitted successfully!");
-      setCurrentStep(1);
-      setSelected([]);
-      setRegistrations({});
-      setTransactionId("");
-      setScreenshot(null);
-      fetchRegistrationData();
-      setActiveTab("registered");
     } catch (err) {
       console.error("Checkout error:", err);
       alert(
-        err.response?.data?.error ||
-          "Submission failed. Please try again."
+        err.response?.data?.error || "Submission failed. Please try again."
       );
     } finally {
       setLoadingCheckout(false);
     }
   };
-
+  const clearCheckoutSession = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setSelected([]);
+    setRegistrations({});
+    setTransactionId("");
+    setScreenshot(null);
+    setActiveTab("registered");
+    setCurrentStep(1);
+    navigate(`/yatra/${yatra_id}/register`);
+  };
   return (
-    <div className="checkout-full">
-      <h3>Step 3: Checkout & Payment</h3>
+    <>
+      {loadingCheckout && <FullPageLoader />}
+      <div className="checkout-full">
+        <h3>Step 3: Checkout & Payment</h3>
 
-      <div className="checkout-summary">
-        <p><strong>Total Amount:</strong> ₹{totalAmount}</p>
-      </div>
+        <div className="checkout-summary">
+          <p>
+            <strong>Total Amount:</strong> ₹{totalAmount}
+          </p>
+        </div>
 
-      <div className="qr-section">
-        <h4>Scan & Pay</h4>
-        <img src={qrUrl} alt="UPI QR" className="qr-code" />
+        <div className="qr-section">
+          <h4>Scan & Pay</h4>
+          <img src={qrUrl} alt="UPI QR" className="qr-code" />
 
-        <form onSubmit={handleSubmitProof} className="proof-form">
+          <form onSubmit={handleSubmitProof} className="proof-form">
+            <div className="form-group">
+              <label>Transaction ID *</label>
+              <input
+                type="text"
+                value={transactionId}
+                onChange={(e) => setTransactionId(e.target.value)}
+                required
+              />
+            </div>
 
-          <div className="form-group">
-            <label>Transaction ID *</label>
-            <input
-              type="text"
-              value={transactionId}
-              onChange={(e) => setTransactionId(e.target.value)}
-              required
-            />
-          </div>
+            <div className="form-group">
+              <label>Payment Screenshot *</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleScreenshotChange(e.target.files[0])}
+                required
+              />
 
-          <div className="form-group">
-            <label>Payment Screenshot *</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleScreenshotChange(e.target.files[0])}
-              required
-            />
-
-            {/* Status Messages */}
-            {/* {verifying && <p style={{ color: "blue" , fontSize:"12px"}}>⏳ Verifying screenshot…</p>}
+              {/* Status Messages */}
+              {/* {verifying && <p style={{ color: "blue" , fontSize:"12px"}}>⏳ Verifying screenshot…</p>}
             {verificationStatus === "valid" && (
               <p style={{ color: "green" , fontSize:"12px"}}>{message}</p>
             )}
             {verificationStatus === "invalid" && (
               <p style={{ color: "red" , fontSize:"12px"}}>{message}</p>
             )} */}
-          </div>
+            </div>
 
+            <button
+              type="submit"
+              className="btn-next"
+              disabled={
+                loadingCheckout ||
+                verifying ||
+                verificationStatus !== "valid" ||
+                !transactionId
+              }
+            >
+              {loadingCheckout ? "Submitting..." : "Submit All & Pay"}
+            </button>
+          </form>
           <button
-            type="submit"
-            className="btn-next"
-            disabled={
-              loadingCheckout ||
-              verifying ||
-              verificationStatus !== "valid" ||
-              !transactionId
-            }
+            onClick={() => {
+              if (confirm("Cancel payment? All data will be lost.")) {
+                clearCheckoutSession();
+              }
+            }}
+            style={{
+              marginTop: "16px",
+              color: "#e63946",
+              background: "none",
+              border: "1px solid #aaa",
+              fontSize: "14px",
+            }}
           >
-            {loadingCheckout ? "Submitting..." : "Submit All & Pay"}
+            Cancel Payment
           </button>
-        </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

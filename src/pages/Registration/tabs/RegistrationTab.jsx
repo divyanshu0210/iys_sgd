@@ -6,9 +6,18 @@ import ReviewStep from "../steps/ReviewStep";
 import CheckoutStep from "../steps/CheckoutStep";
 import "../css/registrationTab.css";
 import FullPageLoader from "../../../components/FullPageLoader";
+import { useNavigate } from "react-router-dom";
 
 const RegistrationTab = ({ title, note, filterFn, showBanner = false }) => {
-  const { registerData, selected,loading, initialLoading ,currentStep, setCurrentStep} = useYatraRegistration();
+  const {
+    registerData,
+    selected,
+    loading,
+    initialLoading,
+    currentStep,
+    setCurrentStep,
+  } = useYatraRegistration();
+  const navigate = useNavigate();
 
   const profiles = registerData.profiles?.filter(filterFn) || [];
 
@@ -26,15 +35,17 @@ const RegistrationTab = ({ title, note, filterFn, showBanner = false }) => {
             <h3>{title}</h3>
             {note && <p className="info-text">{note}</p>}
 
-            {initialLoading ? (
-               <FullPageLoader/>
+            {profiles.length === 0 && initialLoading ? (
+              <FullPageLoader />
             ) : profiles.length === 0 ? (
               <p className="empty-msg">No profiles available.</p>
             ) : (
               <div className="whatsapp-list">
                 {profiles.map((p) => (
-                  <WhatsAppCard key={p.id} profile={p} />
+                  <WhatsAppCard key={p.id} profile={p} loading={loading} />
                 ))}
+
+                {initialLoading && <FullPageLoader />}
               </div>
             )}
 
@@ -48,17 +59,10 @@ const RegistrationTab = ({ title, note, filterFn, showBanner = false }) => {
           </>
         );
       case 2:
-        return (
-          <ReviewStep
-            onBack={() => setCurrentStep(1)}
-            onNext={() => setCurrentStep(3)}
-          />
-        );
+        return <ReviewStep />;
       case 3:
         return (
           <CheckoutStep
-            setCurrentStep={setCurrentStep}
-            onBack={() => setCurrentStep(2)}
           />
         );
       default:
