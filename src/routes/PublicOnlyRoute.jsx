@@ -6,5 +6,5 @@ export default function PublicOnlyRoute() {
   const { user ,loading} = useAuth();
 
   // If user is logged in → redirect to home
-  return user ||loading ? <Navigate to="/" replace /> : <Outlet />;
+  return user  ? <Navigate to="/" replace /> : <Outlet />;
 }

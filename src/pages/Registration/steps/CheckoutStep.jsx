@@ -243,6 +243,7 @@ const CheckoutStep = () => {
     setScreenshot(null);
     setActiveTab("registered");
     setCurrentStep(1);
+    setIsNavigationLocked(false);
     navigate(`/yatra/${yatra_id}/register`);
   };
   return (
