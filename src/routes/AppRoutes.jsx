@@ -19,12 +19,15 @@
   import Members from "../pages/Members/Members";
   import VerifyEmail from "../pages/Auth/VerifyEmail";
   import VerificationEmailSent from "../pages/Auth/VerificationEmailSent";
+import PendingPaymentGuard from "./PendingPaymentGuard";
 
   export default function AppRoutes() {
     return (
       <Routes>
         {/* Public */}
+         <Route element={<PendingPaymentGuard />}>
         <Route path="/" element={<Home />} />
+         </Route>
 
         {/* Public-only (blocked if logged in) */}
         <Route element={<PublicOnlyRoute />}>
@@ -44,12 +47,14 @@
 
         {/* Protected */}
         <Route element={<ProtectedRoute />}>
+        <Route element={<PendingPaymentGuard />}>
           <Route path="/complete-profile" element={<BasicProfile />} />
           <Route path="/yatras" element={<YatraList />} />
 
           <Route element={<YatraRegistrationLayout />}>
             <Route path="/yatra/:yatra_id/register" element={<YatraRegister />} />
             <Route path="/checkout" element={<CheckoutStep />} />
+          </Route>
           </Route>
         </Route>
 
@@ -61,7 +66,7 @@
           element={<RoleProtectedRoute allowedStatuses={["devotee", "mentor"]} />}
         >
           <Route path="/members" element={<Members />} />
-        </Route>
+        </Route>  
 
         {/* Email verification */}
         <Route path="/email-verified" element={<VerifyEmail />} />

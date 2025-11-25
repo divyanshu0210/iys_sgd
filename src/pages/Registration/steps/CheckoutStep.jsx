@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   STORAGE_KEY,
   useYatraRegistration,
@@ -15,6 +15,9 @@ const CheckoutStep = () => {
   const [transactionId, setTransactionId] = useState("");
 
   const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [qrLoading, setQrLoading] = useState(true);
+  const ignoreLeaveWarning = useRef(false);
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   // 🔵 NEW: status of screenshot verification
   const [verificationStatus, setVerificationStatus] = useState("pending");
@@ -62,6 +65,11 @@ const CheckoutStep = () => {
 
     // 1. Block browser back/forward navigation
     const handlePopState = (e) => {
+      console.log("popstate event", ignoreLeaveWarning.current);
+      if (ignoreLeaveWarning.current) {
+        // clearCheckoutSession();
+        return;
+      }
       // Ask user
       const confirmLeave = window.confirm(blockMessage);
 
@@ -76,6 +84,9 @@ const CheckoutStep = () => {
 
     // 2. Block page refresh/close
     const handleBeforeUnload = (e) => {
+      console.log("unload event", ignoreLeaveWarning.current);
+      if (ignoreLeaveWarning.current) return; // allow unload if ignoring warnings
+      // Standard message
       e.preventDefault();
       e.returnValue = blockMessage; // Some browsers require this
       return blockMessage;
@@ -94,7 +105,7 @@ const CheckoutStep = () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       setIsNavigationLocked(false);
     };
-  }, [checkoutData, setIsNavigationLocked]);
+  }, [checkoutData, setIsNavigationLocked, ignoreLeaveWarning]);
 
   if (!checkoutData) {
     return (
@@ -248,7 +259,7 @@ const CheckoutStep = () => {
   };
   return (
     <>
-      {loadingCheckout && <FullPageLoader />}
+      {(loadingCheckout || qrLoading) && <FullPageLoader />}
       <div className="checkout-full">
         <h3>Step 3: Checkout & Payment</h3>
 
@@ -260,9 +271,48 @@ const CheckoutStep = () => {
 
         <div className="qr-section">
           <h4>Scan & Pay</h4>
-          <img src={qrUrl} alt="UPI QR" className="qr-code" />
 
-          <form onSubmit={handleSubmitProof} className="proof-form">
+          <img
+            src={qrUrl}
+            alt="UPI QR"
+            className="qr-code"
+            onLoad={() => setQrLoading(false)}
+          />
+
+          {isMobile && (
+            <>
+              <p>OR</p>
+              <button
+                type="button"
+                onClick={() => {
+                  ignoreLeaveWarning.current = true;
+
+                  window.location.href = `upi://pay?pa=${upiId}&pn=Yatra&am=${totalAmount}&tn=Yatra+Payment`;
+                  setTimeout(() => {
+                    ignoreLeaveWarning.current = false;
+                  }, 1000);
+                }}
+                style={{
+                  marginTop: "10px",
+                  background: "#0077cc",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                }}
+              >
+                Pay with any UPI App
+              </button>
+            </>
+          )}
+
+          <form
+            onSubmit={handleSubmitProof}
+            className="proof-form"
+            style={{ marginTop: "20px" }}
+          >
             <div className="form-group">
               <label>Transaction ID *</label>
               <input

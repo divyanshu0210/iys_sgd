@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import API from "../services/api";
+import { STORAGE_KEY } from "../pages/Registration/context/YatraRegistrationContext";
 
 const AuthContext = createContext();
 
@@ -32,13 +33,13 @@ export function AuthProvider({ children }) {
       setProfile(null);
       setProfileStage("not-exists");
       return "not-exists";
-    } 
+    }
   };
 
   // ✅ Run once on mount
   useEffect(() => {
     const initializeAuth = async () => {
-      setLoading(true)
+      setLoading(true);
       const token = localStorage.getItem("userToken");
       console.log("AuthProvider mounted, token:", token);
 
@@ -85,7 +86,15 @@ export function AuthProvider({ children }) {
       if (aT) {
         logoutFromGoogle(aT);
       }
-      localStorage.clear();
+      const keepKeys = [STORAGE_KEY];
+
+      // Remove everything else
+      Object.keys(localStorage).forEach((key) => {
+        if (!keepKeys.includes(key)) {
+          localStorage.removeItem(key);
+        }
+      });
+
       setUser(null);
       setProfile(null);
       setProfileStage("not-exists");

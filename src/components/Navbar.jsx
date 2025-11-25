@@ -150,7 +150,7 @@ export default function Navbar() {
                 e.preventDefault();
                 alert("Please complete or cancel the payment before leaving.");
               } else {
-                setIsMenuOpen(false);
+                setIsMenuOpen(true);
               }
             }}
             style={{ cursor: "pointer" }}

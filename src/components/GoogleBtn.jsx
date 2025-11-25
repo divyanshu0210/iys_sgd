@@ -7,12 +7,11 @@ import FullPageLoader from "./FullPageLoader";
 
 const GoogleBtn = ({ setStatus }) => {
   const navigate = useNavigate();
-  const { setUser, fetchProfile ,setLoading} = useAuth();
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const { setUser, fetchProfile ,setLoading,loading} = useAuth();
 
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      setGoogleLoading(true);
+      setLoading(true);
       setStatus(""); 
 
       try {
@@ -46,7 +45,7 @@ const GoogleBtn = ({ setStatus }) => {
 
         setStatus({ type: "error", msg: backendMsg });
       } finally {
-        setGoogleLoading(false);
+        setLoading(false);
       }
     },
 
@@ -57,7 +56,7 @@ const GoogleBtn = ({ setStatus }) => {
 
   return (
     <>
-    {googleLoading&&<FullPageLoader/>}
+    {loading&&<FullPageLoader/>}
     <div
       style={{
         display: "flex",
@@ -89,7 +88,7 @@ const GoogleBtn = ({ setStatus }) => {
 
       <button
         onClick={() => login()}
-        disabled={googleLoading}
+        disabled={loading}
         style={{
           display: "flex",
           alignItems: "center",
@@ -101,8 +100,8 @@ const GoogleBtn = ({ setStatus }) => {
           fontWeight: "500",
           fontSize: "16px",
           padding: "10px 20px",
-          cursor: googleLoading ? "not-allowed" : "pointer",
-          opacity: googleLoading ? 0.7 : 1,
+          cursor: loading ? "not-allowed" : "pointer",
+          opacity: loading ? 0.7 : 1,
           boxShadow:
             "0 1px 3px rgba(60,64,67,0.3), 0 1px 1px rgba(60,64,67,0.15)",
           transition: "background-color 0.2s, box-shadow 0.2s",
@@ -119,7 +118,7 @@ const GoogleBtn = ({ setStatus }) => {
             marginRight: "10px",
           }}
         />
-        {googleLoading ? "Connecting..." : "Continue with Google"}
+        {loading ? "Connecting..." : "Continue with Google"}
       </button>
     </div>
     </>
