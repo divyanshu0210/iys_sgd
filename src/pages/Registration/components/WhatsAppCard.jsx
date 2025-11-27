@@ -42,9 +42,10 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
     registrations[profileId]?.form_fields &&
     Object.keys(registrations[profileId].form_fields).length > 0;
 
+  //payments that are due & rejected
   const selectableInstallments =
     profile.installments_info?.filter((inst) =>
-      ["due"].includes(inst.tag.toLowerCase())
+      ["due","rejected"].includes(inst.tag.toLowerCase())
     ) || [];
 
   const hasSelectableInstallments =
@@ -98,7 +99,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
 
       // --- Process installments to match frontend format ---
       const installments_selected = data.installments
-        .filter((i) => i.payment?.proof)
+        .filter((i) => i.payment?.proof && i.payment?.status !== "rejected")
         .map((i) => i.label);
 
       const installments_paid = data.installments
@@ -114,7 +115,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
         amount: i.amount,
         is_paid: i.is_paid,
         proof: i.payment?.proof || null,
-        verified: i.payment?.is_verified || false,
+        status: i.payment?.status || false,
         transaction_id: i.payment?.transaction_id || null,
       }));
 
@@ -222,12 +223,14 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                       case "verified":
                         color = "#047857"; // green
                         break;
-                      case "unverified":
+                      case "rejected":
+                        color = "#b91c1c"; // red
+                        break;
                       case "verification pending":
                         color = "#ca8a04"; // amber
                         break;
                       default:
-                        color = "#b91c1c"; // red (due)
+                        color = "#dc2626"; // red (due)
                     }
 
                     return (

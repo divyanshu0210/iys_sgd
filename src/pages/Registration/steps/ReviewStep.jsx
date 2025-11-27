@@ -6,7 +6,7 @@ import {
 import RegistrationFormModal from "./RegistrationFormModal";
 import { useState } from "react";
 
-const ReviewStep = ({ onBack, onNext }) => {
+const ReviewStep = () => {
   const [editingProfile, setEditingProfile] = useState(null);
   const navigate = useNavigate();
 
@@ -18,6 +18,7 @@ const ReviewStep = ({ onBack, onNext }) => {
     hasPaidInstallments,
     yatra,
     yatra_id,
+    setCurrentStep,
   } = useYatraRegistration();
 
   // Build registration_installments object for backend
@@ -167,7 +168,7 @@ const ReviewStep = ({ onBack, onNext }) => {
                         const inst = data.installments_info?.find(
                           (i) => i.label === label
                         );
-                        return inst && ["due"].includes(inst.tag.toLowerCase());
+                        return inst && ["due","rejected"].includes(inst.tag.toLowerCase());
                       })
                       .map((instLabel) => (
                         <span

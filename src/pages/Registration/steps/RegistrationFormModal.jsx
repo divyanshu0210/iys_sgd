@@ -49,7 +49,8 @@ function RegistrationFormModal({ profile, onClose }) {
     const match = existing?.installments_details?.find(
       (i) => i.label === label
     );
-    const instPaidOrProof = match?.is_paid || match?.proof;
+    const instPaidOrProof = match?.is_paid || match?.proof && match?.status !=='rejected';
+    // const instPaidOrProof = match?.is_paid;
     if (instPaidOrProof) return; // cannot select paid/proof installments
     setInstallmentsSelected((prev) =>
       prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
@@ -104,7 +105,7 @@ function RegistrationFormModal({ profile, onClose }) {
     const amount = installmentsSelected
       .filter((label) => {
         const inst = profile?.installments_info.find((i) => i.label === label);
-        return inst && ["due"].includes(inst.tag.toLowerCase());
+        return inst && ["due","rejected"].includes(inst.tag.toLowerCase());
       })
       .reduce((sum, label) => sum + getInstallmentAmount(label), 0);
 
@@ -134,7 +135,8 @@ function RegistrationFormModal({ profile, onClose }) {
     const match = existing?.installments_details?.find(
       (i) => i.label === label
     );
-    return !(match?.is_paid || match?.proof);
+    return !(match?.is_paid || (match?.proof&& match?.status !=='rejected'));
+    // return !(match?.is_paid || match?.proof);
   });
 
   return (
@@ -150,85 +152,85 @@ function RegistrationFormModal({ profile, onClose }) {
           </button>
         </header>
 
-        {isReadOnly ?(
+        {isReadOnly ? (
           <div className="info-banner">
             ⚠️ Form is read-only because proof has been submitted.
           </div>
-        ):(
+        ) : (
           <p className="info-banner"> Form can only be filled once..</p>
         )}
 
         <form className="form-body" onSubmit={handleSubmit}>
           {/* --- Dynamic Fields --- */}
-          {(yatra.form_fields || []).length > 0 && (  
-          <div className="form-section">
-            <h3 className="section-title">Personal Details</h3>
-            <div className="form-fields">
-              {(yatra.form_fields || []).map((field) => (
-                <div key={field.name} className="form-group-modern">
-                  <label className="form-label">
-                    {field.label}{" "}
-                    {field.is_required && !isReadOnly && (
-                      <span className="required">*</span>
-                    )}
-                  </label>
-                  {field.field_type === "select" ? (
-                    <select
-                      name={field.name}
-                      onChange={handleFieldChange}
-                      value={formFields[field.name] || ""}
-                      disabled={isReadOnly}
-                      className="form-input"
-                    >
-                      <option value="">Select...</option>
-                      {field.options.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-                  ) : field.field_type === "radio" ? (
-                    <div className="radio-group-modern">
-                      {field.options.map((opt) => (
-                        <label key={opt} className="radio-label-modern">
-                          <input
-                            type="radio"
-                            name={field.name}
-                            value={opt}
-                            onChange={handleFieldChange}
-                            checked={formFields[field.name] === opt}
-                            disabled={isReadOnly}
-                          />
-                          {opt}
-                        </label>
-                      ))}
-                    </div>
-                  ) : field.field_type === "checkbox" ? (
-                    <label className="checkbox-modern">
-                      <input
-                        type="checkbox"
-                        name={field.name}
-                        checked={!!formFields[field.name]}
-                        onChange={handleFieldChange}
-                        disabled={isReadOnly}
-                      />
-                      Yes
+          {(yatra.form_fields || []).length > 0 && (
+            <div className="form-section">
+              <h3 className="section-title">Personal Details</h3>
+              <div className="form-fields">
+                {(yatra.form_fields || []).map((field) => (
+                  <div key={field.name} className="form-group-modern">
+                    <label className="form-label">
+                      {field.label}{" "}
+                      {field.is_required && !isReadOnly && (
+                        <span className="required">*</span>
+                      )}
                     </label>
-                  ) : (
-                    <input
-                      type={field.field_type}
-                      name={field.name}
-                      onChange={handleFieldChange}
-                      value={formFields[field.name] || ""}
-                      placeholder={field.label}
-                      disabled={isReadOnly}
-                      className="form-input"
-                    />
-                  )}
-                </div>
-              ))}
+                    {field.field_type === "select" ? (
+                      <select
+                        name={field.name}
+                        onChange={handleFieldChange}
+                        value={formFields[field.name] || ""}
+                        disabled={isReadOnly}
+                        className="form-input"
+                      >
+                        <option value="">Select...</option>
+                        {field.options.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    ) : field.field_type === "radio" ? (
+                      <div className="radio-group-modern">
+                        {field.options.map((opt) => (
+                          <label key={opt} className="radio-label-modern">
+                            <input
+                              type="radio"
+                              name={field.name}
+                              value={opt}
+                              onChange={handleFieldChange}
+                              checked={formFields[field.name] === opt}
+                              disabled={isReadOnly}
+                            />
+                            {opt}
+                          </label>
+                        ))}
+                      </div>
+                    ) : field.field_type === "checkbox" ? (
+                      <label className="checkbox-modern">
+                        <input
+                          type="checkbox"
+                          name={field.name}
+                          checked={!!formFields[field.name]}
+                          onChange={handleFieldChange}
+                          disabled={isReadOnly}
+                        />
+                        Yes
+                      </label>
+                    ) : (
+                      <input
+                        type={field.field_type}
+                        name={field.name}
+                        onChange={handleFieldChange}
+                        value={formFields[field.name] || ""}
+                        placeholder={field.label}
+                        disabled={isReadOnly}
+                        className="form-input"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
           )}
 
           {/* --- Installments Section --- */}
@@ -257,6 +259,7 @@ function RegistrationFormModal({ profile, onClose }) {
                 const isSelected = installmentsSelected.includes(label);
                 const amount = inst.amount || getInstallmentAmount(label);
                 const hasProof = !!inst.proof;
+                const isRejected = inst.status === "rejected";
 
                 return (
                   <div
@@ -274,28 +277,34 @@ function RegistrationFormModal({ profile, onClose }) {
                         type="checkbox"
                         checked={isSelected || isPaid}
                         onChange={() => handleInstallmentToggle(label)}
-                        disabled={isPaid || hasProof}
+                        disabled={isPaid || (hasProof && !isRejected )}
+                        // disabled={isPaid}
                       />
                       <span>
                         <strong>{label}</strong>
-                        {!hasProof&&(
-                          
-                          <span>- ₹{amount}</span>
-                        ) }
+                        {/* {!isPaid && <span>- ₹{amount}</span>} */}
+                        {!hasProof && <span>- ₹{amount}</span>}
                       </span>
                       {isPaid && (
                         <span className="installment-status paid">Paid</span>
                       )}
                       {hasProof && (
+                        <>
+                        {inst.status==='rejected' && (<br/>)}
                         <span
                           className={`installment-status ${
-                            inst.verified ? "verified" : "pending"
+                            inst.status === "verified"
+                              ? "verified"
+                              : inst.status === "rejected"
+                              ? "rejected"
+                              : "pending"
                           }`}
                         >
-                          ({inst.verified ? "Verified" : "Verification Pending"}
-                          )
+                        {inst.status === "rejected" ? "(Rejected - Please re-upload)" : `(${inst.status})`}
                         </span>
+                        </>
                       )}
+
                     </label>
                     {hasProof && (
                       <a

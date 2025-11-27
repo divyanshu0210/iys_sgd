@@ -179,7 +179,9 @@
 .installment-status.pending {
   color: #ca8a04;
 }
-
+.installment-status.rejected {
+  color: #b91c1c; /* red */
+}
 .view-proof-link {
   font-size: 0.8rem;
   color: #2563eb;
