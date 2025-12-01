@@ -127,7 +127,7 @@ const CheckoutStep = () => {
           const inst = regData.installments_info?.find(
             (i) => i.label === label
           );
-          return inst && ["due"].includes(inst.tag.toLowerCase());
+          return inst && ["due", "rejected"].includes(inst.tag.toLowerCase());
         });
 
         if (dueOrPending.length > 0) {

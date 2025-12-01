@@ -102,7 +102,7 @@ const ReviewStep = () => {
                             (i) => i.label === label
                           );
                           return (
-                            inst && ["due"].includes(inst.tag.toLowerCase())
+                            inst && ["due","rejected"].includes(inst.tag.toLowerCase())
                           );
                         })
                         .map((instLabel) => (
