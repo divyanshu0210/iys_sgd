@@ -7,6 +7,7 @@ import AlertModal from "./components/AlertModal";
 import ApproveTab from "./tabs/ApproveTab";
 import NewRegistrationTab from "./tabs/NewRegistrationTab";
 import RegisteredTab from "./tabs/RegisteredTab";
+import { useAuth } from "../../context/AuthContext";
 
 export default function YatraRegister() {
   const {
@@ -23,7 +24,10 @@ export default function YatraRegister() {
     eligibilityData,
   } = useYatraRegistration();
 
+  const {profile} = useAuth();
+
   useEffect(() => {
+    if(profile==null) return;
     const loadAll = async () => {
       setInitialLoading(true);
 
@@ -37,7 +41,7 @@ export default function YatraRegister() {
     };
 
     loadAll();
-  }, [yatra_id]);
+  }, [yatra_id,profile]);
 
   const renderActiveTab = () => {
     switch (activeTab) {

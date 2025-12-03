@@ -7,6 +7,7 @@ import API from "../../../services/api";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import FullPageLoader from "../../../components/FullPageLoader";
+import Tesseract from "tesseract.js";
 
 const CheckoutStep = () => {
   const { setIsNavigationLocked } = useAuth();
@@ -184,12 +185,75 @@ const CheckoutStep = () => {
     }
   };
 
+
+  // =====================================================
+  // OCR Extraction Helpers
+  // =====================================================
+  const extractRawNumbers = (txt) => {
+    const matches = txt.match(/\d[\d,]*/g) || [];
+    return matches.map((m) => m.replace(/,/g, ""));
+  };
+
+  const generateVariants = (numStr) => {
+    const variants = [];
+
+    variants.push(Number(numStr));
+
+    if (numStr.length > 1) {
+      const truncated = numStr.substring(1);
+      if (/^\d+$/.test(truncated)) variants.push(Number(truncated));
+    }
+
+    return variants.filter((v) => v > 0);
+  };
+
+  // =====================================================
+  // Tesseract OCR Verification
+  // =====================================================
+  const verifyScreenshotOCR = async (file) => {
+    setVerifying(true);
+    setVerificationStatus("pending");
+    setMessage("Reading payment screenshot...");
+
+    try {
+      const { data: { text } } = await Tesseract.recognize(file, "eng");
+
+      // extract numbers
+      const raw = extractRawNumbers(text);  
+
+      let variants = [];
+      raw.forEach((n) => {
+        variants = [...variants, ...generateVariants(n)];
+      });
+
+      variants = [...new Set(variants)];
+
+      console.log("OCR extracted:", variants);
+
+      // check for match
+      if (variants.includes(totalAmount)) {
+        setVerificationStatus("valid");
+        setMessage(`✔ Screenshot valid. Amount detected: ₹${totalAmount}`);
+      } else {
+        setVerificationStatus("invalid");
+        setMessage("Amount mismatch. Expected ₹" + totalAmount);
+      }
+    } catch (err) {
+      console.error("OCR error", err);
+      setVerificationStatus("invalid");
+      setMessage("OCR failed.");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   // Automatically trigger verification when user selects screenshot
   const handleScreenshotChange = (file) => {
     setScreenshot(file);
     if (file) {
       // verifyPaymentScreenshot(file);
-      setVerificationStatus("valid");
+      verifyScreenshotOCR(file);
+      // setVerificationStatus("valid");
     }
   };
 
@@ -332,14 +396,20 @@ const CheckoutStep = () => {
                 required
               />
 
-              {/* Status Messages */}
-              {/* {verifying && <p style={{ color: "blue" , fontSize:"12px"}}>⏳ Verifying screenshot…</p>}
-            {verificationStatus === "valid" && (
-              <p style={{ color: "green" , fontSize:"12px"}}>{message}</p>
-            )}
-            {verificationStatus === "invalid" && (
-              <p style={{ color: "red" , fontSize:"12px"}}>{message}</p>
-            )} */}
+           {/* OCR Status */}
+              {verifying && (
+                <p style={{ color: "blue", fontSize: "12px" }}>
+                  ⏳ Verifying screenshot…
+                </p>
+              )}
+
+              {verificationStatus === "valid" && (
+                <p style={{ color: "green", fontSize: "12px" }}>{message}</p>
+              )}
+
+              {verificationStatus === "invalid" && (
+                <p style={{ color: "red", fontSize: "12px" }}>{message}</p>
+              )}
             </div>
 
             <button

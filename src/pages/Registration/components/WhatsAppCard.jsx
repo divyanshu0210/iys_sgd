@@ -45,7 +45,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
   //payments that are due & rejected
   const selectableInstallments =
     profile.installments_info?.filter((inst) =>
-      ["due","rejected"].includes(inst.tag.toLowerCase())
+      ["due", "rejected"].includes(inst.tag.toLowerCase())
     ) || [];
 
   const hasSelectableInstallments =
@@ -193,10 +193,20 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <div className="profileName"
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <strong >{profile.full_name}</strong>
+              <div
+                style={{ display: "flex", alignItems: "center" ,justifyContent:"flex-start"}}
+                >
+                <div
+                className="whatsapp-profileName"
+                  style={{
+                    marginRight: "6px",
+                    whiteSpace: "normal", 
+                    wordBreak:"break-word",
+                    overflow: "visible", 
+                  }}
+                >
+                  <strong>{profile.full_name}</strong>
+                </div>
                 {profile.is_self && <span className="badge-self">You</span>}
               </div>
               <div className="whatsapp-memberid">
@@ -291,7 +301,12 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
               <button
                 onClick={() => toggleSelect(profile)}
                 className={`action-btn ${hasExistingData ? "edit" : "open"}`}
-                style={{ minWidth: "80px", maxHeight: "35px", color: "black",backgroundColor:"white" }}
+                style={{
+                  minWidth: "80px",
+                  maxHeight: "35px",
+                  color: "black",
+                  backgroundColor: "white",
+                }}
                 disabled={isLoadingRegistration}
               >
                 {getButtonText()}

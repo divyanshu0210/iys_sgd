@@ -11,7 +11,8 @@ function ShimmerBox() {
       style={{
         height: "140px",
         borderRadius: "12px",
-        background: "linear-gradient(90deg, #e6e8eb 0%, #f5f6f8 50%, #e9ebee 100%)",
+        background:
+          "linear-gradient(90deg, #e6e8eb 0%, #f5f6f8 50%, #e9ebee 100%)",
         backgroundSize: "200% 100%",
         animation: "shimmer 1.4s infinite",
       }}
@@ -19,15 +20,15 @@ function ShimmerBox() {
   );
 }
 
-
 export default function YatraList() {
   const [yatras, setYatras] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [openApprovalModal, setOpenApprovalModal] = useState(false);
   const [openPendingModal, setOpenPendingModal] = useState(false);
+  const [open24HrModal, setOpen24HrModal] = useState(false);
 
-  const { profileStage } = useAuth();
+  const { profileStage, profile } = useAuth();
 
   useEffect(() => {
     API.get("/yatras/list/")
@@ -44,13 +45,43 @@ export default function YatraList() {
     });
   };
 
+  function formatDateTime(dateString) {
+    if (!dateString) return null;
+
+    const date = new Date(dateString);
+
+    return date.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  const has24HoursPassed = (approvedAt) => {
+    if (!approvedAt) return false;
+    console.log("Approved at:", approvedAt);
+    const approvedTime = new Date(approvedAt).getTime();
+    const now = Date.now();
+    const diffHours = (now - approvedTime) / (1000 * 60 * 60);
+    return diffHours >= 24;
+  };
+
   const handleOpenClick = (e, yatra) => {
+    console.log("Profile stage on Yatra open click:", profileStage);
     if (profileStage === "guest") {
       e.preventDefault();
       setOpenApprovalModal(true);
     } else if (profileStage === "approval") {
       e.preventDefault();
       setOpenPendingModal(true);
+    } else if (
+      profileStage === "devotee" &&
+      !has24HoursPassed(profile?.profile_approved_at)
+    ) {
+      // e.preventDefault();
+      // setOpen24HrModal(true);
     }
   };
 
@@ -70,7 +101,7 @@ export default function YatraList() {
       {loading ? (
         <>
           <ShimmerBox />
-          <ShimmerBox />  
+          <ShimmerBox />
         </>
       ) : yatras.length === 0 ? (
         <p>No yatras yet.</p>
@@ -163,7 +194,10 @@ export default function YatraList() {
       )}
 
       {/* Guest → Show Approval Form */}
-      <Modal open={openApprovalModal} onClose={() => setOpenApprovalModal(false)}>
+      <Modal
+        open={openApprovalModal}
+        onClose={() => setOpenApprovalModal(false)}
+      >
         <ProfileApprovalForm onClose={() => setOpenApprovalModal(false)} />
       </Modal>
 
@@ -175,8 +209,26 @@ export default function YatraList() {
           </h3>
           <p style={{ fontSize: 15, color: "#444", lineHeight: "1.5" }}>
             Your profile has been submitted for approval. You’ll get access to
-            this feature once it’s confirmed.
+            this feature after 24 hrs it is confirmed.
           </p>
+        </div>
+      </Modal>
+
+      <Modal open={open24HrModal} onClose={() => setOpen24HrModal(false)}>
+        <div style={{ textAlign: "center", padding: 20 }}>
+          <h3 style={{ color: "#1E3A8A" }}>Please Wait 24hrs</h3>
+
+          <p style={{ fontSize: 15, marginBottom: 10 }}>
+            You can view Yatra 24 hours after your profile
+            approval.
+          </p>
+
+          {profile?.profile_approved_at && (
+            <p style={{ fontSize: 12, color: "#555" }}>
+              <strong>Approved At:</strong>{" "}
+              {formatDateTime(profile.profile_approved_at)}
+            </p>
+          )}
         </div>
       </Modal>
     </div>
