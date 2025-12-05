@@ -31,7 +31,7 @@ export default function YatraList() {
   const { profileStage, profile } = useAuth();
 
   useEffect(() => {
-    API.get("/yatras/list/")
+    API.get("/yatra/list/")
       .then((res) => setYatras(res.data))
       .finally(() => setLoading(false));
   }, []);
@@ -208,19 +208,17 @@ export default function YatraList() {
             Approval Pending
           </h3>
           <p style={{ fontSize: 15, color: "#444", lineHeight: "1.5" }}>
-            Your profile has been submitted for approval. You’ll get access to
-            this feature after 24 hrs it is confirmed.
+            Your profile has been submitted for approval. Profile will become acive after 24 hrs of approval.
           </p>
         </div>
       </Modal>
 
       <Modal open={open24HrModal} onClose={() => setOpen24HrModal(false)}>
         <div style={{ textAlign: "center", padding: 20 }}>
-          <h3 style={{ color: "#1E3A8A" }}>Please Wait 24hrs</h3>
+          <h3 style={{ color: "#1E3A8A" }}>Profile Activation</h3>
 
           <p style={{ fontSize: 15, marginBottom: 10 }}>
-            You can view Yatra 24 hours after your profile
-            approval.
+            Profile will become acive after 24 hrs of approval.
           </p>
 
           {profile?.profile_approved_at && (

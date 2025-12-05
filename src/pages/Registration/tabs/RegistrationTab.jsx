@@ -8,7 +8,13 @@ import "../css/registrationTab.css";
 import FullPageLoader from "../../../components/FullPageLoader";
 import { useNavigate } from "react-router-dom";
 
-const RegistrationTab = ({ title, note, filterFn, showBanner = false }) => {
+const RegistrationTab = ({
+  title,
+  note,
+  filterFn,
+  showBanner = false,
+  emptyMessage,
+}) => {
   const {
     registerData,
     selected,
@@ -20,6 +26,35 @@ const RegistrationTab = ({ title, note, filterFn, showBanner = false }) => {
   const navigate = useNavigate();
 
   const profiles = registerData.profiles?.filter(filterFn) || [];
+
+  const defaultEmptyMessage = (
+    <p className="empty-msg">
+      <strong>No profiles to display yet.</strong>
+      <br />
+      <br />
+      To see profiles listed here for the yatra, your counselor needs to review
+      and <strong>approve</strong> them first.
+      <br />
+      <br />
+      If you've submitted a profile, please wait for approval!
+    </p>
+  );
+
+  const renderEmptyState = () => {
+    if (profiles.length === 0 && initialLoading) {
+      return <FullPageLoader />;
+    }
+
+    if (profiles.length === 0) {
+      return emptyMessage ? (
+        <div className="empty-msg">{emptyMessage}</div>
+      ) : (
+        defaultEmptyMessage
+      );
+    }
+
+    return null;
+  };
 
   const renderStep = () => {
     switch (currentStep) {
@@ -35,11 +70,7 @@ const RegistrationTab = ({ title, note, filterFn, showBanner = false }) => {
             <h3>{title}</h3>
             {note && <p className="info-text">{note}</p>}
 
-            {profiles.length === 0 && initialLoading ? (
-              <FullPageLoader />
-            ) : profiles.length === 0 ? (
-              <p className="empty-msg">No profiles available.</p>
-            ) : (
+            {renderEmptyState() || (
               <div className="whatsapp-list">
                 {profiles.map((p) => (
                   <WhatsAppCard key={p.id} profile={p} loading={loading} />
@@ -61,10 +92,7 @@ const RegistrationTab = ({ title, note, filterFn, showBanner = false }) => {
       case 2:
         return <ReviewStep />;
       case 3:
-        return (
-          <CheckoutStep
-          />
-        );
+        return <CheckoutStep />;
       default:
         return null;
     }
