@@ -49,7 +49,8 @@ function RegistrationFormModal({ profile, onClose }) {
     const match = existing?.installments_details?.find(
       (i) => i.label === label
     );
-    const instPaidOrProof = match?.is_paid || match?.proof && match?.status !=='rejected';
+    const instPaidOrProof =
+      match?.is_paid || (match?.proof && match?.status !== "rejected");
     // const instPaidOrProof = match?.is_paid;
     if (instPaidOrProof) return; // cannot select paid/proof installments
     setInstallmentsSelected((prev) =>
@@ -105,7 +106,7 @@ function RegistrationFormModal({ profile, onClose }) {
     const amount = installmentsSelected
       .filter((label) => {
         const inst = profile?.installments_info.find((i) => i.label === label);
-        return inst && ["due","rejected"].includes(inst.tag.toLowerCase());
+        return inst && ["due", "rejected"].includes(inst.tag.toLowerCase());
       })
       .reduce((sum, label) => sum + getInstallmentAmount(label), 0);
 
@@ -135,7 +136,7 @@ function RegistrationFormModal({ profile, onClose }) {
     const match = existing?.installments_details?.find(
       (i) => i.label === label
     );
-    return !(match?.is_paid || (match?.proof&& match?.status !=='rejected'));
+    return !(match?.is_paid || (match?.proof && match?.status !== "rejected"));
     // return !(match?.is_paid || match?.proof);
   });
 
@@ -152,14 +153,14 @@ function RegistrationFormModal({ profile, onClose }) {
           </button>
         </header>
 
-        {isReadOnly ? (
-          <div className="info-banner">
-            ⚠️ Form is read-only because proof has been submitted.
-          </div>
-        ) : (
-          <p className="info-banner"> Form can only be filled once..</p>
-        )}
-
+        {(yatra.form_fields || []).length > 0 &&
+          (isReadOnly ? (
+            <div className="info-banner">
+              ⚠️ Form is read-only because proof has been submitted.
+            </div>
+          ) : (
+            <p className="info-banner">Form can only be filled once.</p>
+          ))}
         <form className="form-body" onSubmit={handleSubmit}>
           {/* --- Dynamic Fields --- */}
           {(yatra.form_fields || []).length > 0 && (
@@ -277,7 +278,7 @@ function RegistrationFormModal({ profile, onClose }) {
                         type="checkbox"
                         checked={isSelected || isPaid}
                         onChange={() => handleInstallmentToggle(label)}
-                        disabled={isPaid || (hasProof && !isRejected )}
+                        disabled={isPaid || (hasProof && !isRejected)}
                         // disabled={isPaid}
                       />
                       <span>
@@ -290,21 +291,22 @@ function RegistrationFormModal({ profile, onClose }) {
                       )}
                       {hasProof && (
                         <>
-                        {inst.status==='rejected' && (<br/>)}
-                        <span
-                          className={`installment-status ${
-                            inst.status === "verified"
-                              ? "verified"
-                              : inst.status === "rejected"
-                              ? "rejected"
-                              : "pending"
-                          }`}
-                        >
-                        {inst.status === "rejected" ? "(Rejected - Please re-upload)" : `(${inst.status})`}
-                        </span>
+                          {inst.status === "rejected" && <br />}
+                          <span
+                            className={`installment-status ${
+                              inst.status === "verified"
+                                ? "verified"
+                                : inst.status === "rejected"
+                                ? "rejected"
+                                : "pending"
+                            }`}
+                          >
+                            {inst.status === "rejected"
+                              ? "(Rejected - Please re-upload)"
+                              : `(${inst.status})`}
+                          </span>
                         </>
                       )}
-
                     </label>
                     {hasProof && (
                       <a
