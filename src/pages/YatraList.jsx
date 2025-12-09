@@ -20,6 +20,20 @@ function ShimmerBox() {
   );
 }
 
+export function formatDateTime(dateString) {
+  if (!dateString) return null;
+
+  const date = new Date(dateString);
+
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function YatraList() {
   const [yatras, setYatras] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,20 +58,6 @@ export default function YatraList() {
       year: "numeric",
     });
   };
-
-  function formatDateTime(dateString) {
-    if (!dateString) return null;
-
-    const date = new Date(dateString);
-
-    return date.toLocaleString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
 
   const has24HoursPassed = (approvedAt) => {
     if (!approvedAt) return false;
@@ -208,7 +208,8 @@ export default function YatraList() {
             Approval Pending
           </h3>
           <p style={{ fontSize: 15, color: "#444", lineHeight: "1.5" }}>
-            Your profile has been submitted for approval. Profile will become acive after 24 hrs of approval.
+            Your profile has been submitted for approval. Profile will become
+            acive after 24 hrs of approval.
           </p>
         </div>
       </Modal>

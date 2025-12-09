@@ -4,6 +4,9 @@ import { useYatraRegistration } from "../context/YatraRegistrationContext";
 import InstallmentBadge from "./InstallmentBadge";
 import RegistrationFormModal from "../steps/RegistrationFormModal";
 import API from "../../../services/api";
+import Modal from "../../../components/Modal";
+import AccomodationTravelInfo from "./AccomodationTravelInfo";
+import { generateRCS } from "../scripts/generateRCS";
 
 const STATUS_LABELS = {
   pending: "Not Started",
@@ -24,7 +27,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
     requestApproval,
     setRegistrations,
   } = useYatraRegistration();
-
+  const [openInfoModal, setOpenInfoModal] = useState(false);
   const [localShowForm, setLocalShowForm] = useState(false);
   const [isLoadingRegistration, setIsLoadingRegistration] = useState(false);
 
@@ -61,7 +64,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
   );
   const getButtonText = () => {
     if (isLoadingRegistration) return "Loading...";
-    if (profile.is_registered || hasExistingData) return "View";
+    if (profile.is_registered || hasExistingData) return "Payments";
     return "Register";
   };
   const unSelect = (profile) => {
@@ -194,15 +197,19 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
 
             <div style={{ display: "flex", flexDirection: "column" }}>
               <div
-                style={{ display: "flex", alignItems: "center" ,justifyContent:"flex-start"}}
-                >
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                }}
+              >
                 <div
-                className="whatsapp-profileName"
+                  className="whatsapp-profileName"
                   style={{
                     marginRight: "6px",
-                    whiteSpace: "normal", 
-                    wordBreak:"break-word",
-                    overflow: "visible", 
+                    whiteSpace: "normal",
+                    wordBreak: "break-word",
+                    overflow: "visible",
                   }}
                 >
                   <strong>{profile.full_name}</strong>
@@ -296,24 +303,61 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                     <InstallmentBadge key={inst.label} installment={inst} />
                   ))}
             </div>
-
-            {!isEligibilityCard && (
-              <button
-                onClick={() => toggleSelect(profile)}
-                className={`action-btn ${hasExistingData ? "edit" : "open"}`}
-                style={{
-                  minWidth: "80px",
-                  maxHeight: "35px",
-                  color: "black",
-                  backgroundColor: "white",
-                }}
-                disabled={isLoadingRegistration}
-              >
-                {getButtonText()}
-              </button>
-            )}
           </div>
         </div>
+        {!isEligibilityCard && (
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: "10px",
+            }}
+          >
+            <button
+              onClick={() => toggleSelect(profile)}
+              className={`action-btn ${hasExistingData ? "edit" : "open"}`}
+              style={{
+                minWidth: "80px",
+                maxHeight: "35px",
+                color: "black",
+                backgroundColor: "white",
+              }}
+              disabled={isLoadingRegistration}
+            >
+              {getButtonText()}
+            </button>
+
+            {/* {profile.registration_status === "paid" && ( */}
+            {profile.registration_status && (
+              <>
+                <button
+                  onClick={() => setOpenInfoModal(true)}
+                  className="action-btn"
+                  style={{
+                    maxWidth: "fit-content",
+                    color: "black",
+                    backgroundColor: "white",
+                  }}
+                >
+                  Travel Info
+                </button>
+                <button
+                  className="action-btn"
+                  style={{
+                    maxWidth: "fit-content",
+                    color: "black",
+                    backgroundColor: "white",
+                  }}
+                  onClick={() => generateRCS(profile, yatra)}
+                >
+                  Print RCS
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         {isEligibilityCard && (
           <div>
@@ -382,6 +426,10 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
       {localShowForm && (
         <RegistrationFormModal profile={profile} onClose={handleModalClose} />
       )}
+
+      <Modal open={openInfoModal} onClose={() => setOpenInfoModal(false)}>
+        <AccomodationTravelInfo profile={profile} />
+      </Modal>
     </>
   );
 };

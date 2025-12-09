@@ -26,6 +26,8 @@ export default function Modal({ open, onClose, children }) {
           width: "90%",
           maxWidth: "600px",
           position: "relative",
+          maxHeight: "80vh", // <-- 80% screen height
+          overflowY: "auto",
         }}
       >
         <button
@@ -38,10 +40,9 @@ export default function Modal({ open, onClose, children }) {
             background: "transparent",
             fontSize: "1.2rem",
             cursor: "pointer",
-            
           }}
         >
-          <span style={{color:"black"}}>✕</span>
+          <span style={{ color: "black" }}>✕</span>
         </button>
         {children}
       </div>
