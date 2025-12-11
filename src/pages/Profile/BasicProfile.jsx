@@ -100,6 +100,23 @@ export default function BasicProfile() {
       if (!details[key]) newErrors[key] = "This field is required";
     }
 
+    // Mobile number validation (exactly 10 digits)
+    if (details.mobile) {
+      const mobile = details.mobile.trim();
+      const mobileRegex = /^\d{10}$/;
+      if (!mobileRegex.test(mobile)) {
+        newErrors.mobile = "Mobile number must be 10 digits";
+      }
+    }
+    // Aadhaar specific validation
+    if (details.aadhaarNumber) {
+      const aadhaar = details.aadhaarNumber.trim();
+      const aadhaarRegex = /^\d{12}$/; // exactly 12 digits
+      if (!aadhaarRegex.test(aadhaar)) {
+        newErrors.aadhaarNumber = "Aadhaar number must be 12 digits";
+      }
+    }
+
     // Photo
     if (!details.photo) newErrors.photo = "Photo is required (max 1 MB)";
     else if (details.photo.size > MAX_PHOTO_SIZE)
