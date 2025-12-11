@@ -22,8 +22,25 @@ const getTravelIcon = (mode) => {
 };
 
 const AccomodationTravelInfo = ({ profile }) => {
+  const noTravelInfo =
+    (!profile.accommodation || profile.accommodation.length === 0) &&
+    (!profile.journey || profile.journey.length === 0) &&
+    (!profile.custom_fields || profile.custom_fields.length === 0);
+
   return (
     <div className="extra-details-container">
+      {/* Fallback Message */}
+      {noTravelInfo && (
+        <div
+          className="uniform-box"
+          style={{ textAlign: "center" }}
+        >
+          <h4 className="detail-heading">No Information Available</h4>
+          <p style={{ fontSize: "13px", marginTop: "5px" }}>
+            Accommodation, travel, or additional details will be added soon.
+          </p>
+        </div>
+      )}
 
       {/* Accommodation */}
       {profile.accommodation?.length > 0 && (
@@ -33,7 +50,9 @@ const AccomodationTravelInfo = ({ profile }) => {
           {profile.accommodation.map((a, i) => (
             <div key={i} className="compact-row">
               <div>
-                <span className="icon"><Bed size={15} /></span>
+                <span className="icon">
+                  <Bed size={15} />
+                </span>
                 {a.accommodation.place_name}
                 {a.room_number ? ` (Room ${a.room_number})` : ""}
                 {a.bed_number ? ` (Bed ${a.bed_number})` : ""}
@@ -41,9 +60,11 @@ const AccomodationTravelInfo = ({ profile }) => {
 
               <small>
                 Address: {a.accommodation.address || "—"} <br />
-                Check-in: {formatDateTime(a.accommodation.checkin_datetime) || "—"}
+                Check-in:{" "}
+                {formatDateTime(a.accommodation.checkin_datetime) || "—"}
                 <br />
-                Check-out: {formatDateTime(a.accommodation.checkout_datetime) || "—"}
+                Check-out:{" "}
+                {formatDateTime(a.accommodation.checkout_datetime) || "—"}
               </small>
             </div>
           ))}
@@ -90,7 +111,6 @@ const AccomodationTravelInfo = ({ profile }) => {
           ))}
         </div>
       )}
-
     </div>
   );
 };

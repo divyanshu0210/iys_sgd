@@ -40,6 +40,7 @@ export default function Modal({ open, onClose, children }) {
             background: "transparent",
             fontSize: "1.2rem",
             cursor: "pointer",
+            zIndex:1000,
           }}
         >
           <span style={{ color: "black" }}>✕</span>
