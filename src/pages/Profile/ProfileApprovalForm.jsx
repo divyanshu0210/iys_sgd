@@ -34,7 +34,7 @@ export default function ProfileApprovalForm({ onClose }) {
       // navigate after short delay
       const stage = await fetchProfile();
       setTimeout(() => navigate("/"), 1500);
-      onClose(); // ✅ close after submit
+      onClose?.(); // ✅ close after submit
     } catch (err) {
       const errorMsg =
         err.response?.data?.message ||
@@ -49,7 +49,7 @@ export default function ProfileApprovalForm({ onClose }) {
 
   const handleSkip = () => {
     navigate("/"); // 👈 skip approval and continue
-    onClose(); // ✅ close after submit
+    onClose?.(); // ✅ close after submit
   };
 
   return (

@@ -7,12 +7,54 @@ import API from "../../../services/api";
 import Modal from "../../../components/Modal";
 import AccomodationTravelInfo from "./AccomodationTravelInfo";
 import { generateRCS } from "../scripts/generateRCS";
+import MoreActionsMenu from "./MoreActionsMenu";
+import InitiateSubstitutionModal from "../Substitution/InitiateSubstitutionModal";
+import CancellationModal from "../Substitution/CancellationModal";
 
-const STATUS_LABELS = {
-  pending: "Not Started",
-  partial: "Incomplete",
-  paid: "Confirmed",
-  cancelled: "Cancelled",
+// Full status map (matches backend)
+const STATUS_MAP = {
+  pending: {
+    text: "Not Started",
+    bg: "#e2e3e5",
+    color: "#383d41",
+    icon: "○",
+  },
+  partial: {
+    text: "Incomplete",
+    bg: "#f59e0b",
+    color: "#ffffff",
+    icon: "●",
+  },
+  paid: {
+    text: "Confirmed",
+    bg: "#d4edda",
+    color: "#155724",
+    icon: "✓",
+  },
+  substituted: {
+    text: "Substituted",
+    bg: "#cce5ff",
+    color: "#004085",
+    icon: "⇄",
+  },
+  refunded: {
+    text: "Refunded",
+    bg: "#f8d7da",
+    color: "#721c24",
+    icon: "↩",
+  },
+  cancelled: {
+    text: "Cancelled",
+    bg: "#f8d7da",
+    color: "#721c24",
+    icon: "✗",
+  },
+  attended: {
+    text: "Attended",
+    bg: "#d1ecf1",
+    color: "#0c5460",
+    icon: "✓✓",
+  },
 };
 
 const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
@@ -29,6 +71,9 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
   } = useYatraRegistration();
   const [openInfoModal, setOpenInfoModal] = useState(false);
   const [localShowForm, setLocalShowForm] = useState(false);
+  const [openSubstitutionModal, setOpenSubstitutionModal] = useState(false);
+  const [openCancellationModal, setOpenCancellationModal] = useState(false);
+
   const [isLoadingRegistration, setIsLoadingRegistration] = useState(false);
 
   const profileId = profile.id || profile.profile_id;
@@ -56,9 +101,25 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
       selectableInstallments.some((inst) => inst.label === instLabel)
     ) || false;
 
+  const registrationStatus = profile.registration_status || "pending";
+  const statusStyle = STATUS_MAP[registrationStatus];
+
+  // Final statuses where editing is no longer allowed
+  const isFinalStatus = ["substituted", "refunded", "cancelled"].includes(
+    registrationStatus
+  );
+
+  const amountPaid = profile?.installments_info?.filter((i) => i.tag === "verified")
+    .reduce((sum, i) => sum + Number(i.amount), 0);
+
   console.log(
     "selectableInstallments",
+    yatra,
+    registrations,
+    profile,
+    profileId,
     selectableInstallments,
+    regData,
     regData?.installments_selected,
     hasSelectableInstallments
   );
@@ -222,16 +283,24 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
             </div>
           </div>
 
-          {!hasSelectableInstallments && (
-            <span className={`badge-registered ${profile.registration_status}`}>
-              {STATUS_LABELS[profile.registration_status] ||
-                profile.registration_status}
+          {!hasSelectableInstallments && !isEligibilityCard && (
+            <span
+              className="badge-registered"
+              style={{
+                backgroundColor: statusStyle.bg,
+                color: statusStyle.color,
+              }}
+            >
+              {statusStyle.icon}
+              {" " + statusStyle.text}
             </span>
           )}
+
           <div className="installmet-edit">
             {/* === Installments List === */}
             {!isEligibilityCard &&
               !hasSelectableInstallments &&
+              !isFinalStatus &&
               profile?.installments_info && (
                 <div className="installments-div">
                   {profile.installments_info.map((inst) => {
@@ -305,7 +374,43 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
             </div>
           </div>
         </div>
-        {!isEligibilityCard && (
+        {!isEligibilityCard &&
+          !hasSelectableInstallments &&
+          ["refunded", "cancelled"].includes(registrationStatus) && (
+            <p
+              style={{
+                fontSize: "13px",
+                color: "#333",
+                marginTop: "15px",
+                textAlign: "center",
+                lineHeight: "20px",
+              }}
+            >
+              Refund Amount:&nbsp;
+              <strong style={{ color: "#047857", fontSize: "15px" }}>
+                ₹{Number(amountPaid) - Number(yatra.cancellation_fee)}
+              </strong>
+              <br />
+              <span style={{ color: "#047857", fontSize: "12px" }}>
+                ₹{amountPaid} (Yatra Charges Paid) - ₹{yatra.cancellation_fee}{" "}
+                (Cancellation Fee)
+              </span>
+              <br />
+              <br />
+              Refund Status:&nbsp;{" "}
+              <strong>
+                {registrationStatus === "cancelled" ? "Pending" : "Completed"}
+              </strong>
+              <br/>
+              {registrationStatus === "cancelled" && (
+                <span style={{ fontSize: "12px", color: "#333" }}>
+                  Yatra Team will contact you to proceed with the refund.
+                </span>
+              )}
+            </p>
+          )}
+
+        {!isEligibilityCard && !hasSelectableInstallments && !isFinalStatus && (
           <div
             style={{
               display: "flex",
@@ -329,8 +434,8 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
               {getButtonText()}
             </button>
 
-            {/* {profile.registration_status === "paid" && ( */}
-            {profile.registration_status && (
+            {registrationStatus && (
+              // {registrationStatus == "paid" && (
               <>
                 <button
                   onClick={() => setOpenInfoModal(true)}
@@ -356,6 +461,17 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                 </button>
               </>
             )}
+
+            <MoreActionsMenu
+              onSubstitute={() => {
+                console.log("Open substitution modal for", profile.first_name);
+                setOpenSubstitutionModal(true);
+              }}
+              onCancellation={() => {
+                console.log("Open cancellation modal for", profile.first_name);
+                setOpenCancellationModal(true);
+              }}
+            />
           </div>
         )}
 
@@ -429,6 +545,29 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
 
       <Modal open={openInfoModal} onClose={() => setOpenInfoModal(false)}>
         <AccomodationTravelInfo profile={profile} />
+      </Modal>
+      <Modal
+        open={openSubstitutionModal}
+        onClose={() => setOpenSubstitutionModal(false)}
+      >
+        <InitiateSubstitutionModal
+          registrationId={profile.registration_id}
+          yatra={yatra}
+        />
+      </Modal>
+      <Modal
+        open={openCancellationModal}
+        onClose={() => setOpenCancellationModal(false)}
+      >
+        <CancellationModal
+          profile_id={profile.id}
+          installments={profile.installments_info}
+          yatra={yatra}
+          onSuccess={() => {
+            setOpenCancellationModal(false);
+            window.location.reload();
+          }}
+        />
       </Modal>
     </>
   );

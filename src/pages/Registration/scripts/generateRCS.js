@@ -1,9 +1,12 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import API from "../../../services/api";
+import QRCode from "qrcode";
+
+const baseURL = import.meta.env.VITE_BACKEND_URL;
 
 const fetchBase64Image = async (url) => {
-  const res = await API.get(`/api/proxy-image/?url=${encodeURIComponent(url)}`);
+  const res = await API.get(`api/proxy-image/?url=${encodeURIComponent(url)}`);
   return res.data.base64;
 };
 
@@ -28,13 +31,19 @@ export async function generateRCS(profile, yatra) {
   doc.setFontSize(16);
   doc.text(`${yatra.title} – Registration Confirmation Slip`, 10, 10);
 
+  // inside generateRCS
+  let qrData = `${baseURL}yatras/mark-attendance/${profile.registration_id}`;
+  console.log("QR Data:", qrData);
+  const qrBase64 = await QRCode.toDataURL(qrData);
+
+  // Add QR to PDF
+  doc.addImage(qrBase64, "PNG", 10, 20, 40, 40);
+
   // -------------------------------------------------------------
   // LEFT: QR placeholder box (empty for now)
   // -------------------------------------------------------------
   doc.setDrawColor(180);
   doc.rect(10, 20, 40, 40); // (x, y, width, height)
-  doc.setFontSize(10);
-  doc.text("QR Here", 22, 42);
 
   // -------------------------------------------------------------
   // RIGHT: Profile image box

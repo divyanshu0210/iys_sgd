@@ -1,0 +1,136 @@
+/* Wrapper */
+.sub-modal-wrapper {
+  padding: 20px;
+  max-width: 420px;
+  min-width: 320px;
+  margin: 0 auto;
+}
+
+/* Error Box */
+.sub-error-box {
+  background: #fff1f2;
+  border: 1px solid #ef4444;
+  color: #9f1239;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Existing Notice */
+.sub-existing-notice {
+  background: #eff6ff;
+  border: 1px solid #3b82f6;
+  color: #1e40af;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+/* Headings */
+.sub-heading {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Paragraph defaults */
+.sub-desc {
+  font-size: 12px;
+  color: #555;
+  margin-top: 10px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Two digit code */
+.sub-code-box {
+  font-size: 42px;
+  font-weight: 700;
+  margin: 15px auto;
+  letter-spacing: 8px;
+  padding: 10px 0;
+  width: 100%;
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+
+/* Breakdown toggle */
+.sub-breakdown-toggle {
+  font-size: 13px;
+  color: #2563eb;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-top: 16px;
+  user-select: none;
+}
+
+/* Breakdown section */
+.sub-breakdown-section {
+  padding: 14px;
+}
+
+.sub-breakdown-row {
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.sub-breakdown-net {
+  font-size: 15px;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #ddd;
+  color: #047857;
+}
+
+/* Form styles */
+.sub-label {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.sub-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.sub-fee-note {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+/* Button */
+.sub-btn {
+  width: 100%;
+  padding: 12px;
+  background: #1d4ed8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.sub-btn.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}

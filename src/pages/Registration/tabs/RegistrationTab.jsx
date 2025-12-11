@@ -7,6 +7,7 @@ import CheckoutStep from "../steps/CheckoutStep";
 import "../css/registrationTab.css";
 import FullPageLoader from "../../../components/FullPageLoader";
 import { useNavigate } from "react-router-dom";
+import SubstitutionRequests from "../Substitution/SubstitutionRequests";
 
 const RegistrationTab = ({
   title,
@@ -100,9 +101,15 @@ const RegistrationTab = ({
       default:
         return null;
     }
-  };
+  }
 
-  return <div className="tab-content">{renderStep()}</div>;
-};
+  return (
+
+<>
+<div className="tab-content">{renderStep()}</div>
+<SubstitutionRequests />
+</>
+  )
+}
 
 export default RegistrationTab;
