@@ -88,6 +88,7 @@ export default function Navbar() {
 
         {/* Desktop or Always-visible Menu for non-logged users */}
         <div className={`desktop-menu ${!user ? "always-visible" : ""}`}>
+          <NavLink to="/donate">Donate</NavLink>
           <NavLink to="/">Home</NavLink>
           {user ? (
             profileStage !== "not-exists" ? (
@@ -144,20 +145,33 @@ export default function Navbar() {
         {/* Mobile Hamburger (only when logged in) */}
         {user && (
           <div
-            className="mobile-only"
-            onClick={(e) => {
-              if (isNavigationLocked) {
-                e.preventDefault();
-                alert("Please complete or cancel the payment before leaving.");
-              } else {
-                setIsMenuOpen(true);
-              }
+            style={{
+              display: "flex",
+              justifyContent: "right",
+              alignItems: "center",
             }}
-            style={{ cursor: "pointer" }}
           >
-            <div className="bar"></div>
-            <div className="bar"></div>
-            <div className="bar"></div>
+            <div className="mobile-only">
+              <NavLink to="/donate">Donate</NavLink>
+            </div>
+            <div
+              className="mobile-only"
+              onClick={(e) => {
+                if (isNavigationLocked) {
+                  e.preventDefault();
+                  alert(
+                    "Please complete or cancel the payment before leaving."
+                  );
+                } else {
+                  setIsMenuOpen(true);
+                }
+              }}
+              style={{ cursor: "pointer" }}
+            >
+              <div className="bar"></div>
+              <div className="bar"></div>
+              <div className="bar"></div>
+            </div>
           </div>
         )}
       </div>

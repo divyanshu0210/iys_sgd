@@ -20,6 +20,7 @@
   import VerifyEmail from "../pages/Auth/VerifyEmail";
   import VerificationEmailSent from "../pages/Auth/VerificationEmailSent";
 import PendingPaymentGuard from "./PendingPaymentGuard";
+import DonatePage from "../pages/Donate/DonatePage";
 
   export default function AppRoutes() {
     return (
@@ -60,6 +61,7 @@ import PendingPaymentGuard from "./PendingPaymentGuard";
 
         {/* Profile (public?) */}
         <Route path="/profile" element={<Profile />} />
+        <Route path="/donate" element={<DonatePage />} />
 
         {/* Role Protected */}
         <Route
