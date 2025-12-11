@@ -1,22 +1,19 @@
-.donate-page{
-  background: #f0f2f5; 
-  padding: 10px;
-
+.donate-page {
+  background: #f0f2f5;
+  padding: 20px;
 }
 
 /* MAIN WRAPPER */
 .donate-wrapper {
   display: flex;
-  /* padding: 40px; */
-  gap: 40px;
-  /* box-sizing: border-box; */
+  gap: 30px;
   border-radius: 20px;
 }
 
 /* LEFT SECTION */
 .donate-left {
   flex: 1;
-  padding: 20px;    
+  padding: 0px 20px;
 }
 
 .donate-heading {
@@ -32,6 +29,30 @@
   margin-bottom: 20px;
 }
 
+.donate-shloka {
+  text-align: center;
+  margin: 20px 0 40px 0;
+  padding: 15px 20px;
+  background: #e8f1ff; /* subtle blue background */
+  border-radius: 12px;
+  border: 1px solid #c7ddff;
+  box-shadow: 0 4px 12px rgba(0, 80, 160, 0.1);
+}
+
+.donate-shloka .sanskrit {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d4e89;
+  line-height: 1.5;
+}
+
+.donate-shloka .translation {
+  font-size: 14px;
+  color: #2a2a2a;
+  margin-top: 10px;
+  font-style: italic;
+}
+
 .donate-message {
   font-size: 16px;
   margin-top: 10px;
@@ -44,7 +65,6 @@
   list-style: none;
   color: #444;
   font-size: 16px;
-  /* text-align: right  ; */
 }
 
 /* SLIDER */
@@ -53,6 +73,7 @@
   width: 100%;
   height: 50vh;
   border-radius: 12px;
+  border: 5px solid white;
   overflow: hidden;
   box-shadow: 0 6px 16px rgba(0, 60, 140, 0.2);
 }
@@ -109,12 +130,12 @@
 .donation-card {
   width: 100%;
   max-width: 420px;
-  height: fit-content;
   background: #ffffff;
   padding: 28px;
   border-radius: 14px;
   border: 1px solid #d2e4ff;
   box-shadow: 0 8px 20px rgba(0, 80, 160, 0.15);
+  max-height: fit-content;
 }
 
 .donation-card h2 {
@@ -138,7 +159,7 @@
   margin-top: 20px;
   text-align: center;
   padding: 15px 10px;
-  background: #e8f1ff; /* Light blue block */
+  background: #e8f1ff;
   border-radius: 12px;
   border: 1px solid #c7ddff;
 }
@@ -176,15 +197,76 @@
 @media (max-width: 900px) {
   .donate-wrapper {
     flex-direction: column;
-    padding: 20px;  
+    gap: 20px;
   }
 
-  .donate-left{
-    padding: 0px;
+  /* LEFT SECTION */
+  .donate-left {
+    padding: 0;
   }
 
-  .donate-list{
+  .slider-container {
+    height: 30vh;
+  }
+
+  .donate-shloka {
+    margin: 15px 0 25px 0;
+    padding: 12px 15px;
+  }
+
+  .donate-shloka .sanskrit {
     font-size: 14px;
   }
 
+  .donate-shloka .translation {
+    font-size: 12px;
+  }
+
+  .donate-message,
+  .donate-list {
+    display: none; /* Hide extra text for compact view */
+  }
+
+  .donate-heading {
+    font-size: 20px;
+    margin-bottom: 5px;
+  }
+
+  .donate-sub {
+    font-size: 13px;
+    margin-bottom: 15px;
+  }
+
+  /* CARD */
+  .donation-card {
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  .qr-img {
+    width: 140px;
+  }
+
+  .detail-row {
+    font-size: 14px;
+  }
+
+  .upi-note {
+    font-size: 12px;
+  }
+
+  .donate-btn {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .slider-overlay {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+  }
 }

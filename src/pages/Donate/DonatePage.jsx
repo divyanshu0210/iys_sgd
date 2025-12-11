@@ -23,11 +23,24 @@ export default function DonatePage() {
 
   return (
     <div className="donate-page">
-
       {/* HEADER */}
       <div className="donate-header">
         <h1 className="donate-heading">Support IYS Sri Govind Dham</h1>
-        <p className="donate-sub">Small donations create big spiritual impact.</p>
+        <p className="donate-sub">
+          Small donations create big spiritual impact.
+        </p>
+      </div>
+
+      {/* SHLOKA */}
+      <div className="donate-shloka">
+        <p className="sanskrit">
+          प्राणैरर्थैर्धिया वाचा श्रेय आचरणं सदा ॥
+        </p>
+        <p className="translation">
+          "The perfection of life is to develop pure devotion to the Lord, which
+          means to engage one's life, wealth, intelligence, and words in His
+          service."
+        </p>
       </div>
 
       {/* MAIN SECTIONS */}
@@ -76,7 +89,9 @@ export default function DonatePage() {
             <div className="qr-box">
               <h3>Scan & Donate</h3>
               <img src="src/assets/react.svg" className="qr-img" alt="QR" />
-              <p className="upi-note">Works on Google Pay • PhonePe • Paytm • All UPI Apps</p>
+              <p className="upi-note">
+                Google Pay • PhonePe • Paytm • All UPI Apps
+              </p>
 
               <Detail label="UPI ID" value="govinddham@upi" />
             </div>
