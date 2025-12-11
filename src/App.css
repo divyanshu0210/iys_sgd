@@ -1,8 +1,20 @@
 main {
   background-color: "#f8f9fa";
-  /* min-height:100vh ; */
+  min-height:92vh ;
+}
+
+.normal-page {
+  max-width: 1400px;
+  margin: 0 auto;
   padding: 2rem 1rem;
 }
+
+.full-width-page {
+  margin: 0;
+  max-width: none;
+  padding: 0px;
+}
+
 /* ---------------------------
    📱 Mobile Responsive Tweaks
    --------------------------- */
@@ -11,7 +23,7 @@ main {
 
 /* Extra small screens */
 @media (max-width: 480px) {
-  main {
+  main , .normal-page , .full-width-page{
     padding: 0px;
   }
 }

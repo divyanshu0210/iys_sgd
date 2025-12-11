@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [profileStage, setProfileStage] = useState("not-exists"); // "not-exists", "guest", "approval", "devotee"
   const [loading, setLoading] = useState(true);
+  const [donatePage, setDonatePage] = useState(false);
   const [isNavigationLocked, setIsNavigationLocked] = useState(false);
 
   const determineProfileStage = (data) => {
@@ -119,6 +120,8 @@ export function AuthProvider({ children }) {
         setProfileStage,
         isNavigationLocked,
         setIsNavigationLocked,
+        donatePage,
+        setDonatePage
       }}
     >
       {children}

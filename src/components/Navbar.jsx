@@ -54,6 +54,7 @@ export default function Navbar() {
         position: "sticky",
         top: 0,
         zIndex: 1000,
+        height : "8vh",
       }}
     >
       <div

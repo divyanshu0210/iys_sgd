@@ -6,19 +6,13 @@ import AppRoutes from "./routes/AppRoutes";
 import { useAuth } from "./context/AuthContext";
 
 export default function App() {
-  const {loading } = useAuth();
+  const { loading, donatePage } = useAuth();
   return (
     <>
-     {loading&&( <FullPageLoader />)}
+      {loading && <FullPageLoader />}
       <Navbar />
       <main>
-        <div
-          style={{
-            maxWidth: "1400px",
-            margin: "0 auto",
-            width: "100%",
-          }}
-        >
+        <div className={donatePage ? "full-width-page" : "normal-page"}>
           <AppRoutes />
         </div>
       </main>

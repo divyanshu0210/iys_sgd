@@ -1,109 +1,82 @@
+
+import { useAuth } from "../../context/AuthContext";
 import "../../css/DonatePage.css";
 import React, { useEffect, useState } from "react";
-
 export default function DonatePage() {
-  const images = [
-    "/images/activity1.jpg",
-    "/images/activity2.jpg",
-    "/images/activity3.jpg",
-    "/images/activity4.jpg",
-    "/images/activity4.jpg",
-    "/images/activity4.jpg",
-  ];
-
+const images = [
+  "https://i.ytimg.com/vi/zgJs9yK-b-8/sddefault.jpg",
+  "https://www.krishnatemple.com/wp-content/uploads/2022/05/prasadam_donations2.jpg",
+  "https://static.toiimg.com/thumb/msid-122098793,width-1280,height-720,resizemode-4/122098793.jpg",
+  "https://www.krishnatemple.com/wp-content/uploads/2023/06/Be-a-Book-Distributor-Web.jpg",
+  "https://iskconmumbaipull-21250.kxcdn.com/web/image/2452-4faea8e9/ff3.webp",
+];
   const [index, setIndex] = useState(0);
-
+  const {setDonatePage} = useAuth();
   useEffect(() => {
-    const interval = setInterval(
-      () => setIndex((i) => (i + 1) % images.length),
-      2500
-    );
+    const interval = setInterval(() => {
+      setIndex((i) => (i + 1) % images.length);
+    }, 3000); // change every 3 seconds
     return () => clearInterval(interval);
-  }, [images.length]);
-
+  }, [images.length]);  
+  
+  useEffect(() => {
+   setDonatePage(true);
+    return () => setDonatePage(false);
+  }, []);
   return (
     <div className="donate-page">
-      {/* HEADER */}
-      <div className="donate-header">
-        <h1 className="donate-heading">Support IYS Sri Govind Dham</h1>
-        <p className="donate-sub">
-          Small donations create big spiritual impact.
-        </p>
+      {/* Full-screen background slideshow */}
+      <div className="background-slider">
+        {images.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt="Background"
+            className={`bg-image ${i === index ? "active" : ""}`}
+          />
+        ))}
+        {/* Dark overlay to make text readable */}
+        <div className="bg-overlay" />
       </div>
-
-      {/* SHLOKA */}
-      <div className="donate-shloka">
-        <p className="sanskrit">
-          प्राणैरर्थैर्धिया वाचा श्रेय आचरणं सदा ॥
-        </p>
-        <p className="translation">
-          "The perfection of life is to develop pure devotion to the Lord, which
-          means to engage one's life, wealth, intelligence, and words in His
-          service."
-        </p>
-      </div>
-
-      {/* MAIN SECTIONS */}
-      <div className="donate-wrapper">
-        {/* LEFT SECTION */}
-        <div className="donate-left">
-          <div className="slider-container">
-            <img src={images[index]} alt="Activity" className="slider-image" />
-            <div className="slider-overlay">
-              <p>Serving With Love & Devotion</p>
-            </div>
-            <div className="slider-dots">
-              {images.map((_, i) => (
-                <div
-                  key={i}
-                  className={`dot ${i === index ? "active" : ""}`}
-                  onClick={() => setIndex(i)}
-                />
-              ))}
-            </div>
+      {/* Content container */}
+      <div className="content-container">
+        {/* Left side - Shloka (centered vertically) */}
+        <div className="shloka-section">
+          <div className="donate-shloka">
+            <p className="sanskrit">
+              प्राणैरर्थैर्धिया वाचा श्रेय आचरणं सदा ॥
+            </p>
+            <p className="translation">
+              "The perfection of life is to develop pure devotion to the Lord, which
+              means to engage one's life, wealth, intelligence, and words in His
+              service."
+            </p>
           </div>
-
-          <p className="donate-message">
-            Your generous contribution helps us continue:
-          </p>
-
-          <ul className="donate-list">
-            <li>• Youth preaching programs</li>
-            <li>• Prasadam distribution</li>
-            <li>• Temple seva & festivals</li>
-            <li>• Scriptural education</li>
-            <li>• Spiritual Yatras</li>
-            <li>• Book Distribution</li>
-          </ul>
         </div>
-
-        {/* RIGHT SECTION */}
-        <div className="donate-right">
-          <div className="donation-card">
-            <h2>Donation Details</h2>
-
-            <Detail label="Account Name" value="Sri Govind Dham Trust" />
-            <Detail label="Account Number" value="12345678910" />
-            <Detail label="IFSC Code" value="SBIN0001234" />
-
-            <div className="qr-box">
-              <h3>Scan & Donate</h3>
-              <img src="src/assets/react.svg" className="qr-img" alt="QR" />
-              <p className="upi-note">
-                Google Pay • PhonePe • Paytm • All UPI Apps
-              </p>
-
-              <Detail label="UPI ID" value="govinddham@upi" />
-            </div>
-
-            <button className="donate-btn">Share Donation Receipt</button>
+        {/* Right side - Donation Card */}
+        <div className="donation-card">
+          <h2>Support IYS Sri Govind Dham</h2>
+          <p className="donate-sub">
+            Small donations create big spiritual impact.
+          </p>
+          <Detail label="Account Name" value="Sri Govind Dham Trust" />
+          <Detail label="Account Number" value="12345678910" />
+          <Detail label="IFSC Code" value="SBIN0001234" />
+          <div className="qr-box">
+            <h3>Scan & Donate</h3>
+            <img src="src\assets\react.svg" className="qr-img" alt="UPI QR" />
+            <p className="upi-note">
+              Google Pay • PhonePe • Paytm • All UPI Apps
+            </p>
           </div>
+            <Detail label="UPI ID" value="govinddham@upi" />
+
+          <button className="donate-btn">Share Donation Receipt</button>
         </div>
       </div>
     </div>
   );
 }
-
 function Detail({ label, value }) {
   return (
     <div className="detail-row">
