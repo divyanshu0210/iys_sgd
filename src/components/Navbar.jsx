@@ -83,26 +83,47 @@ export default function Navbar() {
         }}
       >
         {/* Logo */}
-        <Link
-          to="/"
-          className={"logo-text"}
-          onClick={(e) => {
-            if (isNavigationLocked) {
-              e.preventDefault();
-              alert("Please complete or cancel the payment before leaving.");
-            }
-          }}
-          style={{
-            padding:"5px",
-            fontWeight: 700,
-            fontSize: "1.2rem",
-            color: "#fff",
-            textDecoration: "none",
-            transition: "font-size 0.2s",
-          }}
-        >
-          IYS <br /> Sri Govind Dham
-        </Link>
+     <Link
+  to="/"
+  className="logo-text"
+  onClick={(e) => {
+    if (isNavigationLocked) {
+      e.preventDefault();
+      alert("Please complete or cancel the payment before leaving.");
+    }
+  }}
+  style={{
+    padding: "5px",
+    color: "#fff",
+    textDecoration: "none",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    lineHeight: 1.1,
+  }}
+>
+  <span
+    style={{
+      fontWeight: 800,
+      fontSize: "1.8rem",
+      letterSpacing: "0.8rem",   // spacing between I Y S
+    }}
+  >
+    IYS
+  </span>
+
+  <span
+    style={{
+      fontWeight: 400,
+      fontSize: "0.75rem",
+      marginTop: "2px",
+      opacity: 0.95,
+    }}
+  >
+    Sri Govind Dham
+  </span>
+</Link>
+
 
         {/* Desktop Menu */}
         <div className={`desktop-menu ${!user ? "always-visible" : ""}`}>
