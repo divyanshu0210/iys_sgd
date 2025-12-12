@@ -95,6 +95,10 @@ export default function YatraList() {
         width: "100%",
         maxWidth: "950px",
         marginBottom: "30px",
+        margin: "auto",
+        display:'flex',
+        flexDirection:'row',
+        flexWrap:'wrap'
       }}
     >
       {/* 🔵 Show 2 shimmers while loading */}
@@ -117,6 +121,7 @@ export default function YatraList() {
             gap: 4,
             background: "white",
             boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+            width:"100%",
           };
 
           return (

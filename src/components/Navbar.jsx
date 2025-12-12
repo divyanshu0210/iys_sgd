@@ -6,6 +6,8 @@ export default function Navbar() {
   const { user, profile, profileStage, logout, isNavigationLocked } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [prevScrollPos, setPrevScrollPos] = useState(window.pageYOffset);
+  const [visible, setVisible] = useState(true);
   const menuRef = useRef();
 
   // Close menu when clicking outside
@@ -19,6 +21,18 @@ export default function Navbar() {
     else document.removeEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen]);
+
+  // Scroll handler to hide/show navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollPos = window.pageYOffset;
+      setVisible(prevScrollPos > currentScrollPos || currentScrollPos < 10);
+      setPrevScrollPos(currentScrollPos);
+    };
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [prevScrollPos]);
 
   const NavLink = ({ to, children }) => (
     <Link
@@ -46,15 +60,17 @@ export default function Navbar() {
 
   return (
     <nav
+      id="navbar"
       style={{
-        padding: "10px 24px",
+        padding: "0px 24px",
         background: "#2c3e50",
         color: "#fff",
         borderBottom: "1px solid #34495e",
         position: "sticky",
-        top: 0,
+        width: "100%",
+        top: visible ? 0 : "-100px", // hide/show based on scroll
         zIndex: 1000,
-        height : "8vh",
+        transition: "top 0.3s",
       }}
     >
       <div
@@ -77,17 +93,18 @@ export default function Navbar() {
             }
           }}
           style={{
+            padding:"5px",
             fontWeight: 700,
-            fontSize: "1.4rem", // default larger size
+            fontSize: "1.2rem",
             color: "#fff",
             textDecoration: "none",
             transition: "font-size 0.2s",
           }}
         >
-          IYS <br></br>Sri Govind Dham
+          IYS <br /> Sri Govind Dham
         </Link>
 
-        {/* Desktop or Always-visible Menu for non-logged users */}
+        {/* Desktop Menu */}
         <div className={`desktop-menu ${!user ? "always-visible" : ""}`}>
           <NavLink to="/donate">Donate</NavLink>
           <NavLink to="/">Home</NavLink>
@@ -102,9 +119,7 @@ export default function Navbar() {
                 <button
                   onClick={() => {
                     if (isNavigationLocked) {
-                      alert(
-                        "Please complete or cancel the payment before logging out."
-                      );
+                      alert("Please complete or cancel the payment before logging out.");
                       return;
                     }
                     logout();
@@ -121,9 +136,7 @@ export default function Navbar() {
                 <button
                   onClick={() => {
                     if (isNavigationLocked) {
-                      alert(
-                        "Please complete or cancel the payment before logging out."
-                      );
+                      alert("Please complete or cancel the payment before logging out.");
                       return;
                     }
                     logout();
@@ -143,7 +156,7 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Hamburger (only when logged in) */}
+        {/* Mobile Hamburger */}
         {user && (
           <div
             style={{
@@ -160,9 +173,7 @@ export default function Navbar() {
               onClick={(e) => {
                 if (isNavigationLocked) {
                   e.preventDefault();
-                  alert(
-                    "Please complete or cancel the payment before leaving."
-                  );
+                  alert("Please complete or cancel the payment before leaving.");
                 } else {
                   setIsMenuOpen(true);
                 }
@@ -177,7 +188,7 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* Overlay & Sliding Menu */}
+      {/* Mobile Overlay Menu */}
       {isMenuOpen && (
         <div className="overlay">
           <div className="mobile-menu" ref={menuRef}>
@@ -200,9 +211,7 @@ export default function Navbar() {
             <button
               onClick={() => {
                 if (isNavigationLocked) {
-                  alert(
-                    "Please complete or cancel the payment before logging out."
-                  );
+                  alert("Please complete or cancel the payment before logging out.");
                   return;
                 }
                 logout();
@@ -216,7 +225,7 @@ export default function Navbar() {
           </div>
         </div>
       )}
-      <style>
+   <style>
         {`
     .desktop-menu {
       display: flex;
@@ -302,7 +311,7 @@ export default function Navbar() {
 
       /* Reduce logo size only when not signed in */
       .logo-text {
-        font-size: 0.7rem !important;
+        font-size: 0.9rem !important;
         font-weight: 600;
       }
 

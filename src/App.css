@@ -1,6 +1,7 @@
 main {
-  background-color: "#f8f9fa";
-  min-height:92vh ;
+  background-color: #f7f9fc;
+  /* min-height:92vh ; */
+  /* padding-top: 70px; */
 }
 
 .normal-page {
