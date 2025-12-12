@@ -78,8 +78,13 @@ export default function Home() {
           <section className="hero-section">
             <div className="hero-overlay">
               <h1 className="hero-title">
-                Inspiring Youth Through Spiritual Wisdom
-              </h1>
+  <span className="highlight">I</span>nspiring 
+
+  <span className="highlight">Y</span>outh <br/>Through <br/>
+
+  <span className="highlight"> S</span>piritual Wisdom
+</h1>
+
               <p className="hero-subtitle">
                 Grow with devotion, service & meaningful association.
               </p>
