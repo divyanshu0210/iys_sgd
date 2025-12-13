@@ -125,7 +125,7 @@
   .hero-section {
     height: fit-content;
     /* margin-top: 1rem; */
-    margin: auto;
+    margin: 1rem 0 auto;
   }
   .hero-overlay {
     margin: auto;

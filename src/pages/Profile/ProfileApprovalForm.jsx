@@ -59,18 +59,17 @@ export default function ProfileApprovalForm({ onClose }) {
       <form className="cp-card" onSubmit={handleSubmit} noValidate>
         <p className="cp-title">Get Profile Approved</p>
         <p className="cp-subtitle">
-          To access Yatra Registration & all features,get profile approved by
-          your mentor.
+          Connect yourself with a spiritual guide to unlock yatra & all other features.
         </p>
 
         <div className="cp-field">
           <label htmlFor="memberId">
-            Mentor Member ID <span style={{ color: "#e74c3c" }}>*</span>
+            Member ID <span style={{ color: "#e74c3c" }}>*</span>
           </label>
           <input
             id="memberId"
             type="text"
-            placeholder="Enter mentor's member ID"
+            placeholder="Enter spiritual guide's member ID"
             value={memberId}
             onChange={(e) => setMemberId(e.target.value)}
             disabled={submitting}

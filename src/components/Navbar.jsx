@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 
 export default function Navbar() {
-  const { user, profile, profileStage, logout, isNavigationLocked } = useAuth();
+  const { user, profile, profileStage, logout, isNavigationLocked , donatePage } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [prevScrollPos, setPrevScrollPos] = useState(window.pageYOffset);
@@ -24,6 +24,8 @@ export default function Navbar() {
 
   // Scroll handler to hide/show navbar
   useEffect(() => {
+    if(!donatePage)return; 
+
     const handleScroll = () => {
       const currentScrollPos = window.pageYOffset;
       setVisible(prevScrollPos > currentScrollPos || currentScrollPos < 10);
@@ -32,7 +34,7 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [prevScrollPos]);
+  }, [prevScrollPos,donatePage]);
 
   const NavLink = ({ to, children }) => (
     <Link
