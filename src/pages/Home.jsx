@@ -128,11 +128,11 @@ export default function Home() {
         {/** --------------------- LATEST YATRA UPDATES + MOMENTS (SIDE BY SIDE) --------------------- **/}
         <div className="home-row yatra-row">
           <section className="slider-section">
-            <h2 className="home-section-title">Our Yatra Moments</h2>
+            <h2 className="home-section-title">Glimpses From Our Yatras</h2>
             <ImageSlider />
           </section>
           <section className="updates-section" style={{ flex: "1 1 50%" }}>
-            <h2 className="home-section-title">Latest Yatra Updates</h2>
+            <h2 className="home-section-title">Upcoming Yatras</h2>
             <YatraList />
           </section>
         </div>
@@ -162,7 +162,7 @@ export default function Home() {
             <div className="card">
               <h3>Mayapur Bace</h3>
               <p>
-                Small spiritual circles across the city to connect, grow, and
+                Special programs for college students to connect, grow, and
                 study the Gita together.
               </p>
             </div>

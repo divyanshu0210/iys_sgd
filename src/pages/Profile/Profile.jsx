@@ -21,7 +21,7 @@ export default function Profile() {
   ];
 
   const InfoRow = ({ label, value }) => (
-    <div className="info-row">
+    <div className="info-row" style={{flexDirection:"row"}} >
       <span className="info-label">{label}:</span>
       <span className="info-value">{value || "-"}</span>
     </div>
