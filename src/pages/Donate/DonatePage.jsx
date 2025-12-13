@@ -1,13 +1,12 @@
 import "../../css/DonatePage.css";
-import React from "react";
+import React, { useState } from "react";
 import ImageSlider from "./ImageSlider";
 
 export default function DonatePage() {
-
+  const [qrLoading, setQrLoading] = useState(true);
 
   return (
     <div className="donate-page">
-
       <div className="donate-header">
         <h1 className="donate-heading">Support IYS Sri Govind Dham</h1>
         <p className="donate-sub">
@@ -16,18 +15,20 @@ export default function DonatePage() {
       </div>
 
       <div className="donate-wrapper">
-
-        {/* LEFT SIDE — Slider Component */}
-        {/* <div className="donate-left">
-          <ImageSlider />
-        </div> */}
-
-        {/* RIGHT SIDE — Donation Card */}
         <div className="donate-right">
           <div className="donation-card">
-            
+
             <div className="qr-box">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Sample" className="qr-img" alt="QR" />
+              {qrLoading && <div className="qr-loader" />}
+
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Sample"
+                className={`qr-img ${qrLoading ? "hidden" : ""}`}
+                alt="QR"
+                onLoad={() => setQrLoading(false)}
+                onError={() => setQrLoading(false)}
+              />
+
               <p className="upi-note">
                 Google Pay • PhonePe • Paytm • All UPI Apps
               </p>
@@ -37,11 +38,10 @@ export default function DonatePage() {
             <Detail label="Account Number" value="12345678910" />
             <Detail label="IFSC Code" value="SBIN0001234" />
             <Detail label="UPI ID" value="govinddham@upi" />
-            
+
             <button className="donate-btn">Share Donation Receipt</button>
           </div>
         </div>
-
       </div>
     </div>
   );

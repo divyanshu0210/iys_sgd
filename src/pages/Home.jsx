@@ -78,11 +78,11 @@ export default function Home() {
           <section className="hero-section">
             <div className="hero-overlay">
               <h1 className="hero-title">
-  <span className="highlight">I</span>nspiring 
+  <span className="highlight">I</span>nspiring <br className="mobile_break"/>
 
   <span className="highlight">Y</span>outh <br/>Through <br/>
 
-  <span className="highlight"> S</span>piritual Wisdom
+  <span className="highlight"> S</span>piritual <br className="mobile_break"/> Experience
 </h1>
 
               <p className="hero-subtitle">

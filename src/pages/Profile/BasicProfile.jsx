@@ -149,7 +149,7 @@ export default function BasicProfile() {
     setStatus(null);
 
     if (!validate()) {
-      setStatus({ type: "error", msg: "Please fill all required fields." });
+      setStatus({ type: "error", msg: "Please fill all required fields correctly." });
       return;
     }
 

@@ -68,6 +68,10 @@
   width: 1200px;
 }
 
+.mobile_break{
+  display: none;
+}
+
 .yatra-row{
     margin: 60px;
 }
@@ -120,7 +124,8 @@
 
   .hero-section {
     height: fit-content;
-    margin-top: 1rem;
+    /* margin-top: 1rem; */
+    margin: auto;
   }
   .hero-overlay {
     margin: auto;
@@ -138,6 +143,11 @@
   .home-row {
     flex-direction: column;
   }
+
+  
+.mobile_break{
+  display: block;
+}
 
   .home-section-title{
     margin: 20px 0px;

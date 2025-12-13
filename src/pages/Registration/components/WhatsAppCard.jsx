@@ -109,7 +109,8 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
     registrationStatus
   );
 
-  const amountPaid = profile?.installments_info?.filter((i) => i.tag === "verified")
+  const amountPaid = profile?.installments_info
+    ?.filter((i) => i.tag === "verified")
     .reduce((sum, i) => sum + Number(i.amount), 0);
 
   console.log(
@@ -401,7 +402,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
               <strong>
                 {registrationStatus === "cancelled" ? "Pending" : "Completed"}
               </strong>
-              <br/>
+              <br />
               {registrationStatus === "cancelled" && (
                 <span style={{ fontSize: "12px", color: "#333" }}>
                   Yatra Team will contact you to proceed with the refund.
@@ -434,8 +435,8 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
               {getButtonText()}
             </button>
 
-            {registrationStatus && (
-              // {registrationStatus == "paid" && (
+            {/* {registrationStatus && ( */}
+            {registrationStatus === "paid" && (
               <>
                 <button
                   onClick={() => setOpenInfoModal(true)}
@@ -448,30 +449,39 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                 >
                   Travel Info
                 </button>
-                <button
-                  className="action-btn"
-                  style={{
-                    maxWidth: "fit-content",
-                    color: "black",
-                    backgroundColor: "white",
-                  }}
-                  onClick={() => generateRCS(profile, yatra)}
-                >
-                  Print RCS
-                </button>
+                {yatra.is_rcs_download_open && (
+                  <button
+                    className="action-btn"
+                    style={{
+                      maxWidth: "fit-content",
+                      color: "black",
+                      backgroundColor: "white",
+                    }}
+                    onClick={() => generateRCS(profile, yatra)}
+                  >
+                    Print RCS
+                  </button>
+                )}
+                {yatra.is_substitution_open && (
+                  <MoreActionsMenu
+                    onSubstitute={() => {
+                      console.log(
+                        "Open substitution modal for",
+                        profile.first_name
+                      );
+                      setOpenSubstitutionModal(true);
+                    }}
+                    onCancellation={() => {
+                      console.log(
+                        "Open cancellation modal for",
+                        profile.first_name
+                      );
+                      setOpenCancellationModal(true);
+                    }}
+                  />
+                )}
               </>
             )}
-
-            <MoreActionsMenu
-              onSubstitute={() => {
-                console.log("Open substitution modal for", profile.first_name);
-                setOpenSubstitutionModal(true);
-              }}
-              onCancellation={() => {
-                console.log("Open cancellation modal for", profile.first_name);
-                setOpenCancellationModal(true);
-              }}
-            />
           </div>
         )}
 
