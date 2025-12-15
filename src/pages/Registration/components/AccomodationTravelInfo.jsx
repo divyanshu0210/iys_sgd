@@ -31,10 +31,7 @@ const AccomodationTravelInfo = ({ profile }) => {
     <div className="extra-details-container">
       {/* Fallback Message */}
       {noTravelInfo && (
-        <div
-          className="uniform-box"
-          style={{ textAlign: "center" }}
-        >
+        <div className="uniform-box" style={{ textAlign: "center" }}>
           <h4 className="detail-heading">No Information Available</h4>
           <p style={{ fontSize: "13px", marginTop: "5px" }}>
             Accommodation, travel, or additional details will be added soon.
@@ -88,7 +85,11 @@ const AccomodationTravelInfo = ({ profile }) => {
                 </div>
 
                 <small>
-                  Vehicle: {j.vehicle_number || "—"}
+                  {j.journey.type?.toLowerCase() === "train" ? (
+                    <>PNR: {j.vehicle_number || "—"}</>
+                  ) : (
+                    <>Vehicle: {j.vehicle_number || "—"}</>
+                  )}
                   {j.seat_number ? ` | Seat ${j.seat_number}` : ""}
                   <br />
                   Departure: {formatDateTime(j.journey.start_datetime) || "—"}

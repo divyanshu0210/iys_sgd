@@ -8,6 +8,24 @@ import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import FullPageLoader from "../../../components/FullPageLoader";
 import Tesseract from "tesseract.js";
+import QRCode from "qrcode";
+
+const AMOUNT_LIMIT = 2000;
+
+const generateUpiUrl = ({ upiId, name, amount, note }) => {
+  const params = new URLSearchParams({
+    pa: upiId,
+    pn: name,
+    cu: "INR",
+    tn: note,
+  });
+
+  params.append("am", amount.toString());
+  if (amount < AMOUNT_LIMIT) {
+  }
+
+  return `upi://pay?${params.toString()}`;
+};
 
 const CheckoutStep = () => {
   const { setIsNavigationLocked } = useAuth();
@@ -20,22 +38,21 @@ const CheckoutStep = () => {
   const ignoreLeaveWarning = useRef(false);
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  // 🔵 NEW: status of screenshot verification
+  // OCR & verification states
   const [verificationStatus, setVerificationStatus] = useState("pending");
   const [verifying, setVerifying] = useState(false);
   const [message, setMessage] = useState("");
 
-  // Data loaded from localStorage
-  const [checkoutData, setCheckoutData] = useState(null);
+  const [utrMatchStatus, setUtrMatchStatus] = useState("pending"); // pending | valid | invalid
+  const [utrMessage, setUtrMessage] = useState("");
+  const [ocrText, setOcrText] = useState("");
 
-  const {
-    fetchRegistrationData,
-    setSelected,
-    setRegistrations,
-    setActiveTab,
-    setCurrentStep,
-    currentStep,
-  } = useYatraRegistration();
+  // Checkout & QR state
+  const [checkoutData, setCheckoutData] = useState(null);
+  const [qrSrc, setQrSrc] = useState("");
+
+  const { setSelected, setRegistrations, setActiveTab, setCurrentStep } =
+    useYatraRegistration();
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -148,43 +165,15 @@ const CheckoutStep = () => {
   }, 0);
 
   const upiId = (yatra || registerData.yatra)?.payment_upi_id || "";
-  const qrUrl = `${API.defaults.baseURL}payments/qr/?amount=${totalAmount}&upi_id=${upiId}&note=Yatra+Payment`;
+  // console.log(upiId)
+  const upiUrl = generateUpiUrl({
+    upiId,
+    name: "ISKCON Yatra",
+    amount: totalAmount,
+    note: "Yatra Payment",
+  });
 
-  // ================================
-  // 🔵 NEW: Verify Screenshot via API
-  // ================================
-  const verifyPaymentScreenshot = async (file) => {
-    setVerifying(true);
-    setVerificationStatus("pending");
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("amount", totalAmount);
-
-      const res = await fetch(
-        `${API.defaults.baseURL}payments/verify-payment/`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const data = await res.json();
-      setMessage(data.message);
-      if (data.success === true) {
-        setVerificationStatus("valid");
-      } else {
-        setVerificationStatus("invalid");
-      }
-    } catch (err) {
-      console.error("Verification failed", err);
-      setVerificationStatus("invalid");
-    } finally {
-      setVerifying(false);
-    }
-  };
-
+  QRCode.toDataURL(upiUrl, { width: 260 }).then(setQrSrc).catch(console.error);
 
   // =====================================================
   // OCR Extraction Helpers
@@ -213,13 +202,18 @@ const CheckoutStep = () => {
   const verifyScreenshotOCR = async (file) => {
     setVerifying(true);
     setVerificationStatus("pending");
+    setUtrMatchStatus("pending");
     setMessage("Reading payment screenshot...");
+    setUtrMessage("");
 
     try {
-      const { data: { text } } = await Tesseract.recognize(file, "eng");
+      const {
+        data: { text },
+      } = await Tesseract.recognize(file, "eng");
+      setOcrText(text);
 
       // extract numbers
-      const raw = extractRawNumbers(text);  
+      const raw = extractRawNumbers(text);
 
       let variants = [];
       raw.forEach((n) => {
@@ -228,22 +222,50 @@ const CheckoutStep = () => {
 
       variants = [...new Set(variants)];
 
-      console.log("OCR extracted:", variants);
-
       // check for match
       if (variants.includes(totalAmount)) {
         setVerificationStatus("valid");
-        setMessage(`✔ Screenshot valid. Amount detected: ₹${totalAmount}`);
+        setMessage(`✔ Amount valid. Amount detected: ₹${totalAmount}`);
       } else {
         setVerificationStatus("invalid");
         setMessage("Amount mismatch. Expected ₹" + totalAmount);
       }
+
+      /* ---------- TRANSACTION ID VERIFICATION ---------- */
+      if (transactionId) {
+        verifyTransactionIdFromText(text, transactionId);
+      }
+      // ------------------------------------------
     } catch (err) {
-      console.error("OCR error", err);
+      // console.error("OCR error", err);
       setVerificationStatus("invalid");
+      setUtrMatchStatus("invalid");
       setMessage("OCR failed.");
+      setUtrMessage("Unable to verify Transaction ID");
     } finally {
       setVerifying(false);
+    }
+  };
+
+  const verifyTransactionIdFromText = (ocrText, value) => {
+    const extractedUTRs = ocrText.match(/\b\d{12,18}\b/g) || [];
+
+    console.log("Extracted UTRs:", extractedUTRs);
+
+    const normalizedInput = value.replace(/\s/g, "");
+
+    const utrMatched = extractedUTRs.some(
+      (utr) => utr.replace(/\s/g, "") === normalizedInput
+    );
+
+    if (utrMatched) {
+      setUtrMatchStatus("valid");
+      setUtrMessage("✔ Transaction ID verified from screenshot");
+    } else {
+      setUtrMatchStatus("invalid");
+      setUtrMessage(
+        "Transaction ID mismatch. Verify UTR No. OR Retry uploading a clear screenshot."
+      );
     }
   };
 
@@ -335,13 +357,14 @@ const CheckoutStep = () => {
 
         <div className="qr-section">
           <h4>Scan & Pay</h4>
-
-          <img
-            src={qrUrl}
-            alt="UPI QR"
-            className="qr-code"
-            onLoad={() => setQrLoading(false)}
-          />
+          {qrSrc && (
+            <img
+              src={qrSrc}
+              alt="UPI QR"
+              className="qr-code"
+              onLoad={() => setQrLoading(false)}
+            />
+          )}
 
           {isMobile && (
             <>
@@ -350,8 +373,16 @@ const CheckoutStep = () => {
                 type="button"
                 onClick={() => {
                   ignoreLeaveWarning.current = true;
+                  const upiIntent = generateUpiUrl({
+                    upiId,
+                    name: "ISKCON Yatra",
+                    amount: totalAmount,
+                    note: "Yatra Payment",
+                  });
 
-                  window.location.href = `upi://pay?pa=${upiId}&pn=Yatra&am=${totalAmount}&tn=Yatra+Payment`;
+                  window.location.href = upiIntent;
+
+                  // window.location.href = `upi://pay?pa=${upiId}&pn=Yatra&am=${totalAmount}&tn=Yatra+Payment`;
                   setTimeout(() => {
                     ignoreLeaveWarning.current = false;
                   }, 1000);
@@ -378,16 +409,6 @@ const CheckoutStep = () => {
             style={{ marginTop: "20px" }}
           >
             <div className="form-group">
-              <label>Transaction ID *</label>
-              <input
-                type="text"
-                value={transactionId}
-                onChange={(e) => setTransactionId(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
               <label>Payment Screenshot *</label>
               <input
                 type="file"
@@ -395,8 +416,7 @@ const CheckoutStep = () => {
                 onChange={(e) => handleScreenshotChange(e.target.files[0])}
                 required
               />
-
-           {/* OCR Status */}
+              {/* OCR Status */}
               {verifying && (
                 <p style={{ color: "blue", fontSize: "12px" }}>
                   ⏳ Verifying screenshot…
@@ -412,6 +432,31 @@ const CheckoutStep = () => {
               )}
             </div>
 
+            <div className="form-group">
+              <label>UTR / UPI Ref. No. / Transaction ID *</label>
+              <input
+                type="number"
+                value={transactionId}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setTransactionId(value);
+
+                  if (ocrText) {
+                    verifyTransactionIdFromText(ocrText, value);
+                  }
+                }}
+                required
+              />
+
+              {utrMatchStatus === "valid" && (
+                <p style={{ color: "green", fontSize: "12px" }}>{utrMessage}</p>
+              )}
+
+              {utrMatchStatus === "invalid" && (
+                <p style={{ color: "red", fontSize: "12px" }}>{utrMessage}</p>
+              )}
+            </div>
+
             <button
               type="submit"
               className="btn-next"
@@ -419,6 +464,7 @@ const CheckoutStep = () => {
                 loadingCheckout ||
                 verifying ||
                 verificationStatus !== "valid" ||
+                utrMatchStatus !== "valid" ||
                 !transactionId
               }
             >

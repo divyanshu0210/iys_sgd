@@ -1,8 +1,8 @@
 // Spiritual Master & Initiation Place options (paste exactly)
 export const CENTER_OPTIONS = [
-  "Vrindavan Base",
-  "Mayapur Base",
-  "Giri Govardhan Base",
+  "Vrindavan Bace",
+  "Mayapur Bace",
+  "Giri Govardhan Bace",
   "Temple VTA",
   "Temple Brahmachari",
   "Others",

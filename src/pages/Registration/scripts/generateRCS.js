@@ -84,7 +84,7 @@ export async function generateRCS(profile, yatra) {
       ["Email", profile.email],
       ["Member ID", profile.member_id],
       ["Center", profile.center],
-      ["Mentor", profile.approved_by || "—"],
+      ["Mentor",`${profile.mentor_name} (${profile.approved_by})`|| "—"],
       ["Registration ID", profile.registration_id],
       ["Status", profile.registration_status],
     ],
@@ -135,7 +135,7 @@ export async function generateRCS(profile, yatra) {
 
     autoTable(doc, {
       startY: cursor + 3,
-      head: [["Type", "Route", "Mode", "Vehicle", "Seat", "Departure"]],
+      head: [["Type", "Route", "Mode", "Vehicle/PNR", "Seat", "Departure"]],
       body: journeyRows,
       styles: { fontSize: 8 },
     });
