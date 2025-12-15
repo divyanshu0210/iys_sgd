@@ -9,6 +9,7 @@ import ProfileApprovalForm from "./Profile/ProfileApprovalForm";
 import ImageSlider from "./Donate/ImageSlider";
 import "../css/Home.css";
 import Footer from "../components/Footer";
+import { Instagram, Youtube, Facebook, MapPin, Phone } from "lucide-react";
 
 export default function Home() {
   const { user, profileStage, loading, setDonatePage } = useAuth();
@@ -22,9 +23,9 @@ export default function Home() {
       navigate("/complete-profile", { replace: true });
     }
 
-    return ()=>{
-      setDonatePage(false)
-    }
+    return () => {
+      setDonatePage(false);
+    };
   }, [user, profileStage, loading, navigate]);
 
   const bannerStyle = {
@@ -32,7 +33,7 @@ export default function Home() {
     border: "1px solid #ffeaa7",
     padding: "1rem",
     borderRadius: "8px",
-    marginTop: "1rem" ,
+    marginTop: "1rem",
     textAlign: "center",
   };
 
@@ -40,37 +41,36 @@ export default function Home() {
     <div>
       {/** --------------------- APPROVAL BANNERS --------------------- **/}
 
-  
       {/** --------------------- MAIN WRAPPER --------------------- **/}
 
       <div className="home-wrapper">
-            {profileStage === "guest" && (
-        <div style={bannerStyle}>
-          <strong>Get Approved!</strong> To access all features, please get your
-          profile approved by your mentor.
-          <button
-            onClick={() => setOpenApprovalModal(true)}
-            style={{
-              marginLeft: "1rem",
-              background: "#f39c12",
-              color: "white",
-              border: "none",
-              padding: "0.5rem 1rem",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            Get Approved
-          </button>
-        </div>
-      )}
+        {profileStage === "guest" && (
+          <div style={bannerStyle}>
+            <strong>Get Approved!</strong> To access all features, please get
+            your profile approved by your mentor.
+            <button
+              onClick={() => setOpenApprovalModal(true)}
+              style={{
+                marginLeft: "1rem",
+                background: "#f39c12",
+                color: "white",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              Get Approved
+            </button>
+          </div>
+        )}
 
-      {profileStage === "approval" && (
-        <div style={bannerStyle}>
-          <strong>Approval Pending:</strong> Your profile has been submitted for
-          approval. You’ll get access to all features once it’s confirmed.
-        </div>
-      )}
+        {profileStage === "approval" && (
+          <div style={bannerStyle}>
+            <strong>Approval Pending:</strong> Your profile has been submitted
+            for approval. You’ll get access to all features once it’s confirmed.
+          </div>
+        )}
 
         {/** --------------------- HERO + SLIDER (SIDE BY SIDE) --------------------- **/}
         <div className="home-row">
@@ -78,17 +78,27 @@ export default function Home() {
           <section className="hero-section">
             <div className="hero-overlay">
               <h1 className="hero-title">
-  <span className="highlight">I</span>nspiring <br className="mobile_break"/>
-
-  <span className="highlight">Y</span>outh <br/>Through <br/>
-
-  <span className="highlight"> S</span>piritual <br className="mobile_break"/> Experience
-</h1>
+                <span className="highlight">I</span>nspiring{" "}
+                <br className="mobile_break" />
+                <span className="highlight">Y</span>outh <br />
+                Through <br />
+                <span className="highlight"> S</span>piritual{" "}
+                <br className="mobile_break" /> Experience
+              </h1>
 
               <p className="hero-subtitle">
                 Grow with devotion, service & meaningful association.
               </p>
-              <button className="hero-btn">Join Youth Programs</button>
+              <button
+                className="hero-btn"
+                onClick={() => {
+                  document
+                    .getElementById("youth-centers")
+                    ?.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                Join Youth Programs
+              </button>
             </div>
           </section>
 
@@ -139,7 +149,7 @@ export default function Home() {
 
         {/** --------------------- NEW: YOUTH CENTERS INFO --------------------- **/}
 
-        <section className="youth-section">
+        <section className="youth-section" id="youth-centers">
           <h2 className="home-section-title">Youth Centers Near You</h2>
 
           <div className="youth-cards">
@@ -149,6 +159,40 @@ export default function Home() {
                 A vibrant spiritual home for youth—daily kirtans, classes,
                 mentoring & seva opportunities.
               </p>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-evenly",
+                  alignItems: "center",
+                }}
+              >
+                <p>
+                  <strong>
+                    {" "}
+                    <MapPin size={18} />
+                  </strong>{" "}
+                  <a
+                    href="https://maps.app.goo.gl/y1KSdUnGKirjerqq9"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#2563EB", textDecoration: "none" }}
+                  >
+                    Vrindavan Bace
+                  </a>
+                </p>
+
+                <p>
+                  <strong>
+                    <Phone size={18} />
+                  </strong>{" "}
+                  <a
+                    href="tel:+919876543210"
+                    style={{ color: "#2563EB", textDecoration: "none" }}
+                  >
+                    +91 9140718421
+                  </a>
+                </p>
+              </div>
             </div>
 
             <div className="card">
@@ -173,9 +217,14 @@ export default function Home() {
             {/* ---- CONTACT INFO ---- */}
             <div className="card">
               <h3 className="footer-heading">Contact Us</h3>
-              <p>📍 Sri Govind Dham, Varanasi</p>
-              <p>📞 +91 98765 43210</p>
-              <p>📧 iys.srigovinddham@gmail.com</p>
+              <p>
+                {" "}
+                <MapPin size={18} /> Sri Govind Dham , ISKCON Ravet
+              </p>
+              <p>
+                <Phone size={18} /> +91 9140718421
+              </p>
+              {/* <p>📧 iys.srigovinddham@gmail.com</p> */}
             </div>
 
             {/* ---- SHLOKA ---- */}
@@ -189,9 +238,59 @@ export default function Home() {
             {/* ---- SOCIAL LINKS ---- */}
             <div className="card">
               <h3 className="footer-heading">Connect</h3>
-              <p>🌐 Instagram: @iys.srigovinddham</p>
-              <p>🌐 YouTube: IYS Sri Govind Dham</p>
-              <p>🌐 Facebook: /IYS Govind Dham</p>
+              <p
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "8px",
+                }}
+              >
+                <Instagram size={18} />
+                <a
+                  href="https://www.instagram.com/iys.srigovinddham"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#2563EB", textDecoration: "none" }}
+                >
+                  @iys.srigovinddham
+                </a>
+              </p>
+
+              <p
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "8px",
+                }}
+              >
+                <Youtube size={18} />
+                <a
+                  href="https://www.youtube.com/@IYSSriGovindDham"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#2563EB", textDecoration: "none" }}
+                >
+                  IYS Sri Govind Dham
+                </a>
+              </p>
+
+              <p
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "8px",
+                }}
+              >
+                <Facebook size={18} />
+                <a
+                  href="https://www.facebook.com/IYSGovindDham"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#2563EB", textDecoration: "none" }}
+                >
+                  IYS Govind Dham
+                </a>
+              </p>
             </div>
           </div>
         </section>

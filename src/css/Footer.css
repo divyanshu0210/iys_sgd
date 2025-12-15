@@ -58,3 +58,10 @@
   background-color: rgb(44, 62, 80);
 }
 
+
+@media (max-width: 480px) {
+.footer-bottom{
+    font-size: 12px;
+}
+}
+
