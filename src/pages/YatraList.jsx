@@ -44,11 +44,16 @@ export default function YatraList() {
 
   const { profileStage, profile } = useAuth();
 
-  useEffect(() => {
-    API.get("/yatra/list/")
-      .then((res) => setYatras(res.data))
-      .finally(() => setLoading(false));
-  }, []);
+ useEffect(() => {
+  API.get("/yatra/list/")
+    .then((res) => {
+      const openYatras = res.data.filter(
+        (y) => y.close_yatra === false
+      );
+      setYatras(openYatras);
+    })
+    .finally(() => setLoading(false));
+}, []);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -169,7 +174,6 @@ export default function YatraList() {
                 </span>
               </div>
 
-              {isOpen && (
                 <div style={{ marginTop: 8 }}>
                   <Link
                     to={`/yatra/${y.id}/register`}
@@ -192,7 +196,7 @@ export default function YatraList() {
                     </button>
                   </Link>
                 </div>
-              )}
+
             </article>
           );
         })
@@ -224,7 +228,7 @@ export default function YatraList() {
           <h3 style={{ color: "#1E3A8A" }}>Profile Activation</h3>
 
           <p style={{ fontSize: 15, marginBottom: 10 }}>
-            Profile will become acive after 24 hrs of approval.
+            Profile Activation require 24 hrs after approval by counseller.
           </p>
 
           {profile?.profile_approved_at && (

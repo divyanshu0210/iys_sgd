@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "../../css/profile.css";
 import API from "../../services/api";
-import {SPIRITUAL_MASTERS } from "./data";
+import { CENTER_OPTIONS, SPIRITUAL_MASTERS } from "./data";
 import ProfileApprovalForm from "./ProfileApprovalForm.jsx";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
 
@@ -23,6 +23,7 @@ export default function BasicProfile() {
     mobile: "",
     maritalStatus: "",
     center: "",
+    customCenter: "", // ✅ NEW
     aadhaarNumber: "",
     photo: null,
     receiveEmails: false,
@@ -117,6 +118,10 @@ export default function BasicProfile() {
       }
     }
 
+    if (details.center === "Others" && !details.customCenter.trim()) {
+      newErrors.customCenter = "This field is required";
+    }
+
     // Photo
     if (!details.photo) newErrors.photo = "Photo is required (max 1 MB)";
     else if (details.photo.size > MAX_PHOTO_SIZE)
@@ -149,7 +154,10 @@ export default function BasicProfile() {
     setStatus(null);
 
     if (!validate()) {
-      setStatus({ type: "error", msg: "Please fill all required fields correctly." });
+      setStatus({
+        type: "error",
+        msg: "Please fill all required fields correctly.",
+      });
       return;
     }
 
@@ -167,7 +175,9 @@ export default function BasicProfile() {
         marital_status: details.maritalStatus,
         mobile: details.mobile,
         aadhar_card_no: details.aadhaarNumber,
-        center: details.center,
+        center:   details.center === "Others"
+    ? details.customCenter.trim()
+    : details.center,
         email_consent: details.receiveEmails,
         is_initiated: details.harinamInitiated === "Yes",
       };
@@ -205,11 +215,30 @@ export default function BasicProfile() {
       const stage = await fetchProfile();
       // setTimeout(() => navigate("/"), 1500);
     } catch (err) {
-      const errorMsg =
-        err.response?.data?.message ||
-        err.response?.data?.detail ||
-        err.message ||
-        "An error occurred while saving the profile.";
+      let errorMsg = "An error occurred while saving the profile.";
+
+      const data = err.response?.data;
+
+      if (data) {
+        // 1️⃣ Field-level DRF errors (most common)
+        if (typeof data === "object" && !Array.isArray(data)) {
+          errorMsg = Object.entries(data)
+            .map(([field, messages]) =>
+              messages
+                .map((msg) => msg.charAt(0).toUpperCase() + msg.slice(1))
+                .join(" ")
+            )
+            .join("\n");
+        }
+
+        // 2️⃣ DRF generic errors
+        else if (data.detail) {
+          errorMsg = data.detail;
+        }
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+
       setStatus({ type: "error", msg: errorMsg });
     } finally {
       setSubmitting(false);
@@ -226,6 +255,7 @@ export default function BasicProfile() {
       mobile: "",
       maritalStatus: "",
       center: "",
+      customCenter: "",
       aadhaarNumber: "",
       photo: null,
       receiveEmails: false,
@@ -271,7 +301,7 @@ export default function BasicProfile() {
               ["gender", "Gender", "select", ""],
               ["mobile", "Mobile Number", "tel", "Mobile number"],
               ["maritalStatus", "Marital Status", "select", ""],
-              ["center", "Center / Base", "text", "Enter center or base"],
+              // ["center", "Center / Base", "text", "Enter center or base"],
               [
                 "aadhaarNumber",
                 "Aadhaar Number",
@@ -319,6 +349,49 @@ export default function BasicProfile() {
                 {errors[key] && <div className="error-text">{errors[key]}</div>}
               </div>
             ))}
+
+            {/* ---------- Center / Base ---------- */}
+            <div className="cp-field">
+              <Label htmlFor="center">Center / Base</Label>
+
+              <select
+                id="center"
+                value={details.center}
+                onChange={(e) => onChange("center", e.target.value)}
+                disabled={submitting}
+                className={errors.center ? "error-border" : ""}
+              >
+                <option value="">Select</option>
+                {CENTER_OPTIONS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+
+              {errors.center && (
+                <div className="error-text">{errors.center}</div>
+              )}
+            </div>
+
+            {/* ---------- Custom Center (only if Others) ---------- */}
+            {details.center === "Others" && (
+              <div className="cp-field">
+                <Label htmlFor="customCenter">Specify Center</Label>
+                <input
+                  id="customCenter"
+                  type="text"
+                  placeholder="Enter your center name"
+                  value={details.customCenter}
+                  onChange={(e) => onChange("customCenter", e.target.value)}
+                  disabled={submitting}
+                  className={errors.customCenter ? "error-border" : ""}
+                />
+                {errors.customCenter && (
+                  <div className="error-text">{errors.customCenter}</div>
+                )}
+              </div>
+            )}
 
             {/* ---------- NEW: Harinam Initiated ---------- */}
             <div className="cp-field">
@@ -574,6 +647,7 @@ export default function BasicProfile() {
               className={`status-box ${
                 status.type === "success" ? "success" : "error"
               }`}
+              style={{ whiteSpace: "pre-line" }}
             >
               {status.msg}
             </div>
