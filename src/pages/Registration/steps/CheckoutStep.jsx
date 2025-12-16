@@ -20,8 +20,8 @@ const generateUpiUrl = ({ upiId, name, amount, note }) => {
     tn: note,
   });
 
-  params.append("am", amount.toString());
   if (amount < AMOUNT_LIMIT) {
+    params.append("am", amount.toString());
   }
 
   return `upi://pay?${params.toString()}`;
