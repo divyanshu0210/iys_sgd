@@ -172,7 +172,8 @@ export default function Home() {
               note="Special programs for college students—weekly sessions, group discussions & retreats."
               contact="+917774032548"
               mail="srigovind.rns@gmail.com"
-              location="https://maps.app.goo.gl/ygcFt7Scu8KjUu8T6"
+              location="https://maps.app.goo.gl/KpmwWMBxfpRdafxHA"
+
             />
 
             <YouthCenter
@@ -180,7 +181,8 @@ export default function Home() {
               note="Special programs for college students to connect, grow, and study the Gita together."
               contact="+917774048503"
               mail="vcdrns@gmail.com"
-              location="https://maps.app.goo.gl/KpmwWMBxfpRdafxHA"
+              location="https://maps.app.goo.gl/ygcFt7Scu8KjUu8T6"
+
             />
           </div>
           <h2 className="home-section-title">Connect, Cultivate, Contribute</h2>
