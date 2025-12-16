@@ -108,7 +108,7 @@ export default function Navbar() {
           }}
         >
           <img
-            src="/iys_logo.png" 
+            src="/iys_logo.png"
             alt="IYS Logo"
             style={{
               width: "clamp(33px, 5vw, 45px)",
@@ -206,7 +206,7 @@ export default function Navbar() {
               alignItems: "center",
             }}
           >
-            <div className="mobile-only">
+            <div className="mobile-only" style={{ paddingRight: 15 }}>
               <NavLink to="/donate">Donate</NavLink>
             </div>
             <div

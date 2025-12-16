@@ -12,6 +12,28 @@ import QRCode from "qrcode";
 import { AccountDetail } from "../../Donate/DonatePage";
 import UpiPaymentSection from "../../Payments/UpiPaymentSection";
 
+const Spinner = () => (
+  <>
+    <div
+      style={{
+        width: 18,
+        height: 18,
+        border: "2px solid #ccc",
+        borderTop: "2px solid #333",
+        borderRadius: "50%",
+        animation: "spin 1s linear infinite",
+      }}
+    />
+    <style>
+      {`@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}`}
+    </style>
+  </>
+);
+
 const CheckoutStep = () => {
   const { setIsNavigationLocked } = useAuth();
   const navigate = useNavigate();
@@ -23,16 +45,25 @@ const CheckoutStep = () => {
 
   const ignoreLeaveWarning = useRef(false);
 
-  // OCR & verification states
-  const [verificationStatus, setVerificationStatus] = useState("pending");
   const [verifying, setVerifying] = useState(false);
   const [message, setMessage] = useState("");
-  const [utrMatchStatus, setUtrMatchStatus] = useState("pending"); // pending | valid | invalid
-  const [utrMessage, setUtrMessage] = useState("");
-  const [ocrText, setOcrText] = useState("");
 
   // Checkout & QR state
   const [checkoutData, setCheckoutData] = useState(null);
+
+  const [stepsVisible, setStepsVisible] = useState(false);
+
+  const [steps, setSteps] = useState({
+    amount: "idle", // idle | loading | success | error
+    utr: "idle",
+    payment: "idle",
+  });
+
+  const [stepMessages, setStepMessages] = useState({
+    amount: "",
+    utr: "",
+    payment: "",
+  });
 
   const { setSelected, setRegistrations, setActiveTab, setCurrentStep } =
     useYatraRegistration();
@@ -62,7 +93,8 @@ const CheckoutStep = () => {
     setIsNavigationLocked(true);
 
     const blockMessage =
-      "You have unsaved payment data. Are you sure you want to leave?";
+      "You have not submitted the Payment Proof. Are you sure you want to leave?";
+    //  If you have made the payment on account number and cancel without submitting screenshot, your payment wll not be tracked . You wont get chance to resubmit the payment.
 
     // 1. Block browser back/forward navigation
     const handlePopState = (e) => {
@@ -171,84 +203,35 @@ const CheckoutStep = () => {
   // =====================================================
   // Tesseract OCR Verification
   // =====================================================
-  const verifyScreenshotOCR = async (file) => {
-    setVerifying(true);
-    setVerificationStatus("pending");
-    setUtrMatchStatus("pending");
-    setMessage("Reading payment screenshot...");
-    setUtrMessage("");
 
-    try {
-      const {
-        data: { text },
-      } = await Tesseract.recognize(file, "eng");
-      setOcrText(text);
+  const verifyAmount = async (text) => {
+    const raw = extractRawNumbers(text);
+    let variants = [];
 
-      // extract numbers
-      const raw = extractRawNumbers(text);
+    raw.forEach((n) => {
+      variants.push(...generateVariants(n));
+    });
 
-      let variants = [];
-      raw.forEach((n) => {
-        variants = [...variants, ...generateVariants(n)];
-      });
+    variants = [...new Set(variants)];
 
-      variants = [...new Set(variants)];
-
-      // check for match
-      if (variants.includes(totalAmount)) {
-        setVerificationStatus("valid");
-        setMessage(`✔ Amount valid. Amount detected: ₹${totalAmount}`);
-      } else {
-        setVerificationStatus("invalid");
-        setMessage("Amount mismatch. Expected ₹" + totalAmount);
-      }
-
-      /* ---------- TRANSACTION ID VERIFICATION ---------- */
-      if (transactionId) {
-        verifyTransactionIdFromText(text, transactionId);
-      }
-      // ------------------------------------------
-    } catch (err) {
-      // console.error("OCR error", err);
-      setVerificationStatus("invalid");
-      setUtrMatchStatus("invalid");
-      setMessage("OCR failed.");
-      setUtrMessage("Unable to verify Transaction ID");
-    } finally {
-      setVerifying(false);
-    }
+    return variants.includes(totalAmount);
   };
 
-  const verifyTransactionIdFromText = (ocrText, value) => {
-    const extractedUTRs = ocrText.match(/\b\d{12,18}\b/g) || [];
+  const verifyUTR = async (text) => {
+    const extractedUTRs = text.match(/\b\d{12,18}\b/g) || [];
+    const normalizedInput = transactionId.replace(/\s/g, "");
 
-    console.log("Extracted UTRs:", extractedUTRs);
-
-    const normalizedInput = value.replace(/\s/g, "");
-
-    const utrMatched = extractedUTRs.some(
+    return extractedUTRs.some(
       (utr) => utr.replace(/\s/g, "") === normalizedInput
     );
-
-    if (utrMatched) {
-      setUtrMatchStatus("valid");
-      setUtrMessage("✔ Transaction ID verified from screenshot");
-    } else {
-      setUtrMatchStatus("invalid");
-      setUtrMessage(
-        "Transaction ID mismatch. Verify UTR No. OR Retry uploading a clear screenshot."
-      );
-    }
   };
+  const sleep = (ms = 300) => new Promise((res) => setTimeout(res, ms));
 
-  // Automatically trigger verification when user selects screenshot
   const handleScreenshotChange = (file) => {
     setScreenshot(file);
-    if (file) {
-      // verifyPaymentScreenshot(file);
-      verifyScreenshotOCR(file);
-      // setVerificationStatus("valid");
-    }
+    setTransactionId("");
+    setStepsVisible(false);
+    setSteps({ amount: "idle", utr: "idle", payment: "idle" });
   };
 
   // ==========================
@@ -279,27 +262,89 @@ const CheckoutStep = () => {
 
   const handleSubmitProof = async (e) => {
     e.preventDefault();
-
-    if (verificationStatus !== "valid") {
-      alert("❌ Screenshot is invalid. Cannot submit.");
+    if (!screenshot || !transactionId) {
+      alert("❌ Screenshot and Transaction ID are required");
       return;
     }
 
-    setLoadingCheckout(true);
+    setStepsVisible(true);
+    setSteps({ amount: "loading", utr: "idle", payment: "idle" });
+    await sleep();
+
     try {
+      const {
+        data: { text },
+      } = await Tesseract.recognize(screenshot, "eng");
+
+      /* ---------- STEP 1: AMOUNT ---------- */
+      const amountValid = await verifyAmount(text);
+      if (!amountValid) {
+        setSteps({ amount: "error", utr: "idle", payment: "idle" });
+        setStepMessages({
+          amount: `Amount mismatch. Expected ₹${totalAmount}`,
+          utr: "",
+          payment: "",
+        });
+        await sleep();
+        alert(`❌ Payment failed`);
+        return;
+      }
+
+      setSteps({ amount: "success", utr: "loading", payment: "idle" });
+      setStepMessages({
+        amount: `Amount ₹${totalAmount} verified successfully`,
+        utr: "",
+        payment: "",
+      });
+      await sleep();
+
+      /* ---------- STEP 2: UTR ---------- */
+      const utrValid = await verifyUTR(text);
+
+      if (!utrValid) {
+        setSteps({ amount: "success", utr: "error", payment: "idle" });
+        setStepMessages((prev) => ({
+          ...prev,
+          utr: "Transaction ID not found in screenshot",
+        }));
+        await sleep();
+        alert(`❌ Payment failed`);
+        return;
+      }
+
+      setSteps({ amount: "success", utr: "success", payment: "loading" });
+      setStepMessages((prev) => ({
+        ...prev,
+        utr: "Transaction ID verified successfully",
+      }));
+      await sleep();
+
+      setLoadingCheckout(true);
       await API.post(`/yatras/${yatra_id}/register/`, registrations);
       const paymentId = await submitBatchProof();
       await uploadScreenshot(paymentId);
+      setSteps({ amount: "success", utr: "success", payment: "success" });
+      setStepMessages((prev) => ({
+        ...prev,
+        payment: "Payment proof submitted successfully",
+      }));
+      await sleep();
 
       // Success → Clear everything
       clearCheckoutSession();
 
-      alert("✅ Payment proof submitted successfully!");
+      alert("✅ Payment submitted successfully!");
     } catch (err) {
       console.error("Checkout error:", err);
-      alert(
-        err.response?.data?.error || "Submission failed. Please try again."
-      );
+      setSteps((s) => ({ ...s, payment: "error" }));
+      setStepMessages((prev) => ({
+        ...prev,
+        payment:
+          err.response?.data?.error || "Payment failed. Please try again.",
+      }));
+      await sleep();
+
+      alert("Payment failed. Please try again.");
     } finally {
       setLoadingCheckout(false);
     }
@@ -315,6 +360,29 @@ const CheckoutStep = () => {
     setIsNavigationLocked(false);
     navigate(`/yatra/${yatra_id}/register`);
   };
+
+  const resetCheckoutState = () => {
+    setScreenshot(null);
+    setTransactionId("");
+
+    setStepsVisible(false);
+    setSteps({
+      amount: "idle",
+      utr: "idle",
+      payment: "idle",
+    });
+
+    setStepMessages({
+      amount: "",
+      utr: "",
+      payment: "",
+    });
+
+    setVerifying(false);
+    setLoadingCheckout(false);
+    setMessage("");
+  };
+
   return (
     <>
       {loadingCheckout && <FullPageLoader />}
@@ -323,40 +391,23 @@ const CheckoutStep = () => {
 
         <div className="checkout-summary">
           <p>
-            <strong>Total Amount:</strong> ₹{totalAmount}
+            <strong>Total Amount:</strong> <span style={{color:"#047857" , fontWeight:700}}>₹{totalAmount}</span>
           </p>
         </div>
 
         <div className="qr-section">
           <AccountDetail />
 
-          <form
-            onSubmit={handleSubmitProof}
-            className="proof-form"
-            style={{ marginTop: "20px" }}
-          >
+          <form onSubmit={handleSubmitProof} className="proof-form">
             <div className="form-group">
               <label>Payment Screenshot *</label>
               <input
                 type="file"
                 accept="image/*"
+                onClick={resetCheckoutState}
                 onChange={(e) => handleScreenshotChange(e.target.files[0])}
                 required
               />
-              {/* OCR Status */}
-              {verifying && (
-                <p style={{ color: "blue", fontSize: "12px" }}>
-                  ⏳ Verifying screenshot…
-                </p>
-              )}
-
-              {verificationStatus === "valid" && (
-                <p style={{ color: "green", fontSize: "12px" }}>{message}</p>
-              )}
-
-              {verificationStatus === "invalid" && (
-                <p style={{ color: "red", fontSize: "12px" }}>{message}</p>
-              )}
             </div>
 
             <div className="form-group">
@@ -367,53 +418,124 @@ const CheckoutStep = () => {
                 onChange={(e) => {
                   const value = e.target.value;
                   setTransactionId(value);
-
-                  if (ocrText) {
-                    verifyTransactionIdFromText(ocrText, value);
-                  }
                 }}
                 required
               />
-
-              {utrMatchStatus === "valid" && (
-                <p style={{ color: "green", fontSize: "12px" }}>{utrMessage}</p>
-              )}
-
-              {utrMatchStatus === "invalid" && (
-                <p style={{ color: "red", fontSize: "12px" }}>{utrMessage}</p>
-              )}
             </div>
+            {stepsVisible && (
+              <div style={{ marginTop: "24px" }}>
+                {[
+                  { key: "amount", label: "Amount Verification" },
+                  { key: "utr", label: "Transaction ID Verification" },
+                  { key: "payment", label: "Payment Submission" },
+                ].map((step) => (
+                  <div key={step.key} style={{ marginBottom: "14px" }}>
+                    {/* Step Row */}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        opacity: steps[step.key] === "idle" ? 0.5 : 1,
+                        fontSize: "14px",
+                      }}
+                    >
+                      <span>{step.label}</span>
 
-            <button
-              type="submit"
-              className="btn-next"
-              disabled={
-                loadingCheckout ||
-                verifying ||
-                verificationStatus !== "valid" ||
-                utrMatchStatus !== "valid" ||
-                !transactionId
-              }
+                      {steps[step.key] === "loading" && <Spinner />}
+                      {steps[step.key] === "success" && (
+                        <span style={{ color: "green" }}>✔</span>
+                      )}
+                      {steps[step.key] === "error" && (
+                        <span style={{ color: "red" }}>✖</span>
+                      )}
+                    </div>
+
+                    {/* Step Message */}
+                    {stepMessages[step.key] && (
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          textAlign: "left",
+                          color:
+                            steps[step.key] === "success"
+                              ? "green"
+                              : steps[step.key] === "error"
+                              ? "red"
+                              : "#555",
+                        }}
+                      >
+                        {stepMessages[step.key]}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* NOTE / WARNING */}
+            {!stepsVisible && (
+              <div
+                style={{
+                  marginBottom: "12px",
+                  fontSize: "13px",
+                  color: "#b45309",
+                  textAlign: "justify",
+                }}
+              >
+                <p>
+                  ⚠️ <strong>Important:</strong> If you do{" "}
+                  <strong>not</strong> submit the payment screenshot after payment, your
+                  payment <strong>will not be recorded</strong>.
+                </p>
+                <br />
+                {/* <p>
+                  ⚠️ If you <strong>cancel without submitting</strong>, you{" "}
+                  <strong>will not get another chance</strong> to submit again & your payment will get lost.
+                </p> */}
+              </div>
+            )}
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                gap: "15px",
+                marginTop: "18px",
+                justifyContent: "center",
+              }}
             >
-              {loadingCheckout ? "Submitting..." : "Submit All & Pay"}
-            </button>
+              <button
+                type="submit"
+                className="btn-next"
+                disabled={loadingCheckout || verifying}
+              >
+                <span>
+                  {verifying
+                    ? "Verifying..."
+                    : loadingCheckout
+                    ? "Submitting..."
+                    : "Submit All & Pay"}
+                </span>
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm("Cancel payment?Your payment can be lost if screenshot not submitted.")) {
+                    clearCheckoutSession();
+                  }
+                }}
+                style={{
+                  color: "#e63946",
+                  background: "none",
+                  border: "1px solid #aaa",
+                  fontSize: "14px",
+                }}
+                disabled={loadingCheckout || verifying}
+              >
+                Cancel Payment
+              </button>
+            </div>
           </form>
-          <button
-            onClick={() => {
-              if (confirm("Cancel payment? All data will be lost.")) {
-                clearCheckoutSession();
-              }
-            }}
-            style={{
-              marginTop: "16px",
-              color: "#e63946",
-              background: "none",
-              border: "1px solid #aaa",
-              fontSize: "14px",
-            }}
-          >
-            Cancel Payment
-          </button>
         </div>
       </div>
     </>
