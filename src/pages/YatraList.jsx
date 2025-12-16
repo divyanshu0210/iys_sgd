@@ -34,6 +34,9 @@ export function formatDateTime(dateString) {
   });
 }
 
+
+const LOCK_24HR = import.meta.env.VITE_APP_LOCK_24HR === "true";
+
 export default function YatraList() {
   const [yatras, setYatras] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -82,11 +85,12 @@ export default function YatraList() {
       e.preventDefault();
       setOpenPendingModal(true);
     } else if (
+       LOCK_24HR &&
       profileStage === "devotee" &&
       !has24HoursPassed(profile?.profile_approved_at)
     ) {
-      // e.preventDefault();
-      // setOpen24HrModal(true);
+      e.preventDefault();
+      setOpen24HrModal(true);
     }
   };
 
