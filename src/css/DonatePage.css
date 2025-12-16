@@ -154,6 +154,13 @@
   /* animation: floatCard 1.6s ease-in-out infinite alternate; */
 }
 
+.donation-account-detail-box{
+  width: 100%;
+  max-width: 420px;
+   padding: clamp(18px, 4vw, 32px);
+  background: #ffffff;
+}
+
 /* Gentle floating animation */
 @keyframes floatCard {
   from { transform: translateY(0px); }

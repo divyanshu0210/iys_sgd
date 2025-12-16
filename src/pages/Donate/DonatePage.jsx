@@ -10,14 +10,14 @@ export default function DonatePage() {
       <div className="donate-header">
         <h1 className="donate-heading">Support IYS Sri Govind Dham</h1>
         <p className="donate-sub">
-          प्राणैरर्थैर्धिया वाचा — let your wealth help reawaken devotion in every soul.
+          प्राणैरर्थैर्धिया वाचा — let your wealth help reawaken devotion in
+          every soul.
         </p>
       </div>
 
       <div className="donate-wrapper">
         <div className="donate-right">
           <div className="donation-card">
-
             {/* <div className="qr-box">
               {qrLoading && <div className="qr-loader" />}
 
@@ -34,11 +34,7 @@ export default function DonatePage() {
               </p>
             </div> */}
 
-            <Detail label="Account Name" value="Vinod V Sankapal" />
-            <Detail label="Account Number" value="337001000234" />
-            <Detail label="IFSC Code" value="ICIC0003370" />
-            <Detail label="Bank Name" value="ICICI Bank Nigdi" />
-            <Detail label="UPI" value="7774032548" />
+            <AccountDetail />
 
             <button className="donate-btn">Share Donation Receipt</button>
           </div>
@@ -53,6 +49,17 @@ function Detail({ label, value }) {
     <div className="detail-row">
       <span>{label}</span>
       <strong>{value}</strong>
+    </div>
+  );
+}
+export function AccountDetail() {
+  return (
+    <div className="donation-account-detail-box">
+      <Detail label="Account Name" value="Vinod V Sankapal" />
+      <Detail label="Account Number" value="337001000234" />
+      <Detail label="IFSC Code" value="ICIC0003370" />
+      <Detail label="Bank Name" value="ICICI Bank Nigdi" />
+      <Detail label="UPI" value="7774032548" />
     </div>
   );
 }

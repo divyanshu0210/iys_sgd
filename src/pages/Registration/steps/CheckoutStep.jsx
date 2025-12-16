@@ -9,47 +9,30 @@ import { useNavigate } from "react-router-dom";
 import FullPageLoader from "../../../components/FullPageLoader";
 import Tesseract from "tesseract.js";
 import QRCode from "qrcode";
-
-const AMOUNT_LIMIT = 2000;
-
-const generateUpiUrl = ({ upiId, name, amount, note }) => {
-  const params = new URLSearchParams({
-    pa: upiId,
-    pn: name,
-    cu: "INR",
-    tn: note,
-  });
-
-  if (amount < AMOUNT_LIMIT) {
-    params.append("am", amount.toString());
-  }
-
-  return `upi://pay?${params.toString()}`;
-};
+import { AccountDetail } from "../../Donate/DonatePage";
+import UpiPaymentSection from "../../Payments/UpiPaymentSection";
 
 const CheckoutStep = () => {
   const { setIsNavigationLocked } = useAuth();
   const navigate = useNavigate();
+
   const [screenshot, setScreenshot] = useState(null);
   const [transactionId, setTransactionId] = useState("");
 
   const [loadingCheckout, setLoadingCheckout] = useState(false);
-  const [qrLoading, setQrLoading] = useState(true);
+
   const ignoreLeaveWarning = useRef(false);
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   // OCR & verification states
   const [verificationStatus, setVerificationStatus] = useState("pending");
   const [verifying, setVerifying] = useState(false);
   const [message, setMessage] = useState("");
-
   const [utrMatchStatus, setUtrMatchStatus] = useState("pending"); // pending | valid | invalid
   const [utrMessage, setUtrMessage] = useState("");
   const [ocrText, setOcrText] = useState("");
 
   // Checkout & QR state
   const [checkoutData, setCheckoutData] = useState(null);
-  const [qrSrc, setQrSrc] = useState("");
 
   const { setSelected, setRegistrations, setActiveTab, setCurrentStep } =
     useYatraRegistration();
@@ -163,17 +146,6 @@ const CheckoutStep = () => {
     const regData = registrations[profileId];
     return sum + (regData?.amount || 0);
   }, 0);
-
-  const upiId = (yatra || registerData.yatra)?.payment_upi_id || "";
-  // console.log(upiId)
-  const upiUrl = generateUpiUrl({
-    upiId,
-    name: "ISKCON Yatra",
-    amount: totalAmount,
-    note: "Yatra Payment",
-  });
-
-  QRCode.toDataURL(upiUrl, { width: 260 }).then(setQrSrc).catch(console.error);
 
   // =====================================================
   // OCR Extraction Helpers
@@ -345,7 +317,7 @@ const CheckoutStep = () => {
   };
   return (
     <>
-      {(loadingCheckout || qrLoading) && <FullPageLoader />}
+      {loadingCheckout && <FullPageLoader />}
       <div className="checkout-full">
         <h3>Step 3: Checkout & Payment</h3>
 
@@ -356,52 +328,7 @@ const CheckoutStep = () => {
         </div>
 
         <div className="qr-section">
-          <h4>Scan & Pay</h4>
-          {qrSrc && (
-            <img
-              src={qrSrc}
-              alt="UPI QR"
-              className="qr-code"
-              onLoad={() => setQrLoading(false)}
-            />
-          )}
-
-          {isMobile && (
-            <>
-              <p>OR</p>
-              <button
-                type="button"
-                onClick={() => {
-                  ignoreLeaveWarning.current = true;
-                  const upiIntent = generateUpiUrl({
-                    upiId,
-                    name: "ISKCON Yatra",
-                    amount: totalAmount,
-                    note: "Yatra Payment",
-                  });
-
-                  window.location.href = upiIntent;
-
-                  // window.location.href = `upi://pay?pa=${upiId}&pn=Yatra&am=${totalAmount}&tn=Yatra+Payment`;
-                  setTimeout(() => {
-                    ignoreLeaveWarning.current = false;
-                  }, 1000);
-                }}
-                style={{
-                  marginTop: "10px",
-                  background: "#0077cc",
-                  color: "#fff",
-                  border: "none",
-                  padding: "8px 12px",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                }}
-              >
-                Pay with any UPI App
-              </button>
-            </>
-          )}
+          <AccountDetail />
 
           <form
             onSubmit={handleSubmitProof}
