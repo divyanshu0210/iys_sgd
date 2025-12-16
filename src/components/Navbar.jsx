@@ -108,7 +108,7 @@ export default function Navbar() {
           }}
         >
           <img
-            src="/src/assets/iys_logo.png" // adjust path if needed
+            src="/iys_logo.png" 
             alt="IYS Logo"
             style={{
               width: "clamp(33px, 5vw, 45px)",
