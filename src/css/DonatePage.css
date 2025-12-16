@@ -10,7 +10,8 @@
       HEADER
 -------------------------------*/
 .donate-heading {
-  font-size: 30px;
+  font-size: clamp(22px, 5.5vw, 30px);
+
   margin-bottom: 10px;
   font-weight: 800;
   text-align: center;
@@ -19,7 +20,7 @@
 }
 
 .donate-sub {
-  font-size: 15px;
+   font-size: clamp(13px, 3.8vw, 15px);
   color: #285fa1;
   margin-bottom: 35px;
   font-weight: 500;
@@ -32,7 +33,7 @@
       MAIN LAYOUT
 -------------------------------*/
 .donate-wrapper {
-  display: flex;
+  /* display: flex; */
   gap: 40px;
   border-radius: 20px;
   align-items: center;
@@ -145,7 +146,7 @@
 .donation-card {
   width: 100%;
   max-width: 420px;
-  padding: 32px;
+   padding: clamp(18px, 4vw, 32px);
   background: #ffffff;
   border-radius: 18px;
   border: 1px solid #cfe0f9;
@@ -167,14 +168,14 @@
   border-radius: 14px;
   border: 1px solid #c9ddff;
     position: relative;
-  width: 300px;
+   width: clamp(220px, 70vw, 300px);
   margin: auto;
 }
 
 .qr-img {
   margin: 14px auto;
   display: block;
-  width: 70%;
+  width: clamp(140px, 55%, 200px);
   height: auto;
 }
 
@@ -202,7 +203,7 @@
 
 .upi-note {
   margin-top: 5px;
-  font-size: 14px;
+   font-size: clamp(12px, 3.6vw, 14px);
   color: #2b4a71;
 }
 
@@ -211,7 +212,8 @@
   display: flex;
   justify-content: space-between;
   margin: 14px 0;
-  font-size: 16px;
+  font-size: clamp(14px, 4vw, 16px);
+
   color: #333;
   font-weight: 500;
 }
@@ -220,8 +222,8 @@
 .donate-btn {
   width: 100%;
   margin-top: 25px;
-  padding: 16px;
-  font-size: 17px;
+   font-size: clamp(15px, 4vw, 17px);
+  padding: clamp(12px, 4vw, 16px);
   font-weight: 600;
   border-radius: 10px;
   border: none;
@@ -259,9 +261,9 @@
 }
 
 @media (max-width: 600px) {
-  .donate-heading {
-    font-size: 30px;
-  }
+
+.donate-sub {
+margin-bottom: 15px;}
 
   .donate-left {
   /* flex: 1; */

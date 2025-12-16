@@ -10,6 +10,12 @@ import ImageSlider from "./Donate/ImageSlider";
 import "../css/Home.css";
 import Footer from "../components/Footer";
 import { Instagram, Youtube, Facebook, MapPin, Phone } from "lucide-react";
+import YouthCenter, {
+  LocationLink,
+  PhoneLink,
+} from "../components/YouthCenter";
+import SocialLink from "../components/SocialLink";
+import DraggableWhatsApp from "../components/DraggableWhatsApp";
 
 export default function Home() {
   const { user, profileStage, loading, setDonatePage } = useAuth();
@@ -153,80 +159,33 @@ export default function Home() {
           <h2 className="home-section-title">Youth Centers Near You</h2>
 
           <div className="youth-cards">
-            <div className="card">
-              <h3>Vrindavan Bace</h3>
-              <p>
-                A vibrant spiritual home for youth—daily kirtans, classes,
-                mentoring & seva opportunities.
-              </p>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-evenly",
-                  alignItems: "center",
-                }}
-              >
-                <p>
-                  <strong>
-                    {" "}
-                    <MapPin size={18} />
-                  </strong>{" "}
-                  <a
-                    href="https://maps.app.goo.gl/y1KSdUnGKirjerqq9"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "#2563EB", textDecoration: "none" }}
-                  >
-                    Vrindavan Bace
-                  </a>
-                </p>
+            <YouthCenter
+              name="Vrindavan Bace"
+              note="A vibrant spiritual home for youth—daily kirtans, classes, mentoring & seva opportunities."
+              location="https://maps.app.goo.gl/y1KSdUnGKirjerqq9"
+              contact="+919075080391"
+              mail="purushgovindadas@gmail.com"
+            />
 
-                <p>
-                  <strong>
-                    <Phone size={18} />
-                  </strong>{" "}
-                  <a
-                    href="tel:+919876543210"
-                    style={{ color: "#2563EB", textDecoration: "none" }}
-                  >
-                    +91 9140718421
-                  </a>
-                </p>
-              </div>
-            </div>
+            <YouthCenter
+              name="Giri Govardhan Bace"
+              note="Special programs for college students—weekly sessions, group discussions & retreats."
+              contact="+917774032548"
+              mail="srigovind.rns@gmail.com"
+              location="https://maps.app.goo.gl/ygcFt7Scu8KjUu8T6"
+            />
 
-            <div className="card">
-              <h3>Giri Govardhan Bace</h3>
-              <p>
-                Special programs for college students—weekly sessions, group
-                discussions & retreats.
-              </p>
-            </div>
-
-            <div className="card">
-              <h3>Mayapur Bace</h3>
-              <p>
-                Special programs for college students to connect, grow, and
-                study the Gita together.
-              </p>
-            </div>
+            <YouthCenter
+              name="Mayapur Bace"
+              note="Special programs for college students to connect, grow, and study the Gita together."
+              contact="+917774048503"
+              mail="vcdrns@gmail.com"
+              location="https://maps.app.goo.gl/KpmwWMBxfpRdafxHA"
+            />
           </div>
           <h2 className="home-section-title">Connect, Cultivate, Contribute</h2>
 
           <div className="youth-cards">
-            {/* ---- CONTACT INFO ---- */}
-            <div className="card">
-              <h3 className="footer-heading">Contact Us</h3>
-              <p>
-                {" "}
-                <MapPin size={18} /> Sri Govind Dham , ISKCON Ravet
-              </p>
-              <p>
-                <Phone size={18} /> +91 9140718421
-              </p>
-              {/* <p>📧 iys.srigovinddham@gmail.com</p> */}
-            </div>
-
             {/* ---- SHLOKA ---- */}
             <div className="card footer-shloka">
               <h3 className="footer-heading">Inspiration</h3>
@@ -235,78 +194,37 @@ export default function Home() {
               prosperity and righteousness.”
             </div>
 
+            {/* ---- CONTACT INFO ---- */}
+            <div className="card">
+              <h3 className="footer-heading">Contact Us</h3>
+              <LocationLink
+                href="https://maps.app.goo.gl/KD3chYPiY4TK7mv78"
+                label="IYS ISKCON Ravet"
+              />
+              <br />
+              <PhoneLink number="+919075080391" />
+            </div>
+
             {/* ---- SOCIAL LINKS ---- */}
             <div className="card">
               <h3 className="footer-heading">Connect</h3>
-              <p
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "8px",
-                }}
-              >
-                <Instagram size={18} />
-                <a
-                  href="https://www.instagram.com/iys.srigovinddham"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "#2563EB", textDecoration: "none" }}
-                >
-                  @iys.srigovinddham
-                </a>
-              </p>
-
-              <p
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "8px",
-                }}
-              >
-                <Youtube size={18} />
-                <a
-                  href="https://www.youtube.com/@IYSSriGovindDham"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "#2563EB", textDecoration: "none" }}
-                >
-                  IYS Sri Govind Dham
-                </a>
-              </p>
-
-              <p
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "8px",
-                }}
-              >
-                <Facebook size={18} />
-                <a
-                  href="https://www.facebook.com/IYSGovindDham"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "#2563EB", textDecoration: "none" }}
-                >
-                  IYS Govind Dham
-                </a>
-              </p>
+              <SocialLink
+                icon={Youtube}
+                href="https://youtube.com/@iysgovinddham?si=cWnX_jBTMgBpDLGS"
+                label="IYS Sri Govind Dham"
+              />
+              <SocialLink
+                icon={Instagram}
+                href="https://www.instagram.com/iys.srigovinddham"
+                label="Coming Soon..."
+              />
             </div>
           </div>
         </section>
         <br />
       </div>
-      {/** --------------------- APPROVAL MODAL --------------------- **/}
-      <Footer />
-
-      <Modal
-        open={openApprovalModal}
-        onClose={() => setOpenApprovalModal(false)}
-      >
-        <ProfileApprovalForm onClose={() => setOpenApprovalModal(false)} />
-      </Modal>
       <a
-        href="https://wa.me/919140718421"
+        href="https://wa.me/919075080391"
         target="_blank"
         rel="noopener noreferrer"
         className="whatsapp-float"
@@ -316,6 +234,15 @@ export default function Home() {
           alt="WhatsApp"
         />
       </a>
+      <Footer />
+      {/** --------------------- APPROVAL MODAL --------------------- **/}
+
+      <Modal
+        open={openApprovalModal}
+        onClose={() => setOpenApprovalModal(false)}
+      >
+        <ProfileApprovalForm onClose={() => setOpenApprovalModal(false)} />
+      </Modal>
     </div>
   );
 }

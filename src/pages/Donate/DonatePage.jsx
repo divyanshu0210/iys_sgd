@@ -18,7 +18,7 @@ export default function DonatePage() {
         <div className="donate-right">
           <div className="donation-card">
 
-            <div className="qr-box">
+            {/* <div className="qr-box">
               {qrLoading && <div className="qr-loader" />}
 
               <img
@@ -32,12 +32,13 @@ export default function DonatePage() {
               <p className="upi-note">
                 Google Pay • PhonePe • Paytm • All UPI Apps
               </p>
-            </div>
+            </div> */}
 
-            <Detail label="Account Name" value="Sri Govind Dham Trust" />
-            <Detail label="Account Number" value="12345678910" />
-            <Detail label="IFSC Code" value="SBIN0001234" />
-            <Detail label="UPI ID" value="govinddham@upi" />
+            <Detail label="Account Name" value="Vinod V Sankapal" />
+            <Detail label="Account Number" value="337001000234" />
+            <Detail label="IFSC Code" value="ICIC0003370" />
+            <Detail label="Bank Name" value="ICICI Bank Nigdi" />
+            <Detail label="UPI" value="7774032548" />
 
             <button className="donate-btn">Share Donation Receipt</button>
           </div>

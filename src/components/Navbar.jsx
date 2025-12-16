@@ -3,7 +3,14 @@ import { useAuth } from "../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 
 export default function Navbar() {
-  const { user, profile, profileStage, logout, isNavigationLocked , donatePage } = useAuth();
+  const {
+    user,
+    profile,
+    profileStage,
+    logout,
+    isNavigationLocked,
+    donatePage,
+  } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [prevScrollPos, setPrevScrollPos] = useState(window.pageYOffset);
@@ -24,7 +31,7 @@ export default function Navbar() {
 
   // Scroll handler to hide/show navbar
   useEffect(() => {
-    if(!donatePage)return; 
+    if (!donatePage) return;
 
     const handleScroll = () => {
       const currentScrollPos = window.pageYOffset;
@@ -34,7 +41,7 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [prevScrollPos,donatePage]);
+  }, [prevScrollPos, donatePage]);
 
   const NavLink = ({ to, children }) => (
     <Link
@@ -64,7 +71,8 @@ export default function Navbar() {
     <nav
       id="navbar"
       style={{
-        padding: "0px 24px",
+        // padding: "0px 12px",
+        padding: "0px 5px 0px 5px",
         background: "#2c3e50",
         color: "#fff",
         borderBottom: "1px solid #34495e",
@@ -85,47 +93,53 @@ export default function Navbar() {
         }}
       >
         {/* Logo */}
-     <Link
-  to="/"
-  className="logo-text"
-  onClick={(e) => {
-    if (isNavigationLocked) {
-      e.preventDefault();
-      alert("Please complete or cancel the payment before leaving.");
-    }
-  }}
-  style={{
-    padding: "5px",
-    color: "#fff",
-    textDecoration: "none",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    lineHeight: 1.1,
-  }}
->
-  <span
-    style={{
-      fontWeight: 800,
-      fontSize: "1.8rem",
-      letterSpacing: "0.8rem",   // spacing between I Y S
-    }}
-  >
-    IYS
-  </span>
+        <Link
+          to="/"
+          className="logo-text"
+          onClick={(e) => {
+            if (isNavigationLocked) {
+              e.preventDefault();
+              alert("Please complete or cancel the payment before leaving.");
+            }
+          }}
+          style={{
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          <img
+            src="/src/assets/iys_logo.png" // adjust path if needed
+            alt="IYS Logo"
+            style={{
+              width: "clamp(33px, 5vw, 45px)",
+              height: "auto",
+              objectFit: "contain",
+            }}
+          />
+          <div
+            style={{
+              padding: "5px",
+              color: "#fff",
+              textDecoration: "none",
+              display: "flex",
+              flexDirection: "column",
+              lineHeight: 1.1,
+            }}
+          >
+            <span className="logo-main">IYS</span>
 
-  <span
-    style={{
-      fontWeight: 400,
-      fontSize: "0.75rem",
-      marginTop: "2px",
-      opacity: 0.95,
-    }}
-  >
-    Sri Govind Dham
-  </span>
-</Link>
-
+            <span
+              style={{
+                fontWeight: 400,
+                fontSize: "clamp(0.6rem, 2.5vw, 0.75rem)",
+                marginTop: "2px",
+                opacity: 0.95,
+              }}
+            >
+              Sri Govind Dham
+            </span>
+          </div>
+        </Link>
 
         {/* Desktop Menu */}
         <div className={`desktop-menu ${!user ? "always-visible" : ""}`}>
@@ -142,7 +156,9 @@ export default function Navbar() {
                 <button
                   onClick={() => {
                     if (isNavigationLocked) {
-                      alert("Please complete or cancel the payment before logging out.");
+                      alert(
+                        "Please complete or cancel the payment before logging out."
+                      );
                       return;
                     }
                     logout();
@@ -159,7 +175,9 @@ export default function Navbar() {
                 <button
                   onClick={() => {
                     if (isNavigationLocked) {
-                      alert("Please complete or cancel the payment before logging out.");
+                      alert(
+                        "Please complete or cancel the payment before logging out."
+                      );
                       return;
                     }
                     logout();
@@ -173,8 +191,8 @@ export default function Navbar() {
             )
           ) : (
             <>
-              <NavLink to="/signin">Sign In</NavLink>
               <NavLink to="/signup">Sign Up</NavLink>
+              <NavLink to="/signin">Sign In</NavLink>
             </>
           )}
         </div>
@@ -196,7 +214,9 @@ export default function Navbar() {
               onClick={(e) => {
                 if (isNavigationLocked) {
                   e.preventDefault();
-                  alert("Please complete or cancel the payment before leaving.");
+                  alert(
+                    "Please complete or cancel the payment before leaving."
+                  );
                 } else {
                   setIsMenuOpen(true);
                 }
@@ -234,7 +254,9 @@ export default function Navbar() {
             <button
               onClick={() => {
                 if (isNavigationLocked) {
-                  alert("Please complete or cancel the payment before logging out.");
+                  alert(
+                    "Please complete or cancel the payment before logging out."
+                  );
                   return;
                 }
                 logout();
@@ -248,7 +270,7 @@ export default function Navbar() {
           </div>
         </div>
       )}
-   <style>
+      <style>
         {`
     .desktop-menu {
       display: flex;
@@ -314,6 +336,13 @@ export default function Navbar() {
       margin-bottom: 10px;
     }
 
+    .logo-main {
+  font-weight: 800;
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  letter-spacing: clamp(0.2rem, 1.5vw, 0.6rem);
+}
+
+
     @keyframes slideIn {
       from { transform: translateX(100%); }
       to   { transform: translateX(0); }
@@ -321,28 +350,36 @@ export default function Navbar() {
 
     /* Responsive adjustments */
     @media (max-width: 768px) {
-      .desktop-menu {
-        display: none;
-      }
+      .desktop-menu:not(.always-visible) {
+    display: none;
+  }
+
 
       /* When NOT logged in → show links inline, smaller */
       .desktop-menu.always-visible {
         display: flex !important;
-        gap: 8px;
-        font-size: 0.875rem; /* 14px */
+      
+         flex-wrap: nowrap;
+  white-space: nowrap;
+  gap: clamp(6px, 1vw, 10px);
       }
 
       /* Reduce logo size only when not signed in */
       .logo-text {
-        font-size: 0.9rem !important;
+   flex-shrink: 0;
         font-weight: 600;
       }
 
+#navbar > div {
+  flex-wrap: nowrap;
+}
+
+
       /* Smaller padding on links when in always-visible mode */
-      .desktop-menu.always-visible a {
-        padding: 6px 10px !important;
-        font-size: 0.8rem;
-      }
+    .desktop-menu.always-visible a {
+  font-size: clamp(0.75rem, 2.8vw, 0.9rem);
+  padding: clamp(4px, 1vw, 8px) clamp(6px, 1.5vw, 12px) !important;
+}
 
       .mobile-only {
         display: block;
