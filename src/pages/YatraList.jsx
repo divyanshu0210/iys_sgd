@@ -85,8 +85,8 @@ export default function YatraList() {
       profileStage === "devotee" &&
       !has24HoursPassed(profile?.profile_approved_at)
     ) {
-      // e.preventDefault();
-      // setOpen24HrModal(true);
+      e.preventDefault();
+      setOpen24HrModal(true);
     }
   };
 
