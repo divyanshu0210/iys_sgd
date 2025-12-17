@@ -40,9 +40,6 @@ export default function BasicProfile() {
     { value: "brahmachari_temple", label: "Brahmachari (Temple)" },
     { value: "unmarried", label: "Unmarried" },
     { value: "grhastha", label: "Grhastha" },
-    { value: "vanaprastha", label: "Vanaprastha" },
-    { value: "sannyasi", label: "Sannyasi" },
-    { value: "others", label: "Others" },
   ];
 
   const [errors, setErrors] = useState({});
