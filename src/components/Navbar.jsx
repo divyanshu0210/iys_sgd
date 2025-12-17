@@ -43,9 +43,10 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [prevScrollPos, donatePage]);
 
-  const NavLink = ({ to, children }) => (
+  const NavLink = ({ to,replace = false, children }) => (
     <Link
       to={to}
+       replace={replace}
       onClick={(e) => {
         if (isNavigationLocked) {
           e.preventDefault();
@@ -191,8 +192,8 @@ export default function Navbar() {
             )
           ) : (
             <>
-              <NavLink to="/signup">Sign Up</NavLink>
-              <NavLink to="/signin">Sign In</NavLink>
+              <NavLink replace to="/signup">Sign Up</NavLink>
+              <NavLink replace to="/signin">Sign In</NavLink>
             </>
           )}
         </div>

@@ -5,11 +5,14 @@ import GoogleBtn from "../../components/GoogleBtn";
 import API from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 
+const isEmailVerificationMandatoryForSignUp =
+  import.meta.env.VITE_ACCOUNT_EMAIL_VERIFICATION === "mandatory";
+
 export default function SignUp() {
   const [form, setForm] = useState({ email: "", password: "" });
   const navigate = useNavigate();
   const [status, setStatus] = useState(null); // { type, msg }
-  const {loading, setLoading}= useAuth();
+  const { loading, setLoading } = useAuth();
 
   // Email/Password Sign Up
   const handleSubmit = async (e) => {
@@ -33,8 +36,11 @@ export default function SignUp() {
         // msg: "Verification email sent! Redirecting...",
         msg: "Signup Successful....",
       });
-      // setTimeout(() => navigate("/email-sent"), 1000);
-      setTimeout(() => navigate("/signin"), 1000);
+      if (isEmailVerificationMandatoryForSignUp) {
+        setTimeout(() => navigate("/email-sent"), 1000);
+      } else {
+        setTimeout(() => navigate("/signin"), 1000);
+      }
     } catch (err) {
       const msg =
         err.response?.data?.email?.[0] ||
@@ -48,7 +54,6 @@ export default function SignUp() {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="reg-page">
@@ -110,10 +115,15 @@ export default function SignUp() {
           </button>
         </div>
 
-  
-        <p style={{ margin: "1.5rem 0", textAlign: "center", fontSize: "0.9rem" }}>
+        <p
+          style={{
+            margin: "1.5rem 0",
+            textAlign: "center",
+            fontSize: "0.9rem",
+          }}
+        >
           Already have an account?{" "}
-          <Link to="/signin" className="btn-link">
+          <Link replace to="/signin" className="btn-link">
             Sign in
           </Link>
         </p>

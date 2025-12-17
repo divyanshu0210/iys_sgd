@@ -33,7 +33,16 @@ export default function SignIn() {
         }
       }, 800);
     } catch (err) {
-      const msg = "Invalid Email or Password";
+       const msg =
+        err.response?.data?.email?.[0] ||
+        err.response?.data?.password1?.[0] ||
+        err.response?.data?.password2?.[0] ||
+        err.response?.data?.username?.[0] ||
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.response?.data?.non_field_errors?.[0] ||
+        "Login failed. Please try again.";
+      // const msg = "Invalid Email or Password";
       err.response?.data?.error ||
         err.message ||
         "Login failed. Please try again.";
@@ -105,7 +114,7 @@ export default function SignIn() {
       </form>
       
         <p style={{ textAlign: "center", margin: "0.5rem 0" }}>
-          <Link to="/password_reset" className="btn-link">
+          <Link to="/forgot-password" className="btn-link">
             Forgot password?
           </Link>
         </p>
@@ -117,7 +126,7 @@ export default function SignIn() {
 
         <p style={{ textAlign: "center", fontSize: "0.9rem" }}>
           New here?{" "}
-          <Link to="/signup" className="btn-link">
+          <Link replace to="/signup" className="btn-link">
             Create account
           </Link>
         </p>

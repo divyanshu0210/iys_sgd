@@ -1,37 +1,44 @@
 // src/pages/PasswordResetConfirm.jsx
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import API from "../../services/api";
 import "../../css/signIn.css";
 
 export default function PasswordResetConfirm() {
-  const { uidb64, token } = useParams();
+  const { uidb36, token } = useParams();
   const [form, setForm] = useState({ new_password1: "", new_password2: "" });
   const [status, setStatus] = useState(null); // { type, msg }
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.new_password1 || !form.new_password2) return;
+    if (form.new_password1 !== form.new_password2) {
+      setStatus({ type: "error", msg: "Passwords do not match" });
+      return;
+    }
 
     setLoading(true);
     setStatus(null);
 
     try {
-      await API.post("api/auth/password/reset/confirm/", {
-        uid: uidb64,
+      await API.post(`api/yatra_auth/password/reset/confirm/`, {
+        uid: uidb36,
         token: token,
-        new_password1: form.new_password1,
-        new_password2: form.new_password2,
+        new_password: form.new_password1,
+        password1: form.new_password1,
+        password2: form.new_password2,
       });
-
       setStatus({ type: "success", msg: "Password reset successful!" });
       setDone(true);
       setForm({ new_password1: "", new_password2: "" });
+      navigate("/password-reset-success", { replace: true });
     } catch (err) {
       const msg =
         err.response?.data?.token?.[0] ||
+        err.response?.data?.new_password?.[0] ||
         err.response?.data?.new_password1?.[0] ||
         err.response?.data?.new_password2?.[0] ||
         err.response?.data?.non_field_errors?.[0] ||
@@ -99,9 +106,7 @@ export default function PasswordResetConfirm() {
               <button
                 type="submit"
                 className="btn-primary"
-                disabled={
-                  loading || !form.new_password1 || !form.new_password2
-                }
+                disabled={loading || !form.new_password1 || !form.new_password2}
               >
                 {loading ? "Resetting..." : "Reset Password"}
               </button>
@@ -109,7 +114,7 @@ export default function PasswordResetConfirm() {
           </div>
         ) : (
           <div style={{ textAlign: "center", marginTop: "1rem" }}>
-            <Link to="/signin" className="btn-primary">
+            <Link replace to="/signin" className="btn-primary">
               Go to Sign In
             </Link>
           </div>
