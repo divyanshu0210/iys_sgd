@@ -1,40 +1,3 @@
-// import { useState } from "react";
-// import API from "../../services/api";
-
-// export default function ForgotPassword() {
-//   const [email, setEmail] = useState("");
-//   const [sent, setSent] = useState(false);
-
-//   const submit = async (e) => {
-//     e.preventDefault();
-//     await API.post("api/yatra_auth/password/reset/", { email });
-//     setSent(true);
-//   };
-
-//   return (
-//     <div className="auth-card">
-//       <h2>Forgot Password</h2>
-
-//       {sent ? (
-//         <p>
-//           If an account exists for <b>{email}</b>, a reset link has been sent.
-//         </p>
-//       ) : (
-//         <form onSubmit={submit}>
-//           <input
-//             type="email"
-//             placeholder="Enter your email"
-//             value={email}
-//             required
-//             onChange={(e) => setEmail(e.target.value)}
-//           />
-//           <button type="submit">Send Reset Link</button>
-//         </form>
-//       )}
-//     </div>
-//   );
-// }
-// src/pages/PasswordReset.jsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import API from "../../services/api";
@@ -48,6 +11,7 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    return ; 
     if (!email) return;
 
     setLoading(true);
