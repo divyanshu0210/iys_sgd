@@ -31,7 +31,7 @@ export default function SignIn() {
         } else {
           navigate("/complete-profile"); // ❌ no profile at all
         }
-      }, 800);
+      }, 1000);
     } catch (err) {
        const msg =
         err.response?.data?.email?.[0] ||
