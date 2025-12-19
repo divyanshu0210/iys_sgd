@@ -39,6 +39,7 @@ export default function ProfileApprovalForm({ onClose }) {
       const errorMsg =
         err.response?.data?.message ||
         err.response?.data?.detail ||
+        err.response?.data?.mentor ||
         err.message ||
         "An error occurred while sending approval request.";
       setStatus({ type: "error", msg: errorMsg });

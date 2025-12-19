@@ -21,7 +21,7 @@ export default function Profile() {
   ];
 
   const InfoRow = ({ label, value }) => (
-    <div className="info-row" style={{flexDirection:"row"}} >
+    <div className="info-row" style={{ flexDirection: "row" }}>
       <span className="info-label">{label}:</span>
       <span className="info-value">{value || "-"}</span>
     </div>
@@ -117,8 +117,8 @@ export default function Profile() {
     <div className="profile-page">
       {/* Left Sidebar */}
       <div className="profile-sidebar">
-          {profile && (
-        <div className="profile-header">
+        {profile && (
+          <div className="profile-header">
             <>
               <div className="avatar-container">
                 <img
@@ -129,21 +129,18 @@ export default function Profile() {
               </div>
 
               <div className="profile-info-compact">
-                <h2 className="profile-name">{profile?.full_name}</h2>
+                <h2 className="profile-name">{profile?.full_name}  (ID: {profile?.member_id || "N/A"})</h2>
                 <p className="profile-username">{profile?.email || "guest"}</p>
 
                 <div className="profile-member-info">
-                  <p>
-                    <strong>ID:</strong> {profile?.member_id || "N/A"}
-                  </p>
                   <p>
                     <strong>Type:</strong> {profile?.user_type || "Member"}
                   </p>
                 </div>
               </div>
             </>
-        </div>
-          )}
+          </div>
+        )}
 
         <nav className="vertical-tabs">
           {tabs.map((tab) => (
