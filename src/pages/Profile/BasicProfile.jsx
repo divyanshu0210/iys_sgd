@@ -27,6 +27,7 @@ export default function BasicProfile() {
     aadhaarNumber: "",
     photo: null,
     receiveEmails: false,
+    roundsChanting: "", // ✅ NEW
 
     // ---- NEW devotional fields ----
     harinamInitiated: "", // "Yes" | "No" | ""
@@ -94,6 +95,7 @@ export default function BasicProfile() {
       "center",
       "aadhaarNumber",
       "harinamInitiated",
+      "roundsChanting", // ✅ REQUIRED FOR ALL
     ]) {
       if (!details[key]) newErrors[key] = "This field is required";
     }
@@ -117,6 +119,12 @@ export default function BasicProfile() {
 
     if (details.center === "Others" && !details.customCenter.trim()) {
       newErrors.customCenter = "This field is required";
+    }
+
+    if (details.roundsChanting) {
+      if (isNaN(details.roundsChanting) || Number(details.roundsChanting) < 0) {
+        newErrors.roundsChanting = "Enter a valid number";
+      }
     }
 
     // Photo
@@ -172,11 +180,13 @@ export default function BasicProfile() {
         marital_status: details.maritalStatus,
         mobile: details.mobile,
         aadhar_card_no: details.aadhaarNumber,
-        center:   details.center === "Others"
-    ? details.customCenter.trim()
-    : details.center,
+        center:
+          details.center === "Others"
+            ? details.customCenter.trim()
+            : details.center,
         email_consent: details.receiveEmails,
         is_initiated: details.harinamInitiated === "Yes",
+        no_of_chanting_rounds: Number(details.roundsChanting),
       };
 
       // ✅ Include devotional fields only if harinamInitiated is "Yes"
@@ -261,6 +271,7 @@ export default function BasicProfile() {
       spiritualMaster: "",
       initiationDate: "",
       initiationPlace: "",
+      roundsChanting: "",
     });
     setErrors({});
     setStatus(null);
@@ -389,6 +400,24 @@ export default function BasicProfile() {
                 )}
               </div>
             )}
+
+            {/* ---------- Rounds Chanting ---------- */}
+            <div className="cp-field">
+              <Label htmlFor="roundsChanting">Number of Rounds Chanting</Label>
+              <input
+                id="roundsChanting"
+                type="number"
+                min="0"
+                placeholder="e.g. 4, 8, 16"
+                value={details.roundsChanting}
+                onChange={(e) => onChange("roundsChanting", e.target.value)}
+                disabled={submitting}
+                className={errors.roundsChanting ? "error-border" : ""}
+              />
+              {errors.roundsChanting && (
+                <div className="error-text">{errors.roundsChanting}</div>
+              )}
+            </div>
 
             {/* ---------- NEW: Harinam Initiated ---------- */}
             <div className="cp-field">
