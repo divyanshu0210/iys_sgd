@@ -182,6 +182,7 @@ const CheckoutStep = () => {
   // =====================================================
   // OCR Extraction Helpers
   // =====================================================
+
   const extractRawNumbers = (txt) => {
     const matches = txt.match(/\d[\d,]*/g) || [];
     return matches.map((m) => m.replace(/,/g, ""));
@@ -199,13 +200,9 @@ const CheckoutStep = () => {
 
     return variants.filter((v) => v > 0);
   };
-
-  // =====================================================
-  // Tesseract OCR Verification
-  // =====================================================
-
-  const verifyAmount = async (text) => {
+  const verifyAmount1 = async (text) => {
     const raw = extractRawNumbers(text);
+    // console.log(raw);
     let variants = [];
 
     raw.forEach((n) => {
@@ -214,16 +211,108 @@ const CheckoutStep = () => {
 
     variants = [...new Set(variants)];
 
+    console.log("Method 1", variants);
+
     return variants.includes(totalAmount);
   };
+  // =====================================================
+  // Tesseract OCR Verification
+  // =====================================================
 
-  const verifyUTR = async (text) => {
-    const extractedUTRs = text.match(/\b\d{12,18}\b/g) || [];
+  const getLines = (txt) =>
+    txt
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+
+  const extractAmounts = (txt) => {
+    const lines = getLines(txt);
+    const amounts = [];
+
+    for (const line of lines) {
+      // Remove junk but keep digits & spaces
+      const clean = line
+        .replace(/[’'`]/g, "")
+        .replace(/[^\d\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      // console.log(clean)
+
+      // Match spaced digits ONLY within this line
+      const match = clean.match(/^(?:\d\s*){3,6}$/);
+
+      if (match) {
+        const num = Number(match[0].replace(/\s+/g, ""));
+        if (num >= 10 && num <= 100000) {
+          amounts.push(num);
+        }
+      }
+    }
+
+    return amounts;
+  };
+
+  const verifyAmount2 = async (text) => {
+    const detected = extractAmounts(text);
+    console.log("Detected amounts Line Method:", detected);
+
+    return detected.includes(Number(totalAmount));
+  };
+
+  const getTextFromOCRSpace = async (imageFile) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      formData.append("apikey", "200f6d298a88957"); // move to env later
+      formData.append("language", "eng");
+      formData.append("OCREngine", "2");
+
+      const response = await fetch("https://api.ocr.space/parse/image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      return data?.ParsedResults?.[0]?.ParsedText || "";
+    } catch (err) {
+      console.error("OCR.space failed", err);
+      return "";
+    }
+  };
+
+  const extractUTRsByLineMethod = (text) => {
+    const lines = getLines(text);
+    const found = [];
+
+    for (const line of lines) {
+      // Keep digits + spaces only
+      const clean = line
+        .replace(/[^\d\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      // Typical UTR length (12–18 digits, may be spaced)
+      const match = clean.match(/^(?:\d\s*){12,18}$/);
+      if (match) {
+        found.push(match[0].replace(/\s+/g, ""));
+      }
+    }
+
+    return found;
+  };
+
+  const verifyUTRFromText = (text) => {
     const normalizedInput = transactionId.replace(/\s/g, "");
-
-    return extractedUTRs.some(
-      (utr) => utr.replace(/\s/g, "") === normalizedInput
+    const regexMatches = text.match(/\b\d{12,18}\b/g) || [];
+    const lineMatches = extractUTRsByLineMethod(text);
+    const allCandidates = [...regexMatches, ...lineMatches].map((u) =>
+      u.replace(/\s/g, "")
     );
+
+    console.log("UTR candidates:", allCandidates);
+
+    return allCandidates.includes(normalizedInput);
   };
   const sleep = (ms = 300) => new Promise((res) => setTimeout(res, ms));
 
@@ -232,6 +321,38 @@ const CheckoutStep = () => {
     setTransactionId("");
     setStepsVisible(false);
     setSteps({ amount: "idle", utr: "idle", payment: "idle" });
+  };
+
+  const verifyAmountFromText = async (text) =>
+    (await verifyAmount1(text)) || (await verifyAmount2(text));
+
+  const extractAllOCRText = async (imageFile) => {
+    let tesseractText = "";
+    let ocrSpaceText = "";
+
+    /* ---------- TESSERACT ---------- */
+    try {
+      const {
+        data: { text },
+      } = await Tesseract.recognize(imageFile, "eng");
+
+      tesseractText = text || "";
+    } catch (err) {
+      console.error("Tesseract failed", err);
+    }
+
+    /* ---------- OCR.SPACE (lazy) ---------- */
+    const runOCRSpace = async () => {
+      if (ocrSpaceText) return ocrSpaceText;
+
+      ocrSpaceText = await getTextFromOCRSpace(imageFile);
+      return ocrSpaceText;
+    };
+
+    return {
+      tesseractText,
+      getOCRSpaceText: runOCRSpace, // function → lazy fallback
+    };
   };
 
   // ==========================
@@ -266,18 +387,22 @@ const CheckoutStep = () => {
       alert("❌ Screenshot and Transaction ID are required");
       return;
     }
-
+    setVerifying(true);
     setStepsVisible(true);
     setSteps({ amount: "loading", utr: "idle", payment: "idle" });
     await sleep();
 
     try {
-      const {
-        data: { text },
-      } = await Tesseract.recognize(screenshot, "eng");
+      const { tesseractText, getOCRSpaceText } = await extractAllOCRText(
+        screenshot
+      );
+      let amountValid = await verifyAmountFromText(tesseractText);
 
-      /* ---------- STEP 1: AMOUNT ---------- */
-      const amountValid = await verifyAmount(text);
+      if (!amountValid) {
+        const ocrSpaceText = await getOCRSpaceText();
+        amountValid = await verifyAmountFromText(ocrSpaceText);
+      }
+
       if (!amountValid) {
         setSteps({ amount: "error", utr: "idle", payment: "idle" });
         setStepMessages({
@@ -299,7 +424,12 @@ const CheckoutStep = () => {
       await sleep();
 
       /* ---------- STEP 2: UTR ---------- */
-      const utrValid = await verifyUTR(text);
+      let utrValid = verifyUTRFromText(tesseractText);
+
+      if (!utrValid) {
+        const ocrSpaceText = await getOCRSpaceText();
+        utrValid = verifyUTRFromText(ocrSpaceText);
+      }
 
       if (!utrValid) {
         setSteps({ amount: "success", utr: "error", payment: "idle" });
@@ -347,6 +477,7 @@ const CheckoutStep = () => {
       alert("Payment failed. Please try again.");
     } finally {
       setLoadingCheckout(false);
+      setVerifying(false);
     }
   };
   const clearCheckoutSession = () => {
@@ -391,7 +522,10 @@ const CheckoutStep = () => {
 
         <div className="checkout-summary">
           <p>
-            <strong>Total Amount:</strong> <span style={{color:"#047857" , fontWeight:700}}>₹{totalAmount}</span>
+            <strong>Total Amount:</strong>{" "}
+            <span style={{ color: "#047857", fontWeight: 700 }}>
+              ₹{totalAmount}
+            </span>
           </p>
         </div>
 
@@ -484,9 +618,9 @@ const CheckoutStep = () => {
                 }}
               >
                 <p>
-                  ⚠️ <strong>Important:</strong> If you do{" "}
-                  <strong>not</strong> submit the payment screenshot after payment, your
-                  payment <strong>will not be recorded</strong>.
+                  ⚠️ <strong>Important:</strong> If you do <strong>not</strong>{" "}
+                  submit the payment screenshot after payment, your payment{" "}
+                  <strong>will not be recorded</strong>.
                 </p>
                 <br />
                 {/* <p>
@@ -520,7 +654,11 @@ const CheckoutStep = () => {
               </button>
               <button
                 onClick={() => {
-                  if (confirm("Cancel payment?Your payment can be lost if screenshot not submitted.")) {
+                  if (
+                    confirm(
+                      "Cancel payment?Your payment can be lost if screenshot not submitted."
+                    )
+                  ) {
                     clearCheckoutSession();
                   }
                 }}
