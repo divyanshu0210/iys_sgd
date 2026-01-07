@@ -15,7 +15,7 @@ const fmt = (dt) => {
   try {
     return new Date(dt).toLocaleString("en-IN", {
       dateStyle: "medium",
-      timeStyle: "short",
+      // timeStyle: "short",
     });
   } catch {
     return dt;
@@ -71,23 +71,49 @@ export async function generateRCS(profile, yatra) {
   // -------------------------------------------------------------
   // MIDDLE: Personal Details table (between QR and photo)
   // -------------------------------------------------------------
+  const personalRows = [
+    ["Name", profile.full_name],
+    ["Gender", profile.gender],
+    ["DOB", fmt(profile.dob)],
+    ["Mobile", profile.mobile],
+    ["Email", profile.email],
+    ["Member ID", profile.member_id],
+    ["Center", profile.center],
+    ["Mentor", `${profile.mentor_name} (${profile.approved_by})` || "—"],
+    ["Registration ID", profile.registration_id],
+    [
+      "Status",
+      profile.is_substitution ? "Substituted" : profile.registration_status,
+    ],
+  ];
+  const pendingNote = `Note: You have to pay balance amount of Rs. ${profile.pending_substitution_fees.total} at the registration counter.`;
+
+  if (profile.is_substitution && profile.pending_substitution_fees) {
+    personalRows.push([
+      "Pending Amount",
+      `Rs. ${profile.pending_substitution_fees.total}\n${pendingNote}`,
+    ]);
+  }
+
   autoTable(doc, {
     startY: 20,
-    margin: { left: 55, right: 55 }, // center available space
+    margin: { left: 55, right: 55 },
     theme: "grid",
-    styles: { fontSize: 8 },
-    body: [
-      ["Name", profile.full_name],
-      ["Gender", profile.gender],
-      ["DOB", fmt(profile.dob)],
-      ["Mobile", profile.mobile],
-      ["Email", profile.email],
-      ["Member ID", profile.member_id],
-      ["Center", profile.center],
-      ["Mentor",`${profile.mentor_name} (${profile.approved_by})`|| "—"],
-      ["Registration ID", profile.registration_id],
-      ["Status", profile.registration_status],
-    ],
+    styles: {
+      fontSize: 8,
+      textColor: [0, 0, 0],
+    },
+    body: personalRows,
+    didParseCell: function (data) {
+      if (
+        data.section === "body" &&
+        data.column.index === 1 && // value column
+        typeof data.cell.raw === "string" &&
+        data.cell.raw.includes("Note: You have to pay")
+      ) {
+        data.cell.styles.textColor = [180, 0, 0]; // red
+      }
+    },
   });
 
   let cursor = doc.lastAutoTable.finalY + 10;
@@ -112,7 +138,11 @@ export async function generateRCS(profile, yatra) {
       startY: cursor + 3,
       head: [["Place", "Room", "Bed", "Address", "Check-in", "Check-out"]],
       body: accRows,
-      styles: { fontSize: 8 },
+      styles: { fontSize: 8, textColor: [0, 0, 0] },
+      headStyles: {
+        textColor: [255, 255, 255], // (safe even if no head)
+        fontStyle: "bold",
+      },
     });
 
     cursor = doc.lastAutoTable.finalY + 10;
@@ -137,7 +167,11 @@ export async function generateRCS(profile, yatra) {
       startY: cursor + 3,
       head: [["Type", "Route", "Mode", "Vehicle/PNR", "Seat", "Departure"]],
       body: journeyRows,
-      styles: { fontSize: 8 },
+      styles: { fontSize: 8, textColor: [0, 0, 0] },
+       headStyles: {
+        textColor: [255, 255, 255], // (safe even if no head)
+        fontStyle: "bold",
+      },
     });
 
     cursor = doc.lastAutoTable.finalY + 10;
@@ -155,7 +189,11 @@ export async function generateRCS(profile, yatra) {
       startY: cursor + 3,
       head: [["Field", "Value"]],
       body: customRows,
-      styles: { fontSize: 8 },
+      styles: { fontSize: 8, textColor: [0, 0, 0] },
+       headStyles: {
+        textColor: [255, 255, 255], // (safe even if no head)
+        fontStyle: "bold",
+      },
     });
 
     cursor = doc.lastAutoTable.finalY + 10;
