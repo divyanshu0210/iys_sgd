@@ -95,7 +95,7 @@ const FormView = ({
   handleSubmit,
 }) => (
   <>
-    <h2 className="sub-heading">Substitute Registration</h2>
+    <h2 className="sub-heading">Cancel & Substitute Registration</h2>
 
     <p className="sub-desc" style={{ marginBottom: "20px" }}>
       Transfer your registration, accommodation, travel & payments to another
@@ -116,7 +116,13 @@ const FormView = ({
     <p className="sub-fee-note">
       Yatra cancellation fee <strong>₹{yatra.cancellation_fee}</strong>.
       <br />
+      <br />
       Substitution is <strong style={{ color: "#b91c1c" }}>permanent</strong>.
+      <br />
+      <p style={{fontSize:"13px" ,color:"#b91c1c"}}>
+
+        <strong>NOTE :</strong> You will not be allowed to register/substitute for the yatra again .
+        </p>
     </p>
 
     <button

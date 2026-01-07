@@ -38,7 +38,7 @@ export default function CancellationModal({
       window.alert("Registration cancelled successfully.");
     } catch (err) {
       setError(
-        err.response?.data?.detail ||
+        err.response?.data?.detail || err.response?.data?.error ||
           "Failed to cancel the registration. Please try again."
       );
     } finally {
@@ -67,7 +67,10 @@ export default function CancellationModal({
       >
         Cancellation is <strong>permanent</strong> and cannot be undone.
         <br/>
-        You cannot register for the yatra again .
+        <strong style={{fontSize:"15px"}}>
+
+        You will not be allowed to register/substitute for the yatra again .
+        </strong>
       </p>
       <p
         style={{

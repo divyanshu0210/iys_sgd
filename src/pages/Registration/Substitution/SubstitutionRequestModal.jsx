@@ -110,7 +110,7 @@ export default function SubstitutionRequestModal({
               textAlign: "center",
             }}
           >
-            Transfer
+            1) Transfer
             <strong style={{ color: "#047857", fontSize: "15px" }}>
               {" "}
               ₹{Number(request.amount_paid) - Number(yatra.cancellation_fee)}
@@ -129,8 +129,8 @@ export default function SubstitutionRequestModal({
           )}
           <br />
           <p className="sub-fee-note">
-            {/* Yatra Substitution fee <strong>₹{yatra.substitution_fee}</strong>. */}
-            At registration desk, arriving devotee(s) has to pay <br />₹
+            {/* Yatra Substitution fee <strong>₹{yatra.substitution_fee}</strong>.arriving devotee(s) has to */}
+           <p style={{textAlign :"justify",color: "#333",}}>2) At registration desk,  pay</p>  ₹
             {yatra.substitution_fee}(Substitution Charges) <br />+ ₹
             {yatra.cancellation_fee}(Cancellation Charges) =
             <strong>

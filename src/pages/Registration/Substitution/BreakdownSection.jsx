@@ -19,7 +19,7 @@ export const BreakdownSection = ({ amount_paid, cancellation_fee }) => (
 
     <div className="sub-breakdown-row">
       <span>Deducted Cancellation Fee</span>
-      <strong>- ₹{cancellation_fee}</strong>
+      <strong style={{ color: "#b91c1c" }}>- ₹{cancellation_fee}</strong>
     </div>
 
     <div className="sub-breakdown-net">

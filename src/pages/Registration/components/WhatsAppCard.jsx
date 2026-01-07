@@ -435,8 +435,8 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
               {getButtonText()}
             </button>
 
-            {/* {registrationStatus && ( */}
             {registrationStatus === "paid" && (
+              // {registrationStatus && (
               <>
                 <button
                   onClick={() => setOpenInfoModal(true)}
@@ -462,6 +462,10 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                     Print RCS
                   </button>
                 )}
+              </>
+            )}
+            {["paid", "partial"].includes(registrationStatus) && (
+              <>
                 {yatra.is_substitution_open && (
                   <MoreActionsMenu
                     onSubstitute={() => {
