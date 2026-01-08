@@ -466,7 +466,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
             )}
             {["paid", "partial"].includes(registrationStatus) && (
               <>
-                {yatra.is_substitution_open && (
+                {(yatra.is_substitution_open || yatra.is_cancellation_open) && (
                   <MoreActionsMenu
                     onSubstitute={() => {
                       console.log(
@@ -482,6 +482,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                       );
                       setOpenCancellationModal(true);
                     }}
+                    yatra={yatra}
                   />
                 )}
               </>

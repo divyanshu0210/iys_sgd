@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-export default function MoreActionsMenu({ onSubstitute, onCancellation }) {
+export default function MoreActionsMenu({ onSubstitute, onCancellation , yatra }) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef();
 
@@ -49,7 +49,8 @@ export default function MoreActionsMenu({ onSubstitute, onCancellation }) {
             zIndex: 999,
           }}
         >
-          {/* <div
+          {yatra.is_substitution_open && (
+            <div
             style={{
               padding: "8px 12px",
               cursor: "pointer",
@@ -61,8 +62,10 @@ export default function MoreActionsMenu({ onSubstitute, onCancellation }) {
             }}
           >
             Substitution
-          </div> */}
-
+          </div>
+          )}
+          {yatra.is_cancellation_open && (
+       
           <div
             style={{
               padding: "8px 12px",
@@ -77,6 +80,9 @@ export default function MoreActionsMenu({ onSubstitute, onCancellation }) {
           >
             Cancellation
           </div>
+          )}
+       
+
         </div>
       )}
     </div>

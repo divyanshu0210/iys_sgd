@@ -12,7 +12,7 @@ function RegistrationFormModal({ profile, onClose }) {
     registerData,
     yatra,
   } = useYatraRegistration();
-  const FULL_PAYMENT_CUTOFF_DATE = new Date("2026-01-07");
+  const FULL_PAYMENT_CUTOFF_DATE = yatra.accept_full_payment_only_date || "2099-01-07";
 
   const today = new Date();
 
@@ -41,7 +41,7 @@ function RegistrationFormModal({ profile, onClose }) {
   }, [existing, yatra]);
 
   const isFullPaymentOnly =
-    today >= FULL_PAYMENT_CUTOFF_DATE && !hasPaidInstallments && installments.length > 1;
+    today >= new Date(FULL_PAYMENT_CUTOFF_DATE) && !hasPaidInstallments && installments.length > 1;
 
   useEffect(() => {
     if (!isFullPaymentOnly) return;
@@ -289,8 +289,7 @@ function RegistrationFormModal({ profile, onClose }) {
             </h3>
             {isFullPaymentOnly && (
               <div className="info-banner warning">
-                ⚠️ After {FULL_PAYMENT_CUTOFF_DATE.toLocaleDateString()},
-                Partial payment is not allowed. Full payment of all installments
+                ⚠️ Partial payment window is closed.<br/> Full payment of all installments
                 is mandatory.
               </div>
             )}

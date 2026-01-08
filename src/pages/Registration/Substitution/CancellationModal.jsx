@@ -9,10 +9,34 @@ export default function CancellationModal({
   yatra,
   onSuccess,
 }) {
-  const [agree, setAgree] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [showBreakdown, setShowBreakdown] = useState(false);
+
+  // ─────────────────────────────
+  // CHECKBOXES CONFIRMATION
+  // ─────────────────────────────
+  const [confirmations, setConfirmations] = useState({
+    permanent: false,
+    noReRegister: false,
+    refundProcess: false,
+  });
+
+  const toggleConfirmation = (key) => {
+    setConfirmations((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const confirmationTexts = {
+    permanent: "I understand that this action is permanent.",
+    noReRegister: "I understand I cannot register again.",
+    refundProcess: `I understand the refund will be made after ${new Date(yatra?.payment_refund_date).toLocaleDateString()}.`,
+  };
+
+  const isAllConfirmed = Object.values(confirmations).every(Boolean);
+  // ─────────────────────────────
 
   // Calculate total amount paid from verified installments
   const amountPaid = installments
@@ -38,7 +62,8 @@ export default function CancellationModal({
       window.alert("Registration cancelled successfully.");
     } catch (err) {
       setError(
-        err.response?.data?.detail || err.response?.data?.error ||
+        err.response?.data?.detail ||
+          err.response?.data?.error ||
           "Failed to cancel the registration. Please try again."
       );
     } finally {
@@ -66,10 +91,9 @@ export default function CancellationModal({
         }}
       >
         Cancellation is <strong>permanent</strong> and cannot be undone.
-        <br/>
-        <strong style={{fontSize:"15px"}}>
-
-        You will not be allowed to register/substitute for the yatra again .
+        <br />
+        <strong style={{ fontSize: "15px" }}>
+          You will not be allowed to register for the yatra again .
         </strong>
       </p>
       <p
@@ -83,7 +107,7 @@ export default function CancellationModal({
         Refund Amount :
         <strong style={{ color: "#047857", fontSize: "15px" }}>
           {" "}
-          ${netRefund}
+          ₹{netRefund}
         </strong>{" "}
         {"  "}
         <BreakdownToggle
@@ -101,30 +125,33 @@ export default function CancellationModal({
         />
       )}
       {/* Confirmation Checkbox */}
-      <label
-        style={{
-          fontSize: "13px",
-          display: "flex",
-          alignItems: "center",
-          marginTop: "15px",
-          cursor: "pointer",
-        }}
-      >
-        <input
-          type="checkbox"
-          checked={agree}
-          onChange={() => setAgree(!agree)}
-          style={{ marginRight: "8px" }}
-        />
-        I understand that this action is permanent.
-      </label>
+      {Object.entries(confirmationTexts).map(([key, label]) => (
+        <label
+          key={key}
+          style={{
+            fontSize: "13px",
+            display: "flex",
+            alignItems: "center",
+            marginTop: "15px",
+            cursor: "pointer",
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={confirmations[key]}
+            onChange={() => toggleConfirmation(key)}
+            style={{ marginRight: "8px" }}
+          />
+          {label}
+        </label>
+      ))}
 
       {/* Button */}
       <div style={{ display: "flex", gap: "10px", marginTop: "25px" }}>
         <button
           className="sub-btn"
           onClick={handleSubmit}
-          disabled={!agree || isSubmitting}
+          disabled={!isAllConfirmed || isSubmitting}
         >
           {isSubmitting ? "Cancelling..." : "Confirm Cancellation"}
         </button>
