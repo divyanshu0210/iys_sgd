@@ -18,7 +18,6 @@ function RegistrationFormModal({ profile, onClose }) {
 
   const profileId = profile.id || profile.profile_id;
   const existing = registrations[profileId];
-  console.log("Existing registration data:", existing, yatra);
 
   const initialFormFields = existing?.form_fields || {};
   const [formFields, setFormFields] = useState(initialFormFields);
@@ -33,6 +32,7 @@ function RegistrationFormModal({ profile, onClose }) {
   const hasPaidInstallments = installmentsPaid.length > 0;
   const isReadOnly = existing?.hasProof || false; // Only disable for proof, not paid installments
   const installments = yatra?.installments || [];
+  console.log("Existing registration data:", existing, yatra, installments);
 
   useEffect(() => {
     setFormFields(existing?.form_fields || {});
@@ -41,7 +41,7 @@ function RegistrationFormModal({ profile, onClose }) {
   }, [existing, yatra]);
 
   const isFullPaymentOnly =
-    today >= FULL_PAYMENT_CUTOFF_DATE && !hasPaidInstallments;
+    today >= FULL_PAYMENT_CUTOFF_DATE && !hasPaidInstallments && installments.length > 1;
 
   useEffect(() => {
     if (!isFullPaymentOnly) return;
