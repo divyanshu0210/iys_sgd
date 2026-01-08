@@ -12,9 +12,13 @@ function RegistrationFormModal({ profile, onClose }) {
     registerData,
     yatra,
   } = useYatraRegistration();
+  const FULL_PAYMENT_CUTOFF_DATE = new Date("2026-01-07");
+
+  const today = new Date();
 
   const profileId = profile.id || profile.profile_id;
   const existing = registrations[profileId];
+  console.log("Existing registration data:", existing, yatra);
 
   const initialFormFields = existing?.form_fields || {};
   const [formFields, setFormFields] = useState(initialFormFields);
@@ -36,6 +40,27 @@ function RegistrationFormModal({ profile, onClose }) {
     setInstallmentsPaid(existing?.installments_paid || []);
   }, [existing, yatra]);
 
+  const isFullPaymentOnly =
+    today >= FULL_PAYMENT_CUTOFF_DATE && !hasPaidInstallments;
+
+  useEffect(() => {
+    if (!isFullPaymentOnly) return;
+
+    const unpaidInstallments = installments
+      .filter((inst) => {
+        const match = existing?.installments_details?.find(
+          (i) => i.label === inst.label
+        );
+        return !(
+          match?.is_paid ||
+          (match?.proof && match?.status !== "rejected")
+        );
+      })
+      .map((inst) => inst.label);
+
+    setInstallmentsSelected(unpaidInstallments);
+  }, [isFullPaymentOnly, installments, existing]);
+
   const handleFieldChange = (e) => {
     if (isReadOnly) return;
     const { name, value, type, checked } = e.target;
@@ -46,6 +71,8 @@ function RegistrationFormModal({ profile, onClose }) {
   };
 
   const handleInstallmentToggle = (label) => {
+    if (isFullPaymentOnly) return;
+
     const match = existing?.installments_details?.find(
       (i) => i.label === label
     );
@@ -102,6 +129,25 @@ function RegistrationFormModal({ profile, onClose }) {
     if (installmentsSelected.length === 0) {
       alert("Select at least one installment to proceed.");
       return;
+    }
+
+    if (isFullPaymentOnly) {
+      const unpaidInstallments = installments.filter((inst) => {
+        const match = existing?.installments_details?.find(
+          (i) => i.label === inst.label
+        );
+        return !(
+          match?.is_paid ||
+          (match?.proof && match?.status !== "rejected")
+        );
+      });
+
+      if (installmentsSelected.length !== unpaidInstallments.length) {
+        alert(
+          "Full payment is mandatory. Partial installment payment is not allowed."
+        );
+        return;
+      }
     }
     const amount = installmentsSelected
       .filter((label) => {
@@ -241,6 +287,13 @@ function RegistrationFormModal({ profile, onClose }) {
                 ? "Payment"
                 : "Choose Installments (multiple allowed)"}
             </h3>
+            {isFullPaymentOnly && (
+              <div className="info-banner warning">
+                ⚠️ After {FULL_PAYMENT_CUTOFF_DATE.toLocaleDateString()},
+                Partial payment is not allowed. Full payment of all installments
+                is mandatory.
+              </div>
+            )}
 
             {!isReadOnly && totalSelectedAmount > 0 && (
               <div className="amount-banner">
