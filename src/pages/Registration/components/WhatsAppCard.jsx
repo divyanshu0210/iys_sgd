@@ -404,9 +404,20 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
               </strong>
               <br />
               {registrationStatus === "cancelled" && (
-                <span style={{ fontSize: "12px", color: "#333" }}>
-                  Yatra Team will contact you to proceed with the refund.
+                <>
+                 <span style={{ fontSize: "12px", color: "#B91C1C" }}>
+                  NOTE: Refund will be processed after{" "}
+                  {new Date(yatra?.payment_refund_date).toLocaleDateString()}.{" "}
+                  <br />
                 </span>
+                <span style={{ fontSize: "12px", color: "#333" }}>
+                  
+                  Yatra Team will contact you to proceed with the refund.
+                </span> 
+                <br /> 
+               
+                </>
+
               )}
             </p>
           )}
