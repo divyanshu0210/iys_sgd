@@ -49,7 +49,7 @@ export default function MoreActionsMenu({ onSubstitute, onCancellation }) {
             zIndex: 999,
           }}
         >
-          <div
+          {/* <div
             style={{
               padding: "8px 12px",
               cursor: "pointer",
@@ -61,7 +61,7 @@ export default function MoreActionsMenu({ onSubstitute, onCancellation }) {
             }}
           >
             Substitution
-          </div>
+          </div> */}
 
           <div
             style={{
