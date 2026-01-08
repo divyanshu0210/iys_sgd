@@ -21,6 +21,7 @@ import VerifiedEmailAlready from "../pages/Auth/VerifiedEmailAlready";
 import ForgotPassword from "../pages/Auth/ForgotPassword";
 import ResetPassword from "../pages/Auth/ResetPassword";
 import PasswordResetSuccess from "../pages/Auth/PasswordResetSuccess";
+import DonationDetailsPage from "../pages/Donate/DonationDetailsPage";
 
 export default function AppRoutes() {
   return (
@@ -65,6 +66,7 @@ export default function AppRoutes() {
       {/* Profile (public?) */}
       <Route path="/profile" element={<Profile />} />
       <Route path="/donate" element={<DonatePage />} />
+      <Route path="/donate/details" element={<DonationDetailsPage />} />
 
       {/* Role Protected */}
       <Route

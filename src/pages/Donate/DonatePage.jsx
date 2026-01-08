@@ -1,9 +1,11 @@
 import "../../css/DonatePage.css";
 import React, { useState } from "react";
 import ImageSlider from "./ImageSlider";
+import { useNavigate } from "react-router-dom";
 
 export default function DonatePage() {
   const [qrLoading, setQrLoading] = useState(true);
+  const navigate = useNavigate();
 
   return (
     <div className="donate-page">
@@ -36,7 +38,7 @@ export default function DonatePage() {
 
             <AccountDetail />
 
-            <button className="donate-btn">Share Donation Receipt</button>
+            <button className="donate-btn"  onClick={() => navigate("/donate/details")}>Share Donation Details</button>
           </div>
         </div>
       </div>
