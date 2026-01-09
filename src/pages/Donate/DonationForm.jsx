@@ -40,9 +40,7 @@ export default function DonationForm() {
       payload.paymentScreenshot = base64Data;
       payload.paymentScreenshotName = paymentScreenshot.name.replace(/\.[^/.]+$/, ".jpg"); // convert extension to jpg
     }
-      console.log(payload);
 
-      // Send JSON payload to Google Apps Script
       const response = await fetch(
         "https://script.google.com/macros/s/AKfycbzDoocqozKcyWl1omgmryWQZdOqjH3wk4K1qOBvjsgFRM7e2VWxs96YHlzZZDNsOrp0jA/exec",
         {

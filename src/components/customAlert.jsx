@@ -41,7 +41,6 @@ function AlertOverlay({ message, onClose }) {
   );
 }
 
-
 const styles = {
   overlay: {
     position: "fixed",
