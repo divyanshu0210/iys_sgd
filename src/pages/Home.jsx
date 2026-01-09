@@ -16,6 +16,7 @@ import YouthCenter, {
 } from "../components/YouthCenter";
 import SocialLink from "../components/SocialLink";
 import DraggableWhatsApp from "../components/DraggableWhatsApp";
+import EventAnnouncementSlider from "../components/EventAnnouncementSlider";
 
 export default function Home() {
   const { user, profileStage, loading, setDonatePage } = useAuth();
@@ -108,19 +109,30 @@ export default function Home() {
             </div>
           </section>
 
+          {/* --------------------- ANNOUNCEMENTS --------------------- */}
+          <section className="upcoming-events">
+            <h2 className="home-section-title">Events & Announcements</h2>
+
+            <EventAnnouncementSlider />
+          </section>
+
+        
+        </div>
+
+        <div className="home-row yatra-row">
+
           {/* FIRST SLIDER */}
-          <section className="slider-section">
+          <section className="slider-section" >
             <h2 className="home-section-title">Our Activities</h2>
             <ImageSlider />
           </section>
-        </div>
 
         {/** --------------------- YOUTH SECTION --------------------- **/}
 
-        <section className="youth-section">
+        <section className="youth-section" >
           <h2 className="home-section-title">For the Youth</h2>
           <div className="youth-cards">
-            <div className="card">
+            <div className="youth-card">
               <h3>Youth Spiritual Retreats</h3>
               <p>
                 Experience transformative yatras and retreats designed for
@@ -128,17 +140,19 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="card">
+            <div className="youth-card">
               <h3>Career + Ethics Workshops</h3>
               <p>Learn life skills with spiritual grounding.</p>
             </div>
 
-            <div className="card">
+            <div className="youth-card">
               <h3>Meditation & Kirtan Sessions</h3>
               <p>Daily joy through mantra meditation & kirtans.</p>
             </div>
           </div>
         </section>
+        </div>
+
 
         {/** --------------------- LATEST YATRA UPDATES --------------------- **/}
         {/** --------------------- LATEST YATRA UPDATES + MOMENTS (SIDE BY SIDE) --------------------- **/}
@@ -158,7 +172,7 @@ export default function Home() {
         <section className="youth-section" id="youth-centers">
           <h2 className="home-section-title">Youth Centers Near You</h2>
 
-          <div className="youth-cards">
+          <div className="cards">
             <YouthCenter
               name="Vrindavan Bace"
               note="A vibrant spiritual home for youth—daily kirtans, classes, mentoring & seva opportunities."
@@ -173,7 +187,6 @@ export default function Home() {
               contact="+917774032548"
               mail="srigovind.rns@gmail.com"
               location="https://maps.app.goo.gl/KpmwWMBxfpRdafxHA"
-
             />
 
             <YouthCenter
@@ -182,12 +195,11 @@ export default function Home() {
               contact="+917774048503"
               mail="vcdrns@gmail.com"
               location="https://maps.app.goo.gl/ygcFt7Scu8KjUu8T6"
-
             />
           </div>
           <h2 className="home-section-title">Connect, Cultivate, Contribute</h2>
 
-          <div className="youth-cards">
+          <div className="cards">
             {/* ---- SHLOKA ---- */}
             <div className="card footer-shloka">
               <h3 className="footer-heading">Inspiration</h3>

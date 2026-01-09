@@ -65,7 +65,7 @@
 }
 
 .slider-section {
-  width: 1200px;
+  width: 1400px;
 }
 
 .mobile_break{
@@ -79,9 +79,27 @@
 /* YOUTH CARDS */
 .youth-cards {
   display: flex;
+  flex-direction: column;
   gap: 25px;
   justify-content: center;
   padding: 0 40px;
+}
+
+.cards {
+  display: flex;
+  /* flex-direction: column; */
+  gap: 25px;
+  justify-content: center;
+  padding: 0 40px;
+}
+
+.youth-card {
+  background: #e8d2b9;
+  width: 100%;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
 }
 
 .card {
@@ -159,6 +177,11 @@
   }
 
   .youth-cards {
+    flex-direction: column;
+    padding: 0px 0px;
+  }
+
+  .cards {
     flex-direction: column;
     padding: 0px 0px;
   }
