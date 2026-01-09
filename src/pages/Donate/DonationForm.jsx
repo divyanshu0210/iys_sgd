@@ -58,7 +58,7 @@ export default function DonationForm() {
         customAlert(
           "Thank you! Donation submitted successfully!"
         );
-        navigate("/donate");
+        navigate("/");
 
         setForm({
           donorName: "",
