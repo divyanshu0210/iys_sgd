@@ -39,11 +39,10 @@ export default function EventAnnouncementSlider() {
   const [timeLeft, setTimeLeft] = useState(null);
 
   const getDescriptionLimit = () => {
-  if (window.innerWidth >= 900) return 500; // desktop
-  return 120; // mobile
-};
-const [descLimit, setDescLimit] = useState(getDescriptionLimit());
-
+    if (window.innerWidth >= 900) return 500; // desktop
+    return 120; // mobile
+  };
+  const [descLimit, setDescLimit] = useState(getDescriptionLimit());
 
   useEffect(() => {
     fetch(API_URL)
@@ -51,9 +50,9 @@ const [descLimit, setDescLimit] = useState(getDescriptionLimit());
       .then(setEvents)
       .catch(console.error);
 
-        const handleResize = () => setDescLimit(getDescriptionLimit());
-  window.addEventListener("resize", handleResize);
-  return () => window.removeEventListener("resize", handleResize);
+    const handleResize = () => setDescLimit(getDescriptionLimit());
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -98,65 +97,77 @@ const [descLimit, setDescLimit] = useState(getDescriptionLimit());
   if (!event) return null;
 
   const imageSrc = event.youtube_thumbnail || event.poster;
+  const clickUrl =
+    event.youtube_live_url || event.youtube_replay_url || imageSrc;
 
   return (
     <div className="event-slider-container">
       {/* IMAGE */}
-      <div className="event-image-wrapper">
-        <div
-          className="event-image-bg"
-          style={{
-            backgroundImage: `url(${imageSrc})`,
-          }}
-        />
+      <a
+        href={clickUrl}
+        rel="noopener noreferrer"
+        className="event-image-link"
+      >
+        <div className="event-image-wrapper">
+          <div
+            className="event-image-bg"
+            style={{
+              backgroundImage: `url(${imageSrc})`,
+            }}
+          />
 
-        <img src={imageSrc} alt={event.title} className="event-slider-image" />
+          <img
+            src={imageSrc}
+            alt={event.title}
+            className="event-slider-image"
+          />
 
-        {/* STATUS BADGE */}
-        {event.status === "live" && (
-          <div className="live-badge live">
-            <PlayCircle size={16} strokeWidth={2} /> LIVE
-          </div>
-        )}
+          {/* STATUS BADGE */}
+          {event.status === "live" && (
+            <div className="live-badge live">
+              <PlayCircle size={16} strokeWidth={2} /> LIVE
+            </div>
+          )}
 
-        {event.status === "upcoming" && timeLeft && (
-          <div className="live-badge upcoming">
-            {timeLeft.days > 0 ? (
-              <>
-                <Calendar size={16} /> {timeLeft.days} day
-                {timeLeft.days > 1 ? "s" : ""} to go
-              </>
-            ) : (
-              <>
-                <Calendar size={16} />
-                {String(timeLeft.hours).padStart(2, "0")}:
-                {String(timeLeft.minutes).padStart(2, "0")}:
-                {String(timeLeft.seconds).padStart(2, "0")}
-              </>
-            )}
-          </div>
-        )}
-      </div>
+          {event.status === "upcoming" && timeLeft && (
+            <div className="live-badge upcoming">
+              {timeLeft.days > 0 ? (
+                <>
+                  <Calendar size={16} /> {timeLeft.days} day
+                  {timeLeft.days > 1 ? "s" : ""} to go
+                </>
+              ) : (
+                <>
+                  <Calendar size={16} />
+                  {String(timeLeft.hours).padStart(2, "0")}:
+                  {String(timeLeft.minutes).padStart(2, "0")}:
+                  {String(timeLeft.seconds).padStart(2, "0")}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </a>
 
       {/* CONTENT */}
       <div className="event-content">
         <h2 className="event-title">{event.title}</h2>
 
-    <p className="event-description">
-  {showFull
-    ? event.description
-    : event.description.slice(0, descLimit) +
-      (event.description.length > descLimit ? "..." : "")}
+        <p className="event-description">
+          {showFull
+            ? event.description
+            : event.description.slice(0, descLimit) +
+              (event.description.length > descLimit ? "..." : "")}
 
-  {event.description.length > descLimit && (
-    <button
-      className="read-more-btn"
-      onClick={() => setShowFull(!showFull)}
-    >
-      {showFull ? " Show Less" : " Read More"}
-    </button>
-  )}
-</p>
+          {event.description.length > descLimit && (
+            <button
+              className="read-more-btn"
+              onClick={() => setShowFull(!showFull)}
+            >
+              {showFull ? " Show Less" : " Read More"}
+            </button>
+          )}
+        </p>
         <div className="event-meta">
           {event.location_name && (
             <span className="meta-item">
