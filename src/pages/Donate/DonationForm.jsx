@@ -3,7 +3,8 @@ import styles from "../../css/DonationForm.module.css";
 import FormField from "./FormField";
 import FullPageLoader from "../../components/FullPageLoader";
 import { useNavigate } from "react-router-dom";
-
+import customAlert from "../../components/CustomAlert";
+import { compressImage } from "./utils.js";
 export default function DonationForm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -14,10 +15,16 @@ export default function DonationForm() {
     donationAmount: "",
     pan: "",
     email: "",
+    transactionId: "",
   });
+  const [paymentScreenshot, setPaymentScreenshot] = useState(null);
 
   const handleChange = (field) => (e) => {
     setForm({ ...form, [field]: e.target.value });
+  };
+
+  const handleFileChange = (e) => {
+    setPaymentScreenshot(e.target.files[0]);
   };
 
   const handleSubmit = async (e) => {
@@ -25,23 +32,34 @@ export default function DonationForm() {
     setLoading(true);
 
     try {
+      let payload = { ...form };
+
+    if (paymentScreenshot) {
+      const compressedBase64 = await compressImage(paymentScreenshot, 800, 800, 0.7);
+      const base64Data = compressedBase64.split(",")[1]; // remove "data:image/jpeg;base64,"
+      payload.paymentScreenshot = base64Data;
+      payload.paymentScreenshotName = paymentScreenshot.name.replace(/\.[^/.]+$/, ".jpg"); // convert extension to jpg
+    }
+      console.log(payload);
+
+      // Send JSON payload to Google Apps Script
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbxYEVLnuHKqCHklnMiAEANaQJcy3JmgrZ6M1lV8o8Dt6KNC14SoU5FpmBjEcC2tK9gp6g/exec", // replace with your web app URL
+        "https://script.google.com/macros/s/AKfycbzDoocqozKcyWl1omgmryWQZdOqjH3wk4K1qOBvjsgFRM7e2VWxs96YHlzZZDNsOrp0jA/exec",
         {
           method: "POST",
-          body: JSON.stringify(form),
-        
+          body: JSON.stringify(payload),
+   
         }
       );
 
       const result = await response.json();
 
       if (result.status === "success") {
-        alert(
-          "Donation submitted successfully! A confirmation email has been sent."
+        customAlert(
+          "Thank you! Donation submitted successfully!"
         );
         navigate("/donate");
-        
+
         setForm({
           donorName: "",
           address: "",
@@ -49,7 +67,9 @@ export default function DonationForm() {
           donationAmount: "",
           pan: "",
           email: "",
+          transactionId: "",
         });
+        setPaymentScreenshot(null);
       } else {
         alert("Error submitting donation: " + result.message);
       }
@@ -96,6 +116,20 @@ export default function DonationForm() {
       imageSrc: "/damt.png",
     },
     {
+      label: `Transaction ID`,
+      key: "transactionId",
+      placeholder: "Enter Transaction ID",
+      imageSrc: "/tid.png",
+    },
+    {
+      label: `Payment Screenshot`,
+      key: "paymentScreenshot",
+      placeholder: "Upload Payment Screenshot",
+      imageSrc: "/pay.png",
+      type: "file",
+      accept: "image/*",
+    },
+    {
       label: `PAN Number (for 80G receipt or donations ₹50,000+)`,
       key: "pan",
       placeholder: "Enter PAN number if applicable",
@@ -111,20 +145,41 @@ export default function DonationForm() {
         {fields.map((field) => (
           <FormField
             key={field.key}
+            name={field.key}
             label={field.label}
             type={field.type}
-            value={form[field.key]}
-            onChange={handleChange(field.key)}
+            value={field.type !== "file" ? form[field.key] : undefined}
+            onChange={
+              field.type === "file" ? handleFileChange : handleChange(field.key)
+            }
             placeholder={field.placeholder}
             imageSrc={field.imageSrc}
             required={field.required !== false}
+            accept={field.accept}
           />
         ))}
 
-        <button type="submit" className={styles.submitBtn} disabled={loading}>
-          {loading ? "Submitting..." : "Submit"}
-        </button>
+        <div className={styles.actionRow}>
+  <button
+    type="button"
+    className={styles.backBtn}
+    onClick={() => navigate(-1)}
+    disabled={loading}
+  >
+    Back
+  </button>
+
+  <button
+    type="submit"
+    className={styles.submitBtn}
+    disabled={loading}
+  >
+    {loading ? "Submitting..." : "Submit"}
+  </button>
+</div>
       </form>
     </>
   );
 }
+
+

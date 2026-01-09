@@ -2,14 +2,17 @@ import React from "react";
 import styles from "../../css/DonationForm.module.css";
 
 export default function FormField({
+  name,
   label,
   required = true,
   type ,
   value,
   onChange,
   placeholder = "",
-  imageSrc = null, 
+  imageSrc = null,
+  accept = null,
 }) {
+   const isFile = type === "file";
   return (
     <div className={styles.inputWithImage}>
       <label className={styles.formLabel}>
@@ -19,13 +22,15 @@ export default function FormField({
 
 
       <input
+        name={name}
         type={type && type}
-        value={value}
+         {...(!isFile && { value })}
         onChange={onChange}
-        placeholder={placeholder}
+        placeholder={!isFile ? placeholder : undefined}
         required={required}
         className={styles.formInput}
         autoComplete="off"
+        {...(accept && { accept })}
       />
     </div>
   );
