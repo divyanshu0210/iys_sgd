@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 let alertRoot = null;
 let alertContainer = null;
 
-export default function customAlert(message) {
+export default function CustomAlert(message) {
   // Prevent multiple alerts
   if (alertRoot) return;
 

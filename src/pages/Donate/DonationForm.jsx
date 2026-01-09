@@ -3,7 +3,7 @@ import styles from "../../css/DonationForm.module.css";
 import FormField from "./FormField";
 import FullPageLoader from "../../components/FullPageLoader";
 import { useNavigate } from "react-router-dom";
-import customAlert from "../../components/CustomAlert";
+import CustomAlert from "../../components/CustomAlert";
 import { compressImage } from "./utils.js";
 export default function DonationForm() {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ export default function DonationForm() {
       const result = await response.json();
 
       if (result.status === "success") {
-        customAlert(
+        CustomAlert(
           "Thank you! Donation submitted successfully!"
         );
         navigate("/");
