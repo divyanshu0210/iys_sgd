@@ -101,6 +101,9 @@ export default function EventAnnouncementSlider() {
     event.youtube_live_url || event.youtube_replay_url || imageSrc;
 
   return (
+    <>
+            <h2 className="home-section-title">Events & Announcements</h2>
+
     <div className="event-slider-container">
       {/* IMAGE */}
       <a
@@ -230,5 +233,7 @@ export default function EventAnnouncementSlider() {
         ))}
       </div>
     </div>
+    </>
+
   );
 }

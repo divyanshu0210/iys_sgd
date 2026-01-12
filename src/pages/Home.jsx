@@ -111,7 +111,6 @@ export default function Home() {
 
           {/* --------------------- ANNOUNCEMENTS --------------------- */}
           <section className="upcoming-events">
-            <h2 className="home-section-title">Events & Announcements</h2>
 
             <EventAnnouncementSlider />
           </section>

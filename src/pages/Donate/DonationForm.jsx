@@ -10,6 +10,7 @@ export default function DonationForm() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     donorName: "",
+    initiatedName: "",
     address: "",
     mobile: "",
     donationAmount: "",
@@ -34,32 +35,38 @@ export default function DonationForm() {
     try {
       let payload = { ...form };
 
-    if (paymentScreenshot) {
-      const compressedBase64 = await compressImage(paymentScreenshot, 800, 800, 0.7);
-      const base64Data = compressedBase64.split(",")[1]; // remove "data:image/jpeg;base64,"
-      payload.paymentScreenshot = base64Data;
-      payload.paymentScreenshotName = paymentScreenshot.name.replace(/\.[^/.]+$/, ".jpg"); // convert extension to jpg
-    }
+      if (paymentScreenshot) {
+        const compressedBase64 = await compressImage(
+          paymentScreenshot,
+          800,
+          800,
+          0.7
+        );
+        const base64Data = compressedBase64.split(",")[1]; // remove "data:image/jpeg;base64,"
+        payload.paymentScreenshot = base64Data;
+        payload.paymentScreenshotName = paymentScreenshot.name.replace(
+          /\.[^/.]+$/,
+          ".jpg"
+        ); // convert extension to jpg
+      }
 
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbzDoocqozKcyWl1omgmryWQZdOqjH3wk4K1qOBvjsgFRM7e2VWxs96YHlzZZDNsOrp0jA/exec",
+        "https://script.google.com/macros/s/AKfycbyiYQfW5Iw-qeE_mh1gzENCmkoIT76uYcmkhA-I-Erqi6ovMmEeMl_XkgYiVBK8NwXD8w/exec",
         {
           method: "POST",
           body: JSON.stringify(payload),
-   
         }
       );
 
       const result = await response.json();
 
       if (result.status === "success") {
-        CustomisedAlert(
-          "Thank you! Donation submitted successfully!"
-        );
+        CustomisedAlert("Thank you! Donation submitted successfully!");
         navigate("/");
 
         setForm({
           donorName: "",
+          initiatedName: "",
           address: "",
           mobile: "",
           donationAmount: "",
@@ -93,6 +100,14 @@ export default function DonationForm() {
       placeholder: "Enter your full name",
       imageSrc: "/name.png",
     },
+    {
+      label: "Initiated Name (if initiated)",
+      key: "initiatedName",
+      placeholder: "Enter your initiated name",
+      // imageSrc: "/init.png", // add icon
+      required: false,
+    },
+
     {
       label: "Address (with District, State, PIN code)",
       key: "address",
@@ -158,26 +173,20 @@ export default function DonationForm() {
         ))}
 
         <div className={styles.actionRow}>
-  <button
-    type="button"
-    className={styles.backBtn}
-    onClick={() => navigate(-1)}
-    disabled={loading}
-  >
-    Back
-  </button>
+          <button
+            type="button"
+            className={styles.backBtn}
+            onClick={() => navigate(-1)}
+            disabled={loading}
+          >
+            Back
+          </button>
 
-  <button
-    type="submit"
-    className={styles.submitBtn}
-    disabled={loading}
-  >
-    {loading ? "Submitting..." : "Submit"}
-  </button>
-</div>
+          <button type="submit" className={styles.submitBtn} disabled={loading}>
+            {loading ? "Submitting..." : "Submit"}
+          </button>
+        </div>
       </form>
     </>
   );
 }
-
-
