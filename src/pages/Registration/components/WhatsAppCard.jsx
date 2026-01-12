@@ -113,17 +113,17 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
     ?.filter((i) => i.tag === "verified")
     .reduce((sum, i) => sum + Number(i.amount), 0);
 
-  console.log(
-    "selectableInstallments",
-    yatra,
-    registrations,
-    profile,
-    profileId,
-    selectableInstallments,
-    regData,
-    regData?.installments_selected,
-    hasSelectableInstallments
-  );
+  // console.log(
+  //   "selectableInstallments",
+  //   yatra,
+  //   registrations,
+  //   profile,
+  //   profileId,
+  //   selectableInstallments,
+  //   regData,
+  //   regData?.installments_selected,
+  //   hasSelectableInstallments
+  // );
   const getButtonText = () => {
     if (isLoadingRegistration) return "Loading...";
     if (profile.is_registered || hasExistingData) return "Payments";
@@ -405,19 +405,16 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
               <br />
               {registrationStatus === "cancelled" && (
                 <>
-                 <span style={{ fontSize: "12px", color: "#B91C1C" }}>
-                  NOTE: Refund will be processed after{" "}
-                  {new Date(yatra?.payment_refund_date).toLocaleDateString()}.{" "}
+                  <span style={{ fontSize: "12px", color: "#B91C1C" }}>
+                    NOTE: Refund will be processed after{" "}
+                    {new Date(yatra?.payment_refund_date).toLocaleDateString()}.{" "}
+                    <br />
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#333" }}>
+                    Yatra Team will contact you to proceed with the refund.
+                  </span>
                   <br />
-                </span>
-                <span style={{ fontSize: "12px", color: "#333" }}>
-                  
-                  Yatra Team will contact you to proceed with the refund.
-                </span> 
-                <br /> 
-               
                 </>
-
               )}
             </p>
           )}
@@ -480,17 +477,9 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                 {(yatra.is_substitution_open || yatra.is_cancellation_open) && (
                   <MoreActionsMenu
                     onSubstitute={() => {
-                      console.log(
-                        "Open substitution modal for",
-                        profile.first_name
-                      );
                       setOpenSubstitutionModal(true);
                     }}
                     onCancellation={() => {
-                      console.log(
-                        "Open cancellation modal for",
-                        profile.first_name
-                      );
                       setOpenCancellationModal(true);
                     }}
                     yatra={yatra}

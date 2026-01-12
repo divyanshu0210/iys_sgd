@@ -86,9 +86,10 @@ export async function generateRCS(profile, yatra) {
       profile.is_substitution ? "Substituted" : profile.registration_status,
     ],
   ];
-  const pendingNote = `Note: You have to pay balance amount of Rs. ${profile.pending_substitution_fees.total} at the registration counter.`;
 
   if (profile.is_substitution && profile.pending_substitution_fees) {
+  const pendingNote = `Note: You have to pay balance amount of Rs. ${profile.pending_substitution_fees.total} at the registration counter.`;
+
     personalRows.push([
       "Pending Amount",
       `Rs. ${profile.pending_substitution_fees.total}\n${pendingNote}`,
