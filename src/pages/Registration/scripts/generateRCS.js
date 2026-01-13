@@ -4,59 +4,183 @@ import API from "../../../services/api";
 import QRCode from "qrcode";
 
 const baseURL = import.meta.env.VITE_BACKEND_URL;
-
+// Color palette (ISKCON-inspired)
+const COLORS = {
+  primary: [255, 87, 34], // saffron/orange
+  dark: [33, 33, 33],
+  gray: [100, 100, 100],
+  lightGray: [245, 245, 245],
+  border: [220, 220, 220],
+};
 const fetchBase64Image = async (url) => {
   const res = await API.get(`api/proxy-image/?url=${encodeURIComponent(url)}`);
   return res.data.base64;
 };
 
-const fmt = (dt) => {
+const fmt = (dt, show_time = true) => {
   if (!dt) return "—";
   try {
     return new Date(dt).toLocaleString("en-IN", {
-      dateStyle: "medium",
-      // timeStyle: "short",
+      ...{ dateStyle: "medium" },
+      ...(show_time && { timeStyle: "short" }),
     });
   } catch {
     return dt;
   }
 };
+function capitalize(value) {
+  // Convert to string and trim
+  const str = String(value ?? "").trim();
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
 
+async function getImageBase64(logoUrl, targetSize = 120) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.src = logoUrl;
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+
+      // Better: preserve aspect ratio (your fixed 100×100 forces distortion if logo isn't square)
+      let w = img.naturalWidth;
+      let h = img.naturalHeight;
+      const max = targetSize;
+
+      if (w > h) {
+        if (w > max) {
+          h = Math.round((h * max) / w);
+          w = max;
+        }
+      } else {
+        if (h > max) {
+          w = Math.round((w * max) / h);
+          h = max;
+        }
+      }
+
+      canvas.width = w;
+      canvas.height = h;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+
+      const dataUrl = canvas.toDataURL("image/png");
+      const base64 = dataUrl.split(",")[1];
+      resolve(base64);
+    };
+
+    img.onerror = () => {
+      console.warn(`Image failed to load: ${logoUrl}`);
+      reject(new Error("Logo load failed"));
+    };
+  });
+}
 export async function generateRCS(profile, yatra) {
-  const doc = new jsPDF("p", "mm", "a4");
+  const doc = new jsPDF({
+    orientation: "p",
+    unit: "mm",
+    format: "a4",
+    compress: true, // ← enables PDF-level compression
+  });
+  // -------------------------------------------------------------
+  // ────────────────────────────────────────────────
+  // HEADER
+  // ────────────────────────────────────────────────
+  const headerY = 8;
+  const logoSize = 12;
 
-  // -------------------------------------------------------------
-  // HEADER TITLE
-  // -------------------------------------------------------------
+  // Left logo
+  try {
+    const logoBase64 = await getImageBase64("/iys_logo.png", 140);
+    doc.addImage(
+      `data:image/png;base64,${logoBase64}`,
+      "PNG",
+      12,
+      headerY,
+      logoSize,
+      logoSize
+    );
+  } catch {
+    doc.setDrawColor(...COLORS.border);
+    doc.rect(12, headerY, logoSize, logoSize);
+    doc.setFontSize(8);
+    doc.text("IYS", 14, headerY + 9);
+  }
+
+  // Right logo
+  try {
+    const logo2Base64 = await getImageBase64("/iskcon_logo.png", 140);
+    doc.addImage(
+      `data:image/png;base64,${logo2Base64}`,
+      "PNG",
+      210 - 12 - logoSize,
+      headerY,
+      logoSize,
+      logoSize
+    );
+  } catch {
+    doc.setDrawColor(...COLORS.border);
+    doc.rect(210 - 12 - logoSize, headerY, logoSize, logoSize);
+    doc.setFontSize(8);
+    doc.text("ISKCON", 210 - 22, headerY + 9);
+  }
+
+  // Header text
+  doc.setFontSize(11);
+  doc.setTextColor(...COLORS.gray);
+  doc.text("IYS Iskcon Ravet, Sri Govind Dham presents", 105, headerY + 5, {
+    align: "center",
+  });
+
   doc.setFontSize(16);
-  doc.text(`${yatra.title} – Registration Confirmation Slip`, 10, 10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...COLORS.primary);
+  doc.text(`IYS Yatra 2026 – ${yatra.title}`, 105, headerY + 11, {
+    align: "center",
+  });
 
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...COLORS.dark);
+
+  // Header underline
+  doc.setDrawColor(...COLORS.primary);
+  doc.setLineWidth(0.5);
+  doc.line(15, headerY + 15, 195, headerY + 15);
+
+  doc.setFontSize(11);
+  doc.text("Registration Confirmation Slip (RCS)", 105, headerY + 23, {
+    align: "center",
+  });
+  const contentStartY = headerY + 32;
   // inside generateRCS
   let qrData = `${baseURL}yatras/mark-attendance/${profile.registration_id}`;
   console.log("QR Data:", qrData);
   const qrBase64 = await QRCode.toDataURL(qrData);
 
   // Add QR to PDF
-  doc.addImage(qrBase64, "PNG", 10, 20, 40, 40);
+  doc.addImage(qrBase64, "PNG", 10, contentStartY, 40, 40);
 
   // -------------------------------------------------------------
   // LEFT: QR placeholder box (empty for now)
   // -------------------------------------------------------------
   doc.setDrawColor(180);
-  doc.rect(10, 20, 40, 40); // (x, y, width, height)
+  doc.rect(10, contentStartY, 40, 40); // (x, y, width, height)
 
   // -------------------------------------------------------------
   // RIGHT: Profile image box
   // -------------------------------------------------------------
   let imgBase64 = null;
-  if (profile.profile_picture_url) {
+  if (profile.profile_picture) {
     try {
-      imgBase64 = await fetchBase64Image(profile.profile_picture_url);
+      imgBase64 = await fetchBase64Image(profile.profile_picture);
       doc.addImage(
         `data:image/jpeg;base64,${imgBase64}`,
         "JPEG",
         160,
-        20,
+        contentStartY,
         40,
         40
       );
@@ -65,7 +189,7 @@ export async function generateRCS(profile, yatra) {
     }
   } else {
     // fallback empty box
-    doc.rect(160, 20, 40, 40);
+    doc.rect(160, contentStartY, 40, 40);
   }
 
   // -------------------------------------------------------------
@@ -73,22 +197,22 @@ export async function generateRCS(profile, yatra) {
   // -------------------------------------------------------------
   const personalRows = [
     ["Name", profile.full_name],
-    ["Gender", profile.gender],
-    ["DOB", fmt(profile.dob)],
+    ["Gender", capitalize(profile.gender)],
+    ["DOB", fmt(profile.dob, false)],
     ["Mobile", profile.mobile],
     ["Email", profile.email],
     ["Member ID", profile.member_id],
     ["Center", profile.center],
-    ["Mentor", `${profile.mentor_name} (${profile.approved_by})` || "—"],
+    ["Counselor", `${profile.mentor_name} (${profile.approved_by})` || "—"],
     ["Registration ID", profile.registration_id],
     [
       "Status",
       profile.is_substitution ? "Substituted" : profile.registration_status,
     ],
   ];
-
+  console.log("Profile :", profile);
   if (profile.is_substitution && profile.pending_substitution_fees) {
-  const pendingNote = `Note: You have to pay balance amount of Rs. ${profile.pending_substitution_fees.total} at the registration counter.`;
+    const pendingNote = `Note: You have to pay balance amount of Rs. ${profile.pending_substitution_fees.total} at the registration counter.`;
 
     personalRows.push([
       "Pending Amount",
@@ -97,7 +221,7 @@ export async function generateRCS(profile, yatra) {
   }
 
   autoTable(doc, {
-    startY: 20,
+    startY: contentStartY,
     margin: { left: 55, right: 55 },
     theme: "grid",
     styles: {
@@ -128,16 +252,15 @@ export async function generateRCS(profile, yatra) {
 
     const accRows = profile.accommodation.map((a) => [
       a.accommodation.place_name,
-      a.room_number || "—",
-      a.bed_number || "—",
       a.accommodation.address,
+      a.room_number || "—",
       fmt(a.accommodation.checkin_datetime),
       fmt(a.accommodation.checkout_datetime),
     ]);
 
     autoTable(doc, {
       startY: cursor + 3,
-      head: [["Place", "Room", "Bed", "Address", "Check-in", "Check-out"]],
+      head: [["Place", "Address", "Room", "Check-in", "Check-out"]],
       body: accRows,
       styles: { fontSize: 8, textColor: [0, 0, 0] },
       headStyles: {
@@ -153,23 +276,34 @@ export async function generateRCS(profile, yatra) {
   // JOURNEY DETAILS
   // -------------------------------------------------------------
   if (profile.journey?.length > 0) {
-    doc.text("Journey Details", 10, cursor);
+    doc.text("Travelling Details", 10, cursor);
 
     const journeyRows = profile.journey.map((j) => [
-      j.journey.type,
+      capitalize(j.journey.type),
       `${j.journey.from_location} -> ${j.journey.to_location}`,
-      j.journey.mode_of_travel,
+      capitalize(j.journey.mode_of_travel),
       j.vehicle_number || "—",
       j.seat_number || "—",
       fmt(j.journey.start_datetime),
+      j.journey.remarks || "—",
     ]);
 
     autoTable(doc, {
       startY: cursor + 3,
-      head: [["Type", "Route", "Mode", "Vehicle/PNR", "Seat", "Departure"]],
+      head: [
+        [
+          "Type",
+          "Route",
+          "Mode",
+          "Vehicle/PNR",
+          "Seat",
+          "Departure",
+          "Details",
+        ],
+      ],
       body: journeyRows,
       styles: { fontSize: 8, textColor: [0, 0, 0] },
-       headStyles: {
+      headStyles: {
         textColor: [255, 255, 255], // (safe even if no head)
         fontStyle: "bold",
       },
@@ -191,7 +325,7 @@ export async function generateRCS(profile, yatra) {
       head: [["Field", "Value"]],
       body: customRows,
       styles: { fontSize: 8, textColor: [0, 0, 0] },
-       headStyles: {
+      headStyles: {
         textColor: [255, 255, 255], // (safe even if no head)
         fontStyle: "bold",
       },
