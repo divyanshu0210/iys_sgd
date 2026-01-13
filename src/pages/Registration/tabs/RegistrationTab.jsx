@@ -23,10 +23,13 @@ const RegistrationTab = ({
     initialLoading,
     currentStep,
     setCurrentStep,
+    applyFilters,
   } = useYatraRegistration();
   const navigate = useNavigate();
 
-  const profiles = registerData.profiles?.filter(filterFn) || [];
+  // const profiles = registerData.profiles?.filter(filterFn) || [];
+
+  const profiles = applyFilters(registerData.profiles?.filter(filterFn)||[],"registered");
 
   const defaultEmptyMessage = (
     <p className="empty-msg">
@@ -64,11 +67,11 @@ const RegistrationTab = ({
           <>
             {showBanner && (
               <div className="rt-banner">
-                <strong>1. </strong> Registration will be complete after
-                payment & verification of all installments.
+                <strong>1. </strong> Registration will be complete after payment
+                & verification of all installments.
                 <br />
-                <strong>2. </strong>Accomodation and travel bookings will be made available only
-                after full payment is received.
+                <strong>2. </strong>Accomodation and travel bookings will be
+                made available only after full payment is received.
                 <br />
               </div>
             )}
@@ -101,15 +104,14 @@ const RegistrationTab = ({
       default:
         return null;
     }
-  }
+  };
 
   return (
-
-<>
-<div className="tab-content">{renderStep()}</div>
-<SubstitutionRequests />
-</>
-  )
-}
+    <>
+      <div className="tab-content">{renderStep()}</div>
+      <SubstitutionRequests />
+    </>
+  );
+};
 
 export default RegistrationTab;

@@ -4,9 +4,10 @@ import WhatsAppCard from "../components/WhatsAppCard";
 import FullPageLoader from "../../../components/FullPageLoader";
 
 const ApproveTab = () => {
-  const { eligibilityData,loading, initialLoading } = useYatraRegistration();
+  const { eligibilityData,loading, initialLoading ,applyFilters } = useYatraRegistration();
 
-  const approveList = eligibilityData.profiles || [];
+  // const approveList = eligibilityData.profiles || [];
+  const approveList = applyFilters(eligibilityData.profiles || [], "approve");
 
   return (
     <div className="tab-content">

@@ -10,52 +10,8 @@ import { generateRCS } from "../scripts/generateRCS";
 import MoreActionsMenu from "./MoreActionsMenu";
 import InitiateSubstitutionModal from "../Substitution/InitiateSubstitutionModal";
 import CancellationModal from "../Substitution/CancellationModal";
+import { STATUS_MAP } from "./YatraRegistrationStatusFilter";
 
-// Full status map (matches backend)
-const STATUS_MAP = {
-  pending: {
-    text: "Not Started",
-    bg: "#e2e3e5",
-    color: "#383d41",
-    icon: "○",
-  },
-  partial: {
-    text: "Incomplete",
-    bg: "#f59e0b",
-    color: "#ffffff",
-    icon: "●",
-  },
-  paid: {
-    text: "Confirmed",
-    bg: "#d4edda",
-    color: "#155724",
-    icon: "✓",
-  },
-  substituted: {
-    text: "Substituted",
-    bg: "#cce5ff",
-    color: "#004085",
-    icon: "⇄",
-  },
-  refunded: {
-    text: "Refunded",
-    bg: "#f8d7da",
-    color: "#721c24",
-    icon: "↩",
-  },
-  cancelled: {
-    text: "Cancelled",
-    bg: "#f8d7da",
-    color: "#721c24",
-    icon: "✗",
-  },
-  attended: {
-    text: "Attended",
-    bg: "#d1ecf1",
-    color: "#0c5460",
-    icon: "✓✓",
-  },
-};
 
 const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
   const {
@@ -82,7 +38,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
     loading?.[`${profileId}-approve`] || loading?.[`${profileId}-unapprove`];
   const isSelfRequesting = loading?.selfRequest && profile.is_self;
   const regData = registrations[profileId];
-  const totalDue = profile.pending_amount || computeTotalDueForProfile(profile);
+  const totalDue = profile?.pending_amount || computeTotalDueForProfile(profile);
   const hasPaid = hasPaidInstallments(profile);
 
   // Check if this profile has existing registration data
@@ -252,7 +208,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
 
             <div className="whatsapp-avatar">
               <img
-                src={profile.profile_picture_url || "/default-avatar.png"}
+                src={profile.profile_picture || "/default-avatar.png"}
                 alt={profile.full_name}
               />
             </div>

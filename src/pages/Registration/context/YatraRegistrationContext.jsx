@@ -18,7 +18,6 @@ export const useYatraRegistration = () => {
 
 export const STORAGE_KEY = "yatra_checkout_session";
 
-
 export const YatraRegistrationProvider = ({ children }) => {
   const { yatra_id } = useParams();
   const { profile } = useAuth();
@@ -30,7 +29,7 @@ export const YatraRegistrationProvider = ({ children }) => {
   const [eligibilityData, setEligibilityData] = useState({ profiles: [] });
   const [activeTab, setActiveTab] = useState("registered");
   const [currentStep, setCurrentStep] = useState(1);
-  
+
   const [selected, setSelected] = useState([]);
   const [registrations, setRegistrations] = useState({});
 
@@ -39,9 +38,11 @@ export const YatraRegistrationProvider = ({ children }) => {
   const [modalMessage, setModalMessage] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
   const yatra = location.state?.yatra || registerData.yatra;
-
-
 
   // Fetch registration data
   const fetchRegistrationData = async (loading = false) => {
@@ -141,6 +142,90 @@ export const YatraRegistrationProvider = ({ children }) => {
     }
   };
 
+  // Filter profiles based on search query and status
+  const applyFilters = (profiles = [], activeTab) => {
+    let filtered = profiles;
+
+    // 🔍 Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+
+      filtered = filtered.filter((p) =>
+        [
+          p.full_name,
+          p.first_name,
+          p.last_name,
+          p.mobile,
+          p.email,
+          String(p.member_id),
+        ]
+          .filter(Boolean)
+          .some((f) => f.toLowerCase().includes(q))
+      );
+    }
+
+    // 🏷 Status filter
+    if (statusFilter !== "all") {
+      if (activeTab === "approve") {
+        filtered =
+          statusFilter === "approved"
+            ? filtered.filter((p) => p.is_approved)
+            : filtered.filter((p) => !p.is_approved);
+      } else {
+        filtered = filtered.filter(
+          (p) => p.registration_status === statusFilter
+        );
+      }
+    }
+
+    return filtered;
+  };
+
+  const getStatusCounts = (activeTab) => {
+    let profiles =
+      activeTab === "approve"
+        ? eligibilityData.profiles || []
+        : registerData.profiles || [];
+
+    // profiles = applyFilters(profiles,activeTab);
+    if (activeTab === "registered") {
+      profiles = profiles.filter((p) => p.is_registered);
+    } else if (activeTab === "newReg") {
+      profiles = profiles.filter((p) => p.is_eligible && !p.is_registered);
+    }
+
+        if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+
+      profiles = profiles.filter((p) =>
+        [
+          p.full_name,
+          p.first_name,
+          p.last_name,
+          p.mobile,
+          p.email,
+          String(p.member_id),
+        ]
+          .filter(Boolean)
+          .some((f) => f.toLowerCase().includes(q))
+      );
+    }
+
+    const counts = { all: profiles.length };
+
+    if (activeTab === "approve") {
+      counts["approved"] = profiles.filter((p) => p.is_approved).length;
+      counts["not_approved"] = profiles.filter((p) => !p.is_approved).length;
+    } else {
+      profiles.forEach((p) => {
+        const status = p.registration_status || "pending";
+        counts[status] = (counts[status] || 0) + 1;
+      });
+    }
+
+    return counts;
+  };
+
   const value = {
     yatra_id,
     profile,
@@ -174,6 +259,12 @@ export const YatraRegistrationProvider = ({ children }) => {
     setInitialLoading,
     currentStep,
     setCurrentStep,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    applyFilters,
+    getStatusCounts,
   };
 
   return (

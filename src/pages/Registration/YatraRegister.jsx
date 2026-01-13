@@ -8,6 +8,8 @@ import ApproveTab from "./tabs/ApproveTab";
 import NewRegistrationTab from "./tabs/NewRegistrationTab";
 import RegisteredTab from "./tabs/RegisteredTab";
 import { useAuth } from "../../context/AuthContext";
+import ProfileSearchBar from "./components/ProfileSearchBar";
+import YatraRegistrationStatusFilter from "./components/YatraRegistrationStatusFilter";
 
 export default function YatraRegister() {
   const {
@@ -24,10 +26,10 @@ export default function YatraRegister() {
     eligibilityData,
   } = useYatraRegistration();
 
-  const {profile} = useAuth();
+  const { profile } = useAuth();
 
   useEffect(() => {
-    if(profile==null) return;
+    if (profile == null) return;
     const loadAll = async () => {
       setInitialLoading(true);
 
@@ -41,7 +43,7 @@ export default function YatraRegister() {
     };
 
     loadAll();
-  }, [yatra_id,profile]);
+  }, [yatra_id, profile]);
 
   const renderActiveTab = () => {
     switch (activeTab) {
@@ -59,7 +61,13 @@ export default function YatraRegister() {
   return (
     <div className="profile-page">
       <Sidebar />
-      <div className="profile-content">{renderActiveTab()}</div>
+      <div className="profile-content">
+        <div className="search-and-filter">
+          <ProfileSearchBar />
+          <YatraRegistrationStatusFilter activeTab={activeTab} />
+        </div>
+        {renderActiveTab()}
+      </div>
 
       <AlertModal
         show={showModal}
