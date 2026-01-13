@@ -17,7 +17,7 @@ export default function MemberDetailsCard({ m }) {
     <div className="member-content">
       <div className="member-photo">
         <img
-          src={m.profile_picture_url || "/default-avatar.png"}
+          src={m.profile_picture   || "/default-avatar.png"}
           alt={m.full_name || "Member"}
         />
       </div>
@@ -49,11 +49,11 @@ export default function MemberDetailsCard({ m }) {
         {m.email && (
           <p className="member-line">
             Email: {m.email}
-            {m.email2 ? `, ${m.email2}` : ""} (Personal)
+            {m.email2 ? `, ${m.email2}` : ""} 
           </p>
         )}
         {m.mobile && (
-          <p className="member-line">Mobile: {m.mobile} (Personal)</p>
+          <p className="member-line">Mobile: {m.mobile}</p>
         )}
         {isPending && m.request_created_at && (
           <p
