@@ -3,7 +3,7 @@ import autoTable from "jspdf-autotable";
 import API from "../../../services/api";
 import QRCode from "qrcode";
 
-const baseURL = import.meta.env.VITE_BACKEND_URL;
+const adminBaseURL = import.meta.env.VITE_ADMIN_BACKEND_URL;
 // Color palette (ISKCON-inspired)
 const COLORS = {
   primary: [255, 87, 34], // saffron/orange
@@ -94,7 +94,7 @@ export async function generateRCS(profile, yatra) {
 
   // Left logo
   try {
-    const logoBase64 = await getImageBase64("/iys_logo.png", 140);
+    const logoBase64 = await getImageBase64("/iys_logo.png", 150);
     doc.addImage(
       `data:image/png;base64,${logoBase64}`,
       "PNG",
@@ -112,7 +112,7 @@ export async function generateRCS(profile, yatra) {
 
   // Right logo
   try {
-    const logo2Base64 = await getImageBase64("/iskcon_logo.png", 140);
+    const logo2Base64 = await getImageBase64("/sp.jpg", 200);
     doc.addImage(
       `data:image/png;base64,${logo2Base64}`,
       "PNG",
@@ -129,15 +129,16 @@ export async function generateRCS(profile, yatra) {
   }
 
   // Header text
-  doc.setFontSize(11);
-  doc.setTextColor(...COLORS.gray);
-  doc.text("IYS Iskcon Ravet, Sri Govind Dham presents", 105, headerY + 5, {
-    align: "center",
-  });
-
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...COLORS.primary);
+  doc.text("IYS Iskcon Ravet, Sri Govind Dham", 105, headerY + 5, {
+    align: "center",
+  });
+
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...COLORS.gray);
   doc.text(`IYS Yatra 2026 – ${yatra.title}`, 105, headerY + 11, {
     align: "center",
   });
@@ -154,9 +155,9 @@ export async function generateRCS(profile, yatra) {
   doc.text("Registration Confirmation Slip (RCS)", 105, headerY + 23, {
     align: "center",
   });
-  const contentStartY = headerY + 32;
+  const contentStartY = headerY + 28;
   // inside generateRCS
-  let qrData = `${baseURL}yatras/mark-attendance/${profile.registration_id}`;
+  let qrData = `${adminBaseURL}mark-attendance/${profile.registration_id}`;
   console.log("QR Data:", qrData);
   const qrBase64 = await QRCode.toDataURL(qrData);
 
@@ -210,7 +211,6 @@ export async function generateRCS(profile, yatra) {
       profile.is_substitution ? "Substituted" : profile.registration_status,
     ],
   ];
-  console.log("Profile :", profile);
   if (profile.is_substitution && profile.pending_substitution_fees) {
     const pendingNote = `Note: You have to pay balance amount of Rs. ${profile.pending_substitution_fees.total} at the registration counter.`;
 
@@ -241,7 +241,8 @@ export async function generateRCS(profile, yatra) {
     },
   });
 
-  let cursor = doc.lastAutoTable.finalY + 10;
+  const tableGap = 7;
+  let cursor = doc.lastAutoTable.finalY + tableGap;
 
   // -------------------------------------------------------------
   // ACCOMMODATION DETAILS
@@ -269,7 +270,7 @@ export async function generateRCS(profile, yatra) {
       },
     });
 
-    cursor = doc.lastAutoTable.finalY + 10;
+    cursor = doc.lastAutoTable.finalY + tableGap;
   }
 
   // -------------------------------------------------------------
@@ -309,7 +310,7 @@ export async function generateRCS(profile, yatra) {
       },
     });
 
-    cursor = doc.lastAutoTable.finalY + 10;
+    cursor = doc.lastAutoTable.finalY + tableGap;
   }
 
   // -------------------------------------------------------------
@@ -331,7 +332,7 @@ export async function generateRCS(profile, yatra) {
       },
     });
 
-    cursor = doc.lastAutoTable.finalY + 10;
+    cursor = doc.lastAutoTable.finalY + tableGap;
   }
 
   // -------------------------------------------------------------
