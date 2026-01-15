@@ -198,10 +198,13 @@ export async function generateRCS(profile,authProfile, yatra) {
     doc.rect(160, contentStartY, 40, 40);
   }
 
+  console.log(profile)
+
   // -------------------------------------------------------------
   // MIDDLE: Personal Details table (between QR and photo)
   // -------------------------------------------------------------
   const personalRows = [
+    ["Initiated Name", profile.initiated_name],
     ["Name", profile.full_name],
     ["Gender", capitalize(profile.gender)],
     ["DOB", fmt(profile.dob, false)],
