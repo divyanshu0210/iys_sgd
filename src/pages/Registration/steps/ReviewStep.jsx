@@ -75,7 +75,7 @@ const ReviewStep = () => {
               return (
                 <tr key={id}>
                   <td>
-                    <strong>{profile.full_name || "Unknown"}</strong>
+                    <strong>{profile.is_initiated?profile.initiated_name:profile.full_name || "Unknown"}</strong>
                     <div style={{ fontSize: "12px", color: "#666" }}>
                       ID: {profile.member_id}
                     </div>
@@ -143,7 +143,7 @@ const ReviewStep = () => {
             return (
               <div key={id} className="review-mobile-card">
                 <div className="mobile-card-header">
-                  <strong>{profile.full_name || "Unknown"}</strong>
+                  <strong>{profile.is_initiated?profile.initiated_name:profile.full_name || "Unknown"}</strong>
                   <span className="mobile-card-id">
                     ID: {profile.member_id}
                   </span>

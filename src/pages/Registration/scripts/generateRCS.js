@@ -204,7 +204,7 @@ export async function generateRCS(profile,authProfile, yatra) {
   // MIDDLE: Personal Details table (between QR and photo)
   // -------------------------------------------------------------
   const personalRows = [
-    ["Initiated Name", profile.initiated_name],
+    ["Initiated Name", profile.initiated_name?profile.initiated_name:""],
     ["Name", profile.full_name],
     ["Gender", capitalize(profile.gender)],
     ["DOB", fmt(profile.dob, false)],
@@ -362,7 +362,7 @@ export async function generateRCS(profile,authProfile, yatra) {
     cursor + 10
   );
 
-  doc.save(`${profile.full_name}_RCS.pdf`);
+  doc.save(`${profile.is_initiated?profile.initiated_name:profile.full_name}_RCS.pdf`);
 }
 
 function renderImportantContacts(doc, yatra, cursor, tableGap) {
@@ -448,5 +448,5 @@ function renderImportantNotes(doc, yatra, cursor, tableGap) {
     cursor += lines.length * lineHeight + noteGap;
   });
 
-  return cursor + tableGap;
+  return cursor-lineHeight-noteGap ;
 }

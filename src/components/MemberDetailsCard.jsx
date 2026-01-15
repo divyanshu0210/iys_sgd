@@ -26,7 +26,7 @@ export default function MemberDetailsCard({ m }) {
         <div className="member-name-row">
           <div style={{ display: "flex" , flexDirection:"column"}}>
 
-          <p className="member-line name-line">{m.full_name || "Unnamed"}</p>
+          <p className="member-line name-line">{m.is_initiated?m.initiated_name:m.full_name || "Unnamed"}</p>
              {isPending && <span className="pending-label">(Pending)</span>}
           </div>
           <MemberActions m={m} />

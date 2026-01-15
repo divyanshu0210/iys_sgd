@@ -155,6 +155,7 @@ export const YatraRegistrationProvider = ({ children }) => {
           p.full_name,
           p.first_name,
           p.last_name,
+          p.initiated_name,
           p.mobile,
           p.email,
           String(p.member_id),
@@ -200,6 +201,7 @@ export const YatraRegistrationProvider = ({ children }) => {
       profiles = profiles.filter((p) =>
         [
           p.full_name,
+          p.initiated_name,
           p.first_name,
           p.last_name,
           p.mobile,

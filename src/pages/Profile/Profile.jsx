@@ -129,7 +129,7 @@ export default function Profile() {
               </div>
 
               <div className="profile-info-compact">
-                <h2 className="profile-name">{profile?.full_name}  (ID: {profile?.member_id || "N/A"})</h2>
+                <h2 className="profile-name">{profile.is_initiated?profile.initiated_name:profile.full_name}  (ID: {profile?.member_id || "N/A"})</h2>
                 <p className="profile-username">{profile?.email || "guest"}</p>
 
                 <div className="profile-member-info">

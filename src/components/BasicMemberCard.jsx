@@ -23,7 +23,7 @@ export default function BasicMemberCard({ m }) {
 
       <div className="member-info">
         <p className="member-line name-line">
-          {m.full_name || "Unnamed"}
+          {m.is_initiated?m.initiated_name:m.full_name || "Unnamed"}
         </p>
 
         <p className="member-line">

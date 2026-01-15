@@ -232,7 +232,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                     overflow: "visible",
                   }}
                 >
-                  <strong>{profile.full_name}</strong>
+                  <strong>{profile.is_initiated?profile.initiated_name:profile.full_name}</strong>
                 </div>
                 {profile.is_self && <span className="badge-self">You</span>}
               </div>

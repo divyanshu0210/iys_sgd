@@ -192,7 +192,7 @@ function RegistrationFormModal({ profile, onClose }) {
         <header className="modal-header">
           <h2 className="modal-title">
             {isReadOnly ? "View Registration" : "Register"} —{" "}
-            <span className="highlight">{profile.full_name}</span>
+            <span className="highlight">{profile.is_initiated?profile.initiated_name:profile.full_name}</span>
           </h2>
           <button className="form-close-btn" onClick={onClose}>
             X
