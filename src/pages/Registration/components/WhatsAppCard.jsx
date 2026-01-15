@@ -11,7 +11,7 @@ import MoreActionsMenu from "./MoreActionsMenu";
 import InitiateSubstitutionModal from "../Substitution/InitiateSubstitutionModal";
 import CancellationModal from "../Substitution/CancellationModal";
 import { STATUS_MAP } from "./YatraRegistrationStatusFilter";
-
+import { useAuth } from "../../../context/AuthContext";
 
 const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
   const {
@@ -25,6 +25,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
     requestApproval,
     setRegistrations,
   } = useYatraRegistration();
+  const { profile: authProfile } = useAuth();
   const [openInfoModal, setOpenInfoModal] = useState(false);
   const [localShowForm, setLocalShowForm] = useState(false);
   const [openSubstitutionModal, setOpenSubstitutionModal] = useState(false);
@@ -38,7 +39,8 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
     loading?.[`${profileId}-approve`] || loading?.[`${profileId}-unapprove`];
   const isSelfRequesting = loading?.selfRequest && profile.is_self;
   const regData = registrations[profileId];
-  const totalDue = profile?.pending_amount || computeTotalDueForProfile(profile);
+  const totalDue =
+    profile?.pending_amount || computeTotalDueForProfile(profile);
   const hasPaid = hasPaidInstallments(profile);
 
   // Check if this profile has existing registration data
@@ -421,7 +423,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                       color: "black",
                       backgroundColor: "white",
                     }}
-                    onClick={() => generateRCS(profile, yatra)}
+                    onClick={() => generateRCS(profile,authProfile, yatra)}
                   >
                     Print RCS
                   </button>

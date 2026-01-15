@@ -78,20 +78,25 @@ async function getImageBase64(logoUrl, targetSize = 120) {
     };
   });
 }
-export async function generateRCS(profile, yatra) {
+
+
+let pageHeight = 0;
+export async function generateRCS(profile,authProfile, yatra) {
   const doc = new jsPDF({
     orientation: "p",
     unit: "mm",
     format: "a4",
     compress: true, // ← enables PDF-level compression
   });
+  pageHeight = doc.getPageHeight()-10;
+  console.log(pageHeight,authProfile)
+
   // -------------------------------------------------------------
   // ────────────────────────────────────────────────
   // HEADER
   // ────────────────────────────────────────────────
   const headerY = 8;
   const logoSize = 12;
-
   // Left logo
   try {
     const logoBase64 = await getImageBase64("/iys_logo.png", 150);
@@ -335,22 +340,110 @@ export async function generateRCS(profile, yatra) {
     cursor = doc.lastAutoTable.finalY + tableGap;
   }
 
+  cursor = renderImportantContacts(doc, yatra, cursor, tableGap);
+  cursor = renderImportantNotes(doc, yatra, cursor, tableGap);
+
   // -------------------------------------------------------------
   // FOOTER
   // -------------------------------------------------------------
   const now = new Date().toLocaleString("en-IN");
-
-  if (cursor > 270) {
+  if (cursor > pageHeight) {
     doc.addPage();
     cursor = 20;
   }
 
   doc.setFontSize(7);
   doc.text(
-    `Downloaded by ${profile.full_name} (${profile.email}) on ${now}`,
+    `Downloaded by ${authProfile.full_name} (${authProfile.email}) on ${now}`,
     10,
     cursor + 10
   );
 
   doc.save(`${profile.full_name}_RCS.pdf`);
+}
+
+function renderImportantContacts(doc, yatra, cursor, tableGap) {
+  const contacts = (yatra.contact_categories || [])
+    .filter((c) => c.show_in_rcs === true)
+    .map((c, index) => ({ ...c, _idx: index }))
+    .sort((a, b) => {
+      const orderDiff = (a.order ?? 0) - (b.order ?? 0);
+      return orderDiff !== 0 ? orderDiff : a._idx - b._idx;
+    });
+
+  if (!contacts.length) return cursor;
+
+  if (cursor > pageHeight) {
+    doc.addPage();
+    cursor = 20;
+  }
+
+  // Title
+  doc.setFontSize(10);
+  doc.text("Important Contact Numbers", 10, cursor);
+  cursor += 6;
+
+  doc.setFontSize(9);
+
+  const lineHeight = 4;
+  const contactGap = 2;
+  const maxWidth = 180;
+
+  contacts.forEach((c, idx) => {
+    const numbersText = c.numbers ? `: ${c.numbers}` : "";
+    const text = `${idx + 1}. ${c.title}${numbersText}`;
+
+    const lines = doc.splitTextToSize(text, maxWidth);
+
+    if (cursor + lines.length * lineHeight > pageHeight) {
+      doc.addPage();
+      cursor = 20;
+    }
+
+    doc.text(lines, 12, cursor);
+    cursor += lines.length * lineHeight + contactGap;
+  });
+
+  return cursor + tableGap / 2;
+}
+
+function renderImportantNotes(doc, yatra, cursor, tableGap) {
+  const notes = (yatra.important_notes || [])
+    .filter((n) => n.show_in_rcs === true)
+    .map((n, index) => ({ ...n, _idx: index }))
+    .sort((a, b) => {
+      const orderDiff = (a.order ?? 0) - (b.order ?? 0);
+      return orderDiff !== 0 ? orderDiff : a._idx - b._idx;
+    });
+
+  if (!notes.length) return cursor;
+
+  if (cursor > pageHeight) {
+    doc.addPage();
+    cursor = 20;
+  }
+
+  doc.setFontSize(10);
+  doc.text("Important Notes", 10, cursor);
+
+  doc.setFontSize(9);
+  cursor += 6;
+
+  const lineHeight = 4;
+  const noteGap = 1;
+
+  notes.forEach((n, idx) => {
+    const text = `${idx + 1}. ${n.note}`;
+    const lines = doc.splitTextToSize(text, 180);
+
+    if (cursor + lines.length * lineHeight > pageHeight) {
+      doc.addPage();
+      cursor = 20;
+    }
+
+    doc.text(lines, 12, cursor);
+    cursor += lines.length * lineHeight + noteGap;
+  });
+
+  return cursor + tableGap;
 }
