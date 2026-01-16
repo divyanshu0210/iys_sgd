@@ -137,7 +137,7 @@ export async function generateRCS(profile,authProfile, yatra) {
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...COLORS.primary);
-  doc.text("IYS Iskcon Ravet, Sri Govind Dham", 105, headerY + 5, {
+  doc.text("IYS ISKCON RAVET, SRI GOVIND DHAM", 105, headerY + 5, {
     align: "center",
   });
 
