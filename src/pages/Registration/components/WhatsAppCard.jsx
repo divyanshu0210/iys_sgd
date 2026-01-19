@@ -164,7 +164,11 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
      setDownloading(true);
   try {
     const success = await generateRCS(profile, authProfile, yatra);
-    if( success) trackRCSDownload(profile.registration_id);
+    if( success) 
+      {
+        setDownloading(false);
+        trackRCSDownload(profile.registration_id);
+      }
   } catch (err) {
     console.error("RCS download failed", err);
     // Optional: show toast
