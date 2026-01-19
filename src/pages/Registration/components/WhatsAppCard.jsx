@@ -6,7 +6,7 @@ import RegistrationFormModal from "../steps/RegistrationFormModal";
 import API from "../../../services/api";
 import Modal from "../../../components/Modal";
 import AccomodationTravelInfo from "./AccomodationTravelInfo";
-import { generateRCS } from "../scripts/generateRCS";
+import { generateRCS, trackRCSDownload } from "../scripts/generateRCS";
 import MoreActionsMenu from "./MoreActionsMenu";
 import InitiateSubstitutionModal from "../Substitution/InitiateSubstitutionModal";
 import CancellationModal from "../Substitution/CancellationModal";
@@ -32,6 +32,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
   const [openCancellationModal, setOpenCancellationModal] = useState(false);
 
   const [isLoadingRegistration, setIsLoadingRegistration] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const profileId = profile.id || profile.profile_id;
   const isApproved = profile.is_approved ?? profile.is_eligible;
@@ -71,17 +72,6 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
     ?.filter((i) => i.tag === "verified")
     .reduce((sum, i) => sum + Number(i.amount), 0);
 
-  // console.log(
-  //   "selectableInstallments",
-  //   yatra,
-  //   registrations,
-  //   profile,
-  //   profileId,
-  //   selectableInstallments,
-  //   regData,
-  //   regData?.installments_selected,
-  //   hasSelectableInstallments
-  // );
   const getButtonText = () => {
     if (isLoadingRegistration) return "Loading...";
     if (profile.is_registered || hasExistingData) return "Payments";
@@ -169,6 +159,21 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
   const handleModalClose = () => {
     setLocalShowForm(false);
   };
+
+  const handleRCSDownload = async () => {
+     setDownloading(true);
+  try {
+    const success = await generateRCS(profile, authProfile, yatra);
+    if( success) trackRCSDownload(profile.registration_id);
+  } catch (err) {
+    console.error("RCS download failed", err);
+    // Optional: show toast
+    // toast.error("Failed to download RCS. Please try again.");
+  }
+   finally {
+    setDownloading(false);
+  }
+};
 
   return (
     <>
@@ -423,7 +428,8 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                       color: "black",
                       backgroundColor: "white",
                     }}
-                    onClick={() => generateRCS(profile,authProfile, yatra)}
+                    onClick={handleRCSDownload}
+                    disabled={downloading} 
                   >
                     Print RCS
                   </button>

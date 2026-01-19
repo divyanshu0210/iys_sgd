@@ -198,8 +198,6 @@ export async function generateRCS(profile,authProfile, yatra) {
     doc.rect(160, contentStartY, 40, 40);
   }
 
-  console.log(profile)
-
   // -------------------------------------------------------------
   // MIDDLE: Personal Details table (between QR and photo)
   // -------------------------------------------------------------
@@ -363,6 +361,7 @@ export async function generateRCS(profile,authProfile, yatra) {
   );
 
   doc.save(`${profile.is_initiated?profile.initiated_name:profile.full_name}_RCS.pdf`);
+  return true;
 }
 
 function renderImportantContacts(doc, yatra, cursor, tableGap) {
@@ -450,3 +449,10 @@ function renderImportantNotes(doc, yatra, cursor, tableGap) {
 
   return cursor-lineHeight-noteGap ;
 }
+
+
+export const trackRCSDownload = (registrationId) => {
+  API.post(`/yatras/${registrationId}/rcs-download/`).catch(() => {
+    // NEVER block UI for analytics
+  });
+};
