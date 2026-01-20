@@ -22,6 +22,7 @@ import ForgotPassword from "../pages/Auth/ForgotPassword";
 import ResetPassword from "../pages/Auth/ResetPassword";
 import PasswordResetSuccess from "../pages/Auth/PasswordResetSuccess";
 import DonationDetailsPage from "../pages/Donate/DonationDetailsPage";
+import ResourcesPage from "../pages/Resources/ResourcesPage";
 
 export default function AppRoutes() {
   return (
@@ -61,6 +62,7 @@ export default function AppRoutes() {
             <Route path="/checkout" element={<CheckoutStep />} />
           </Route>
         </Route>
+        <Route path="/resources" element={<ResourcesPage />} />
       </Route>
 
       {/* Profile (public?) */}

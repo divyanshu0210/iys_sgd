@@ -12,6 +12,7 @@ import InitiateSubstitutionModal from "../Substitution/InitiateSubstitutionModal
 import CancellationModal from "../Substitution/CancellationModal";
 import { STATUS_MAP } from "./YatraRegistrationStatusFilter";
 import { useAuth } from "../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
   const {
@@ -26,6 +27,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
     setRegistrations,
   } = useYatraRegistration();
   const { profile: authProfile } = useAuth();
+  const navigate = useNavigate();
   const [openInfoModal, setOpenInfoModal] = useState(false);
   const [localShowForm, setLocalShowForm] = useState(false);
   const [openSubstitutionModal, setOpenSubstitutionModal] = useState(false);
@@ -161,23 +163,29 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
   };
 
   const handleRCSDownload = async () => {
-     setDownloading(true);
-  try {
-    const success = await generateRCS(profile, authProfile, yatra);
-    if( success) 
-      {
+    setDownloading(true);
+    try {
+      const success = await generateRCS(profile, authProfile, yatra);
+      if (success) {
         setDownloading(false);
         trackRCSDownload(profile.registration_id);
       }
-  } catch (err) {
-    console.error("RCS download failed", err);
-    // Optional: show toast
-    // toast.error("Failed to download RCS. Please try again.");
-  }
-   finally {
-    setDownloading(false);
-  }
-};
+    } catch (err) {
+      console.error("RCS download failed", err);
+      // Optional: show toast
+      // toast.error("Failed to download RCS. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const openResources = () => {
+    const params = new URLSearchParams();
+
+    if (yatra) params.append("yatra", yatra.id);
+
+    navigate(`/resources?${params.toString()}`);
+  };
 
   return (
     <>
@@ -241,7 +249,11 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                     overflow: "visible",
                   }}
                 >
-                  <strong>{profile.is_initiated?profile.initiated_name:profile.full_name}</strong>
+                  <strong>
+                    {profile.is_initiated
+                      ? profile.initiated_name
+                      : profile.full_name}
+                  </strong>
                 </div>
                 {profile.is_self && <span className="badge-self">You</span>}
               </div>
@@ -396,50 +408,66 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
               marginTop: "10px",
             }}
           >
-            <button
-              onClick={() => toggleSelect(profile)}
-              className={`action-btn ${hasExistingData ? "edit" : "open"}`}
-              style={{
-                minWidth: "80px",
-                maxHeight: "35px",
-                color: "black",
-                backgroundColor: "white",
-              }}
-              disabled={isLoadingRegistration}
-            >
-              {getButtonText()}
-            </button>
+            {!yatra.is_rcs_download_open && (
+              <button
+                onClick={() => toggleSelect(profile)}
+                className={`action-btn ${hasExistingData ? "edit" : "open"}`}
+                style={{
+                  minWidth: "80px",
+                  maxHeight: "35px",
+                  color: "black",
+                  backgroundColor: "white",
+                }}
+                disabled={isLoadingRegistration}
+              >
+                {getButtonText()}
+              </button>
+            )}
 
             {registrationStatus === "paid" && (
               // {registrationStatus && (
               <>
-                <button
-                  onClick={() => setOpenInfoModal(true)}
-                  className="action-btn"
-                  style={{
-                    maxWidth: "fit-content",
-                    color: "black",
-                    backgroundColor: "white",
-                  }}
-                >
-                  Travel Info
-                </button>
-                {yatra.is_rcs_download_open && (
+                {yatra.is_rcs_download_open ? (
+                  <>
+                    <button
+                      className="action-btn"
+                      style={{
+                        maxWidth: "fit-content",
+                        color: "black",
+                        backgroundColor: "white",
+                      }}
+                      onClick={handleRCSDownload}
+                      disabled={downloading}
+                    >
+                      Print RCS
+                    </button>
+                  </>
+                ) : (
                   <button
+                    onClick={() => setOpenInfoModal(true)}
                     className="action-btn"
                     style={{
                       maxWidth: "fit-content",
                       color: "black",
                       backgroundColor: "white",
                     }}
-                    onClick={handleRCSDownload}
-                    disabled={downloading} 
                   >
-                    Print RCS
+                    Travel Info
                   </button>
                 )}
               </>
             )}
+                       <button
+              className="action-btn"
+              style={{
+                maxWidth: "fit-content",
+                color: "black",
+                backgroundColor: "white",
+              }}
+              onClick={openResources}
+            >
+              View Resources
+            </button>
             {["paid", "partial"].includes(registrationStatus) && (
               <>
                 {(yatra.is_substitution_open || yatra.is_cancellation_open) && (
