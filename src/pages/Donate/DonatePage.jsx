@@ -3,45 +3,22 @@ import React, { useState } from "react";
 import ImageSlider from "./ImageSlider";
 import { useNavigate } from "react-router-dom";
 
+
 export default function DonatePage() {
   const [qrLoading, setQrLoading] = useState(true);
   const navigate = useNavigate();
 
   return (
-    <div className="donate-page">
-      <div className="donate-header">
-        <h1 className="donate-heading">Support IYS Sri Govind Dham</h1>
-        <p className="donate-sub">
-          प्राणैरर्थैर्धिया वाचा — let your wealth help reawaken devotion in
-          every soul.
-        </p>
-      </div>
 
-      <div className="donate-wrapper">
-        <div className="donate-right">
-          <div className="donation-card">
-            {/* <div className="qr-box">
-              {qrLoading && <div className="qr-loader" />}
+    <div className="donation-container">
+        <img src="/Donation_Page_Poster.png" alt="Donation" className="bg-image" />
 
-              <img
-                src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Sample"
-                className={`qr-img ${qrLoading ? "hidden" : ""}`}
-                alt="QR"
-                onLoad={() => setQrLoading(false)}
-                onError={() => setQrLoading(false)}
-              />
-
-              <p className="upi-note">
-                Google Pay • PhonePe • Paytm • All UPI Apps
-              </p>
-            </div> */}
-
-            <AccountDetail />
-
-            <button className="donate-btn"  onClick={() => navigate("/donate/details")}>Share Donation Details</button>
-          </div>
-        </div>
-      </div>
+      <button
+        className="donate-btn"
+        onClick={() => navigate("/donate/details")}
+      >
+        Donate Now
+      </button>
     </div>
   );
 }
@@ -49,7 +26,7 @@ export default function DonatePage() {
 function Detail({ label, value }) {
   return (
     <div className="detail-row">
-      <span>{label}</span>
+      <span style={{ color: "#285fa1", fontWeight: "bold" }}>{label}</span>
       <strong>{value}</strong>
     </div>
   );
@@ -61,6 +38,7 @@ export function AccountDetail() {
       <Detail label="Account Number" value="337001000234" />
       <Detail label="IFSC Code" value="ICIC0003370" />
       <Detail label="Bank Name" value="ICICI Bank Nigdi" />
+      <p style={{ textAlign: "center", fontWeight: "bold" }}>Or</p>
       <Detail label="UPI" value="7774032548" />
     </div>
   );
