@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import "./ResourcesTutorialModal.css";
 import { ChevronRight, Menu } from "lucide-react"; // Lucide icon
 import { useState } from "react";
+import FullPageLoader from "../../components/FullPageLoader";
 
 export default function ResourcesTutorialModal({ onClose }) {
   const navigate = useNavigate();
@@ -23,32 +24,7 @@ export default function ResourcesTutorialModal({ onClose }) {
 
       <div className="gif-wrapper" style={{ position: "relative" }}>
         {loading && (
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              background: "rgba(0,0,0,0.1)",
-              zIndex: 1,
-            }}
-          >
-            <div
-              className="spinner"
-              style={{
-                border: "4px solid #f3f3f3",
-                borderTop: "4px solid #2c3e50",
-                borderRadius: "50%",
-                width: "40px",
-                height: "40px",
-                animation: "spin 1s linear infinite",
-              }}
-            ></div>
-          </div>
+          <FullPageLoader/>
         )}
 
         <video

@@ -16,8 +16,8 @@ export default function ResourceFilters({ filters, onChange }) {
         <option value="">All Languages</option>
         <option value="hi">Hindi</option>
         <option value="en">English</option>
-        <option value="mr">Marathi</option>
-        <option value="kn">Kannada</option>
+        {/* <option value="mr">Marathi</option> */}
+        {/* <option value="kn">Kannada</option> */}
       </select>
 
       <select onChange={(e) => update("type", e.target.value)}>
