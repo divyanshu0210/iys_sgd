@@ -43,10 +43,10 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [prevScrollPos, donatePage]);
 
-  const NavLink = ({ to,replace = false, children }) => (
+  const NavLink = ({ to, replace = false, children }) => (
     <Link
       to={to}
-       replace={replace}
+      replace={replace}
       onClick={(e) => {
         if (isNavigationLocked) {
           e.preventDefault();
@@ -145,7 +145,7 @@ export default function Navbar() {
         {/* Desktop Menu */}
         <div className={`desktop-menu ${!user ? "always-visible" : ""}`}>
           <NavLink to="/donate">Donate</NavLink>
-          <NavLink to="/">Home</NavLink>
+          {/* <NavLink to="/">Home</NavLink> */}
           {user ? (
             profileStage !== "not-exists" ? (
               <>
@@ -153,6 +153,7 @@ export default function Navbar() {
                   <NavLink to="/members">Members</NavLink>
                 )}
                 <NavLink to="/yatras">Yatras</NavLink>
+                <NavLink to="/resources">Resources</NavLink>
                 <NavLink to="/profile">Profile</NavLink>
                 <button
                   onClick={() => {
@@ -192,8 +193,13 @@ export default function Navbar() {
             )
           ) : (
             <>
-              <NavLink replace to="/signup">Sign Up</NavLink>
-              <NavLink replace to="/signin">Sign In</NavLink>
+              <NavLink to="/resources">Resources</NavLink>
+              <NavLink replace to="/signup">
+                Sign Up
+              </NavLink>
+              <NavLink replace to="/signin">
+                Sign In
+              </NavLink>
             </>
           )}
         </div>
@@ -240,17 +246,22 @@ export default function Navbar() {
               ✕
             </button>
 
-            <NavLink to="/">Home</NavLink>
+            {/* <NavLink to="/">Home</NavLink> */}
             {profileStage !== "not-exists" ? (
               <>
                 {(profileStage === "devotee" || profileStage === "mentor") && (
                   <NavLink to="/members">Members</NavLink>
                 )}
                 <NavLink to="/yatras">Yatras</NavLink>
+                <NavLink to="/resources">Resources</NavLink>
+
                 <NavLink to="/profile">Profile</NavLink>
               </>
             ) : (
-              <NavLink to="/complete-profile">Profile</NavLink>
+              <>
+                <NavLink to="/resources">Resources</NavLink>
+                <NavLink to="/complete-profile">Profile</NavLink>
+              </>
             )}
             <button
               onClick={() => {

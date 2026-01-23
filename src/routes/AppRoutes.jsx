@@ -62,13 +62,13 @@ export default function AppRoutes() {
             <Route path="/checkout" element={<CheckoutStep />} />
           </Route>
         </Route>
-        <Route path="/resources" element={<ResourcesPage />} />
       </Route>
 
       {/* Profile (public?) */}
       <Route path="/profile" element={<Profile />} />
       <Route path="/donate" element={<DonatePage />} />
       <Route path="/donate/details" element={<DonationDetailsPage />} />
+      <Route path="/resources" element={<ResourcesPage />} />
 
       {/* Role Protected */}
       <Route

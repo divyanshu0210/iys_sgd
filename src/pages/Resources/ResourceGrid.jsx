@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ResourceCard from "./ResourceCard";
 
-const GRID_LIMIT = 6;
+const GRID_LIMIT = 9;
 
 export default function ResourceGrid({ resources, layout }) {
   const [expanded, setExpanded] = useState(false);
