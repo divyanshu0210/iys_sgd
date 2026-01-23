@@ -59,7 +59,7 @@
 
 .gif-wrapper {
   margin: 1rem 0;
-  max-height: 400px;
+  max-height: 350px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -68,7 +68,7 @@
 }
 
 .gif-wrapper video {
-  max-height: 400px;
+  max-height: 350px;
   width: 100%;
   max-width: 420px;
   object-fit: contain; /* 👈 important */
