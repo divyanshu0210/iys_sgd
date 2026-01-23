@@ -59,6 +59,11 @@ export function AuthProvider({ children }) {
     initializeAuth();
   }, []);
 
+    useEffect(() => {
+    const img = new Image();
+    img.src = "/Donation_Page_Poster_2.png";
+  }, []);
+
   const login = async (email, password) => {
     const username = email.split("@")[0]; // derive username from email
     const res = await API.post("api/auth/login/", {
