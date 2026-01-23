@@ -1,24 +1,29 @@
 import "../../css/DonatePage.css";
-import React, { useState } from "react";
-import ImageSlider from "./ImageSlider";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 
-
 export default function DonatePage() {
-  const [qrLoading, setQrLoading] = useState(true);
   const navigate = useNavigate();
 
   return (
-
     <div className="donation-container">
-        <img src="/Donation_Page_Poster.png" alt="Donation" className="bg-image" />
+      <img
+        src="/Donation_Page_Poster_2.png"
+        alt="Donation"
+        className="bg-image"
+      />
 
-      <button
-        className="donate-btn"
-        onClick={() => navigate("/donate/details")}
-      >
-        Donate Now
-      </button>
+      <div className="donate-cta-container">
+        <button
+          className="donate-btn"
+          onClick={() => navigate("/donate/details")}
+        >
+          Donate Now
+        </button>
+        <p className="donate-text">
+          Click on <strong>Donate Now</strong> to make your contribution !!
+        </p>
+      </div>
     </div>
   );
 }

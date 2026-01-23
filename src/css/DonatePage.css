@@ -224,39 +224,61 @@
   color: #333;
   font-weight: 500;
 }
+/* ====================================================== */
+/* ====================================================== */
 
 .donation-container {
   width: 100vw;
-  position: absolute;
   display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .bg-image {
   width: 100%;
-  object-fit: contain; /* full image, no crop */
-  align-self: center;
+  object-fit: contain;
+}
+
+/* CTA container below image */
+.donate-cta-container {
+  padding: 10px;
+  text-align: center;
+  background: #975037;
+  width: 100%;
+  border: none;
+}
+
+/* Text */
+.donate-text {
+  font-size: 10px;
+  color: #fff;
 }
 
 /* Button */
 .donate-btn {
-  position: absolute;
-  bottom: 9%;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 8px 20px;
+  padding: 10px 28px;
   font-size: 18px;
   border-radius: 30px;
   border: none;
   background: #ffb703;
   color: #000;
   cursor: pointer;
+  margin-bottom: 5px;
+
 }
 
-/* =========================
-   Desktop Responsive Styles
-   ========================= */
+/* Desktop */
 @media (min-width: 768px) {
-  .donation-container {
+  .donate-cta-container {
+      max-width: 1200px;
+      width: 56%;
+  }
+
+  .donate-text {
+    font-size: 15px;
+  }
+
+    .donation-container {
     max-width: 1200px;
     margin: 0 auto;
     height: 80vh;
@@ -267,16 +289,14 @@
     height: 100%;
   }
 
-  .donate-btn {
-    bottom: 80px;
-    padding: 12px 36px;
+  .donate-btn{
     font-size: 20px;
   }
+
 }
 
-.fade-in {
-  animation: fadeIn 0.7s ease-in;
-}
+/* ====================================================== */
+/* ====================================================== */
 
 
 
