@@ -1,0 +1,113 @@
+.resources-tutorial {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.resources-tutorial h2 {
+  margin-bottom: 0.5rem;
+}
+
+.note {
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+
+}
+.tutorial-heading {
+  display: inline-flex;         
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.5rem;
+
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  color: #2c2c2c;
+}
+/* NEW badge */
+.new-badge {
+  background: linear-gradient(135deg, #f39c12, #ffb703);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(243, 156, 18, 0.35);
+}
+
+/* subtle pulse animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 2px 6px rgba(243, 156, 18, 0.35);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.45);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 6px rgba(243, 156, 18, 0.35);
+  }
+}
+
+.new-badge {
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.gif-wrapper {
+  margin: 1rem 0;
+  max-height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: #f8f8f8;
+}
+
+.gif-wrapper video {
+  max-height: 400px;
+  width: 100%;
+  max-width: 420px;
+  object-fit: contain; /* 👈 important */
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tutorial-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.view-btn {
+  background: #f39c12;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.skip-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.75rem;
+  color: #777;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.skip-btn:hover {
+  color: #333;
+  text-decoration-thickness: 2px;
+}
+
+.skip-btn:focus {
+  outline: none;
+}
