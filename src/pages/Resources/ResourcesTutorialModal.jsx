@@ -61,7 +61,7 @@ export default function ResourcesTutorialModal({ onClose }) {
           ref={(video) => {
             if (video) video.playbackRate = 2; // 🔥 1.25–1.5 is ideal
           }}
-            style={{ width: "100%", borderRadius: "10px", display: loading ? "none" : "block" }}
+          style={{ width: "100%", borderRadius: "10px" }}
         />
       </div>
       <div className="tutorial-actions">
