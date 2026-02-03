@@ -27,13 +27,13 @@ export default function Home() {
   const [openApprovalModal, setOpenApprovalModal] = useState(false);
   const [showResourcesTutorial, setShowResourcesTutorial] = useState(false);
 
-  useEffect(() => {
-    const dismissed = localStorage.getItem(TUTORIAL_DISMISSED_KEY);
+  // useEffect(() => {
+  //   const dismissed = localStorage.getItem(TUTORIAL_DISMISSED_KEY);
 
-    if (!dismissed) {
-      setShowResourcesTutorial(true);
-    }
-  }, []);
+  //   if (!dismissed) {
+  //     setShowResourcesTutorial(true);
+  //   }
+  // }, []);
   
   useEffect(() => {
     setDonatePage(true);
