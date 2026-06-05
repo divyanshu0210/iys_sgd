@@ -7,22 +7,23 @@ export default function DonatePage() {
 
   return (
     <div className="donation-container">
-      <img
-        src="/Donation_Page_Poster_2.png"
-        alt="Donation"
-        className="bg-image"
-      />
-
-      <div className="donate-cta-container">
-        <button
-          className="donate-btn"
-          onClick={() => navigate("/donate/details")}
-        >
-          Donate Now
-        </button>
-        <p className="donate-text">
-          Click on <strong>Donate Now</strong> to make your contribution !!
-        </p>
+      <div className="donation-inner">
+        <img
+          src="/Donation_Page_Poster_2.png"
+          alt="Donation"
+          className="bg-image"
+        />
+        <div className="donate-cta-container">
+          <button
+            className="donate-btn"
+            onClick={() => navigate("/donate/details")}
+          >
+            Donate Now
+          </button>
+          <p className="donate-text">
+            Click on <strong>Donate Now</strong> to make your contribution !!
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -36,6 +37,7 @@ function Detail({ label, value }) {
     </div>
   );
 }
+
 export function AccountDetail() {
   return (
     <div className="donation-account-detail-box">

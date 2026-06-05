@@ -228,18 +228,29 @@
 /* ====================================================== */
 
 .donation-container {
-  width: 100vw;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* Shrinks to fit image width — CTA inherits this */
+.donation-inner {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .bg-image {
+  display: block;
   width: 100%;
+  height: auto;
+  max-height: 90vh;
   object-fit: contain;
 }
 
-/* CTA container below image */
+/* CTA container — width: 100% = same as donation-inner = image width */
 .donate-cta-container {
   padding: 10px;
   text-align: center;
@@ -269,30 +280,17 @@
 
 /* Desktop */
 @media (min-width: 768px) {
-  .donate-cta-container {
-      max-width: 1200px;
-      width: 56%;
-  }
-
   .donate-text {
     font-size: 15px;
   }
 
-    .donation-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    height: 80vh;
-  }
-
   .bg-image {
-    object-fit: contain;
-    height: 100%;
+    max-height: 80vh;
   }
 
-  .donate-btn{
+  .donate-btn {
     font-size: 20px;
   }
-
 }
 
 /* ====================================================== */

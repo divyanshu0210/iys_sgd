@@ -277,9 +277,13 @@ export default function Profile() {
             </div>
 
             <div className="profile-info-compact">
-              <h2 className="profile-name">
-                {profile.is_initiated ? profile.initiated_name : profile.full_name}
-                &nbsp;(ID: {profile.member_id || "N/A"})
+              <h2 className="profile-name" style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "4px" }}>
+                <span style={{ whiteSpace: "nowrap" }}>
+                  {profile.is_initiated ? profile.initiated_name : profile.full_name}
+                </span>
+                <span style={{ whiteSpace: "nowrap", fontSize: "0.75em", color: "#64748b", fontWeight: 500 }}>
+                  (ID: {profile.member_id || "N/A"})
+                </span>
               </h2>
               <p className="profile-username">{profile.email || "guest"}</p>
               <div className="profile-member-info">
