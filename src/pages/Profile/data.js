@@ -1,3 +1,32 @@
+export const GENDER_OPTIONS = [
+  { value: "male",   label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "other",  label: "Other" },
+];
+
+export const MARITAL_OPTIONS = [
+  { value: "brahmachari_temple", label: "Brahmachari (Temple)" },
+  { value: "unmarried",          label: "Unmarried" },
+  { value: "grhastha",           label: "Grhastha" },
+  { value: "sannyasi",           label: "Sannyasi" },
+  { value: "vanaprastha",        label: "Vanaprastha" },
+  { value: "others",             label: "Others" },
+];
+
+// Returns an array of missing field labels when is_initiated is true.
+// Pass the current form values (editData or details).
+export function validateInitiationFields(values) {
+  const required = {
+    initiated_name:   "Initiated Name",
+    spiritual_master: "Spiritual Master",
+    initiation_date:  "Initiation Date",
+    initiation_place: "Initiation Place",
+  };
+  return Object.entries(required)
+    .filter(([key]) => !String(values[key] ?? "").trim())
+    .map(([, label]) => label);
+}
+
 // Spiritual Master & Initiation Place options (paste exactly)
 export const CENTER_OPTIONS = [
   "Vrindavan Bace",

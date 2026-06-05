@@ -104,6 +104,67 @@
   font-weight: 600;
 }
 
+/* ── Inline edit inputs — same height as info-value, no layout shift ── */
+input.edit-input,
+select.edit-input,
+textarea.edit-input {
+  width: auto;
+  min-width: 0;
+  max-width: 50%;
+  height: 1.4em;
+  padding: 0 4px;
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-family: inherit;
+  font-weight: 600;
+  color: #1e293b;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #0ea5e9;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  vertical-align: middle;
+}
+
+input.edit-input:focus,
+select.edit-input:focus,
+textarea.edit-input:focus {
+  border-bottom-color: #0ea5e9;
+  border-bottom-width: 2px;
+  box-shadow: none;
+}
+
+select.edit-input {
+  height: auto;
+  padding: 0 2px;
+  cursor: pointer;
+}
+
+textarea.edit-input {
+  height: auto;
+  flex: 1 1 100%;
+  max-width: 80%;
+  padding: 4px 6px;
+  resize: vertical;
+  background: white;
+  color: #1e293b;
+  font-weight: 600;
+  border: 1px solid #0ea5e9;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  input.edit-input,
+  select.edit-input,
+  textarea.edit-input {
+    flex: 1 1 100%;
+    /* max-width: 40%; */
+    min-width: 0;
+  }
+}
+
 /* Mentor Section */
 .mentor-section {
   margin-top: 2rem;
@@ -338,6 +399,6 @@
   }
 
   .info-label {
-    width: 50vw;
+    flex-shrink: 0;
   }
 }

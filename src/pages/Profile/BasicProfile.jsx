@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "../../css/profile.css";
 import API from "../../services/api";
-import { CENTER_OPTIONS, SPIRITUAL_MASTERS } from "./data";
+import { CENTER_OPTIONS, SPIRITUAL_MASTERS, GENDER_OPTIONS, MARITAL_OPTIONS, validateInitiationFields } from "./data";
 import ProfileApprovalForm from "./ProfileApprovalForm.jsx";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
 
@@ -37,11 +37,6 @@ export default function BasicProfile() {
     initiationPlace: "",
   });
 
-  const MARITAL_STATUS_OPTIONS = [
-    { value: "brahmachari_temple", label: "Brahmachari (Temple)" },
-    { value: "unmarried", label: "Unmarried" },
-    { value: "grhastha", label: "Grhastha" },
-  ];
 
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -139,14 +134,16 @@ export default function BasicProfile() {
 
     // ---- Devotional validation (only when initiated = Yes) ----
     if (details.harinamInitiated === "Yes") {
-      if (!details.initiatedName)
-        newErrors.initiatedName = "Required when initiated";
-      if (!details.spiritualMaster)
-        newErrors.spiritualMaster = "Required when initiated";
-      if (!details.initiationDate)
-        newErrors.initiationDate = "Required when initiated";
-      if (!details.initiationPlace)
-        newErrors.initiationPlace = "Required when initiated";
+      const missing = validateInitiationFields({
+        initiated_name:   details.initiatedName,
+        spiritual_master: details.spiritualMaster,
+        initiation_date:  details.initiationDate,
+        initiation_place: details.initiationPlace,
+      });
+      missing.forEach((label) => {
+        const keyMap = { "Initiated Name": "initiatedName", "Spiritual Master": "spiritualMaster", "Initiation Date": "initiationDate", "Initiation Place": "initiationPlace" };
+        newErrors[keyMap[label]] = "Required when initiated";
+      });
     }
 
     setErrors(newErrors);
@@ -337,7 +334,7 @@ export default function BasicProfile() {
                       </>
                     )}
                     {key === "maritalStatus" &&
-                      MARITAL_STATUS_OPTIONS.map((opt) => (
+                      MARITAL_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>
                           {opt.label}
                         </option>

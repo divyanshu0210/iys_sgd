@@ -16,7 +16,9 @@
   background-image: url("/images/hero-bg.jpg");
   background-size: cover;
   background-position: center;
-  height: 70vh;
+  height: 65vh;        /* match event-slider-container height */
+  min-height: 360px;   /* match event-slider-container min-height */
+  margin-top: 111px;    /* skip the section title above the slider */
   position: relative;
   display: flex;
   align-items: center;
@@ -142,8 +144,8 @@
 
   .hero-section {
     height: fit-content;
-    /* margin-top: 1rem; */
     margin: 1rem 0 auto;
+    min-height: unset;  /* remove desktop min-height on mobile */
   }
   .hero-overlay {
     margin: auto;
