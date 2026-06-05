@@ -23,7 +23,7 @@ const Sidebar = () => {
 
   return (
     <div className="profile-sidebar">
-      <div className="profile-header">
+      <div className="profile-header" style={{ borderBottom: "none" }}>
         <div className="profile-info-compact2">
           <div className="info-row">
             <h2 className="profile-name">
@@ -55,20 +55,6 @@ const Sidebar = () => {
         </div>
       </div>
 
-      <nav className="vertical-tabs">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            className={`tab-button ${activeTab === tab.id ? "active" : ""}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            <span className="tab-label">{tab.label}</span>
-            {/* {tab.id === "newReg" && selected.length > 0 && (
-              <span className="tab-count">{selected.length}</span>
-            )} */}
-          </button>
-        ))}
-      </nav>
     </div>
   );
 };

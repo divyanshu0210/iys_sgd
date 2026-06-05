@@ -4,21 +4,7 @@ import API from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import Modal from "../components/Modal";
 import ProfileApprovalForm from "./Profile/ProfileApprovalForm";
-
-function ShimmerBox() {
-  return (
-    <div
-      style={{
-        height: "140px",
-        borderRadius: "12px",
-        background:
-          "linear-gradient(90deg, #e6e8eb 0%, #f5f6f8 50%, #e9ebee 100%)",
-        backgroundSize: "200% 100%",
-        animation: "shimmer 1.4s infinite",
-      }}
-    />
-  );
-}
+import FullPageLoader from "../components/FullPageLoader";
 
 export function formatDateTime(dateString) {
   if (!dateString) return null;
@@ -110,12 +96,8 @@ export default function YatraList() {
         flexWrap:'wrap'
       }}
     >
-      {/* 🔵 Show 2 shimmers while loading */}
       {loading ? (
-        <>
-          <ShimmerBox />
-          <ShimmerBox />
-        </>
+        <FullPageLoader />
       ) : yatras.length === 0 ? (
         <p>No yatras yet.</p>
       ) : (

@@ -27,7 +27,7 @@ export const YatraRegistrationProvider = ({ children }) => {
   console.log("From yatra context");
   const [registerData, setRegisterData] = useState({ profiles: [], yatra: {} });
   const [eligibilityData, setEligibilityData] = useState({ profiles: [] });
-  const [activeTab, setActiveTab] = useState("registered");
+  const [activeTab, setActiveTab] = useState("approve");
   const [currentStep, setCurrentStep] = useState(1);
 
   const [selected, setSelected] = useState([]);
