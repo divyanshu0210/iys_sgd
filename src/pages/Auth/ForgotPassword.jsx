@@ -11,7 +11,6 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    return ; 
     if (!email) return;
 
     setLoading(true);

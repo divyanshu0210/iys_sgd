@@ -3,13 +3,13 @@ import RegistrationTab from "./RegistrationTab";
 const RegisteredTab = () => {
   return (
     <RegistrationTab
-      title="List of Registered Devotees"
+      title="Status of Registered Devotees"
       filterFn={(p) => p.is_registered}
       showBanner={true}
       emptyMessage={
         <div className="empty-msg">
-          <strong>No registered devotees yet</strong>
-          <div
+          <strong>No registrations started yet</strong>
+          {/* <div
             style={{ marginTop: "1rem", lineHeight: "1.7", textAlign: "left" }}
           >
             <div>
@@ -24,7 +24,7 @@ const RegisteredTab = () => {
               <strong>Step 3 →</strong> <strong>Registered Devotees</strong> tab
               →Track Registration status here in{" "}
             </div>
-          </div>
+          </div> */}
         </div>
       }
     />
