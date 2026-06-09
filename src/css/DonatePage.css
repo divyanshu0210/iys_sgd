@@ -110,7 +110,7 @@
 }
 
 /* DOTS */
-.slider-dots {
+/* .slider-dots {
   width: 100%;
   position: absolute;
   bottom: 12px;
@@ -119,7 +119,7 @@
   z-index: 3;
   align-items: center;
   justify-content: center;
-}
+} */
 
 .dot {
   width: 10px;
