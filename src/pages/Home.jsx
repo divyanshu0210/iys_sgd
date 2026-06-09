@@ -109,7 +109,7 @@ function SectionLabel({ text }) {
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginBottom: 16 }}>
       <div style={{ background: C.orange, width: 32, height: 1 }} />
-      <span style={{ fontWeight: 600, textTransform: "uppercase", color: C.orange, fontSize: 11, letterSpacing: "3.2px" }}>{text}</span>
+      <span style={{ fontWeight: 700, textTransform: "uppercase", color: C.orange, fontSize: 13, letterSpacing: "4px" }}>{text}</span>
       <div style={{ background: C.orange, width: 32, height: 1 }} />
     </div>
   );
@@ -207,12 +207,12 @@ export default function Home() {
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(10,15,35,0.92) 0%, rgba(10,15,35,0.65) 55%, rgba(10,15,35,0.22) 100%)" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #FDF6EC 0%, transparent 22%)" }} />
 
-        <div style={{ position: "relative", zIndex: 2, maxWidth: 1140, margin: "0 auto", padding: "80px 24px 120px", display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "inherit" }}>
+        <div style={{ position: "relative", zIndex: 2, maxWidth: 1140, margin: "0 auto", padding: "clamp(40px, 8vw, 80px) clamp(16px, 3vw, 24px) clamp(60px, 12vw, 120px)", display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "inherit" }}>
           <div style={{ maxWidth: 640 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
               <span style={{ fontWeight: 600, textTransform: "uppercase", color: C.orange, fontSize: 11, letterSpacing: "3.2px" }}>ISKCON Youth Services · Sri Govind Dham</span>
             </div>
-            <h1 style={{ fontWeight: 800, color: "#FDF6EC", fontSize: "clamp(2.2rem, 6vw, 4rem)", lineHeight: 1.15, letterSpacing: "-0.02em", marginBottom: 24 }}>
+            <h1 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, color: "#FDF6EC", fontSize: "clamp(2.4rem, 6vw, 4.2rem)", lineHeight: 1.12, letterSpacing: "-0.02em", marginBottom: 24 }}>
               Ignite Your<br />
               <span style={{ color: C.orange }}>Spiritual Journey</span>
             </h1>
@@ -248,10 +248,10 @@ export default function Home() {
       </section>
 
       {/* ── EVENTS & ANNOUNCEMENTS ───────────────────────────── */}
-      <section style={{ maxWidth: 1140, margin: "0 auto", padding: "80px 24px" }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+      <section style={{ maxWidth: 1140, margin: "0 auto", padding: "clamp(36px, 8vw, 80px) clamp(16px, 3vw, 24px)" }}>
+        <div style={{ textAlign: "center", marginBottom: "clamp(28px, 5vw, 56px)" }}>
           <SectionLabel text="Events & Announcements" />
-          <h2 style={{ fontWeight: 800, fontSize: "clamp(1.8rem, 4vw, 2.8rem)", letterSpacing: "-0.02em", marginBottom: 16 }}>What's Happening</h2>
+          <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)", letterSpacing: "-0.03em", marginBottom: 16 }}>What's Happening</h2>
           <p style={{ color: C.secondary, fontSize: 16, lineHeight: 1.7, maxWidth: 480, margin: "0 auto" }}>
             Stay updated with our latest events, festivals, and spiritual gatherings.
           </p>
@@ -281,7 +281,7 @@ export default function Home() {
                     </span>
                   </div>
                   <div style={{ position: "absolute", bottom: 16, left: 16, right: 16 }}>
-                    <h3 style={{ fontWeight: 700, color: "#FDF6EC", fontSize: 18, margin: 0 }}>{featuredEvent.title}</h3>
+                    <h3 style={{ fontWeight: 700, color: "#FDF6EC", fontSize: 21, letterSpacing: "-0.02em", margin: 0 }}>{featuredEvent.title}</h3>
                     <div style={{ display: "flex", gap: 16, marginTop: 8, flexWrap: "wrap" }}>
                       {featuredEvent.start_datetime && (
                         <span style={{ color: "rgba(253,246,236,0.7)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
@@ -300,7 +300,7 @@ export default function Home() {
             </div>
             {featuredEvent && (
               <div style={{ background: C.cream, padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
-                <p style={{ color: C.secondary, fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+                <p style={{ color: C.secondary, fontSize: 15, lineHeight: 1.75, margin: 0 }}>
                   {featuredEvent.description?.slice(0, 180)}{featuredEvent.description?.length > 180 ? "…" : ""}
                 </p>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
@@ -338,14 +338,14 @@ export default function Home() {
                     </span>
                   </div>
                   <div style={{ position: "absolute", bottom: 10, left: 10, right: 10 }}>
-                    <p style={{ fontWeight: 700, color: "#FDF6EC", fontSize: 13, margin: 0 }}>{ev.title}</p>
+                    <p style={{ fontWeight: 700, color: "#FDF6EC", fontSize: 15, letterSpacing: "-0.01em", margin: 0 }}>{ev.title}</p>
                     {ev.start_datetime && (
-                      <p style={{ color: "rgba(253,246,236,0.6)", fontSize: 11, margin: "2px 0 0" }}>{fmtDate(ev.start_datetime)}</p>
+                      <p style={{ color: "rgba(253,246,236,0.6)", fontSize: 12, margin: "3px 0 0" }}>{fmtDate(ev.start_datetime)}</p>
                     )}
                   </div>
                 </div>
                 <div style={{ background: C.cream, padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
-                  <p style={{ color: C.secondary, fontSize: 12, lineHeight: 1.5, margin: 0 }}>
+                  <p style={{ color: C.secondary, fontSize: 13, lineHeight: 1.65, margin: 0 }}>
                     {ev.description?.slice(0, 100)}{ev.description?.length > 100 ? "…" : ""}
                   </p>
                   {ev.registration_link && (
@@ -365,8 +365,8 @@ export default function Home() {
                   <Bell size={16} color={C.orange} />
                 </div>
                 <div>
-                  <span style={{ color: C.secondary, fontSize: 11 }}>Announcement</span>
-                  <h4 style={{ fontWeight: 600, color: C.dark, fontSize: 13, margin: "2px 0 0" }}>{ev.title}</h4>
+                  <span style={{ color: C.secondary, fontSize: 12 }}>Announcement</span>
+                  <h4 style={{ fontWeight: 600, color: C.dark, fontSize: 15, letterSpacing: "-0.01em", margin: "3px 0 0" }}>{ev.title}</h4>
                 </div>
               </div>
             ))}
@@ -386,7 +386,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 48 }}>
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(0px, 4vw, 48px)" }}>
           <OutlineBtn>
             View All Events <ArrowRight size={16} />
           </OutlineBtn>
@@ -394,13 +394,13 @@ export default function Home() {
       </section>
 
       {/* ── ACTIVITIES ───────────────────────────────────────── */}
-      <section style={{ background: C.navy, padding: "80px 0", width: "100%", position: "relative", overflow: "hidden" }}>
+      <section style={{ background: C.navy, padding: "clamp(36px, 8vw, 80px) 0", width: "100%", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at top right, rgba(232,148,58,0.12) 0%, transparent 60%)" }} />
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at bottom left, rgba(196,160,160,0.08) 0%, transparent 60%)" }} />
-        <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
+        <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 clamp(16px, 3vw, 24px)", position: "relative", zIndex: 1 }}>
+          <div style={{ textAlign: "center", marginBottom: "clamp(28px, 5vw, 56px)" }}>
             <SectionLabel text="What We Offer" />
-            <h2 style={{ fontWeight: 800, fontSize: "clamp(1.8rem, 4vw, 2.8rem)", color: "#FDF6EC", letterSpacing: "-0.02em", marginBottom: 16 }}>Activities for Youth</h2>
+            <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)", color: "#FDF6EC", letterSpacing: "-0.03em", marginBottom: 16 }}>Activities for Youth</h2>
             <p style={{ color: "rgba(253,246,236,0.6)", fontSize: 16, lineHeight: 1.7, maxWidth: 480, margin: "0 auto" }}>
               Transformative programs designed to nurture spiritual growth, community bonds, and personal development.
             </p>
@@ -411,8 +411,8 @@ export default function Home() {
                 <div style={{ borderRadius: 12, background: `${accent}22`, width: 48, height: 48, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Icon size={22} color={accent} />
                 </div>
-                <h3 style={{ fontWeight: 700, color: "#FDF6EC", fontSize: 15, margin: 0 }}>{title}</h3>
-                <p style={{ color: "rgba(253,246,236,0.55)", fontSize: 13, lineHeight: 1.6, margin: 0 }}>{desc}</p>
+                <h3 style={{ fontWeight: 700, color: "#FDF6EC", fontSize: 17, letterSpacing: "-0.01em", margin: 0 }}>{title}</h3>
+                <p style={{ color: "rgba(253,246,236,0.6)", fontSize: 14, lineHeight: 1.7, margin: 0 }}>{desc}</p>
               </div>
             ))}
           </div>
@@ -425,10 +425,10 @@ export default function Home() {
       </section>
 
       {/* ── GALLERY ──────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1140, margin: "0 auto", padding: "80px 24px" }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+      <section style={{ maxWidth: 1140, margin: "0 auto", padding: "clamp(36px, 8vw, 80px) clamp(16px, 3vw, 24px)" }}>
+        <div style={{ textAlign: "center", marginBottom: "clamp(28px, 5vw, 56px)" }}>
           <SectionLabel text="Our Memories" />
-          <h2 style={{ fontWeight: 800, fontSize: "clamp(1.8rem, 4vw, 2.8rem)", letterSpacing: "-0.02em", marginBottom: 16 }}>Moments from Our Trips</h2>
+          <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)", letterSpacing: "-0.03em", marginBottom: 16 }}>Moments from Our Trips</h2>
           <p style={{ color: C.secondary, fontSize: 16, lineHeight: 1.7, maxWidth: 480, margin: "0 auto" }}>
             Glimpses of joy, devotion, and togetherness from our sacred journeys.
           </p>
@@ -458,12 +458,12 @@ export default function Home() {
       </section>
 
       {/* ── UPCOMING TRIPS ───────────────────────────────────── */}
-      <section id="trips-section" style={{ background: C.beige, padding: "80px 0", position: "relative" }}>
+      <section id="trips-section" style={{ background: C.beige, padding: "clamp(36px, 8vw, 80px) 0", position: "relative" }}>
         <div style={{ borderBottom: `1px solid ${C.orange}26`, position: "absolute", bottom: 0, left: 0, right: 0 }} />
         <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 24px" }}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <div style={{ textAlign: "center", marginBottom: "clamp(28px, 5vw, 56px)" }}>
             <SectionLabel text="Sacred Journeys" />
-            <h2 style={{ fontWeight: 800, fontSize: "clamp(1.8rem, 4vw, 2.8rem)", letterSpacing: "-0.02em", marginBottom: 16 }}>Upcoming Yatras</h2>
+            <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)", letterSpacing: "-0.03em", marginBottom: 16 }}>Upcoming Yatras</h2>
             <p style={{ color: C.secondary, fontSize: 16, lineHeight: 1.7, maxWidth: 480, margin: "0 auto" }}>
               Embark on transformative pilgrimages to the most sacred places in India with fellow devotees.
             </p>
@@ -492,7 +492,7 @@ export default function Home() {
                       </div>
                     </div>
                     <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
-                      <h3 style={{ fontWeight: 700, color: C.dark, fontSize: 17, margin: 0 }}>{y.title || "Untitled Yatra"}</h3>
+                      <h3 style={{ fontWeight: 700, color: C.dark, fontSize: 19, letterSpacing: "-0.02em", margin: 0 }}>{y.title || "Untitled Yatra"}</h3>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
                         {y.start_date && (
                           <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
@@ -511,7 +511,7 @@ export default function Home() {
                         )}
                       </div>
                       {y.description && (
-                        <p style={{ color: C.secondary, fontSize: 13, lineHeight: 1.6, margin: 0 }}>
+                        <p style={{ color: C.secondary, fontSize: 14, lineHeight: 1.7, margin: 0 }}>
                           {y.description.slice(0, 120)}{y.description.length > 120 ? "…" : ""}
                         </p>
                       )}
@@ -541,10 +541,10 @@ export default function Home() {
       </section>
 
       {/* ── CENTRES ──────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1140, margin: "0 auto", padding: "80px 24px" }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+      <section style={{ maxWidth: 1140, margin: "0 auto", padding: "clamp(36px, 8vw, 80px) clamp(16px, 3vw, 24px)" }}>
+        <div style={{ textAlign: "center", marginBottom: "clamp(28px, 5vw, 56px)" }}>
           <SectionLabel text="Find Us Near You" />
-          <h2 style={{ fontWeight: 800, fontSize: "clamp(1.8rem, 4vw, 2.8rem)", letterSpacing: "-0.02em", marginBottom: 16 }}>Our Centres</h2>
+          <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)", letterSpacing: "-0.03em", marginBottom: 16 }}>Our Centres</h2>
           <p style={{ color: C.secondary, fontSize: 16, lineHeight: 1.7, maxWidth: 480, margin: "0 auto" }}>
             Connect with your local IYS Sri Govind Dham centre and become part of a thriving spiritual community.
           </p>
@@ -556,9 +556,9 @@ export default function Home() {
                 <div style={{ borderRadius: 10, background: i % 2 === 0 ? `${C.orange}18` : `${C.rose}25`, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <Building2 size={18} color={i % 2 === 0 ? C.orange : C.rose} />
                 </div>
-                <h3 style={{ fontWeight: 700, color: C.dark, fontSize: 14, margin: 0 }}>{c.name}</h3>
+                <h3 style={{ fontWeight: 700, color: C.dark, fontSize: 16, letterSpacing: "-0.01em", margin: 0 }}>{c.name}</h3>
               </div>
-              <p style={{ color: C.secondary, fontSize: 13, lineHeight: 1.5, margin: 0 }}>{c.desc}</p>
+              <p style={{ color: C.secondary, fontSize: 14, lineHeight: 1.65, margin: 0 }}>{c.desc}</p>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, width: "100%" }}>
                 <a href={`tel:${c.phone}`} style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 6, textDecoration: "none", minWidth: 0 }}>
                   <Phone size={12} color={C.orange} style={{ flexShrink: 0 }} /> {c.phone}
