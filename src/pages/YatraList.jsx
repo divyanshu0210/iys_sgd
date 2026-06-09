@@ -21,15 +21,12 @@ export function formatDateTime(dateString) {
 }
 
 
-const LOCK_24HR = import.meta.env.VITE_APP_LOCK_24HR === "true";
-
 export default function YatraList() {
   const [yatras, setYatras] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [openApprovalModal, setOpenApprovalModal] = useState(false);
   const [openPendingModal, setOpenPendingModal] = useState(false);
-  const [open24HrModal, setOpen24HrModal] = useState(false);
 
   const { profileStage, profile } = useAuth();
 
@@ -53,30 +50,26 @@ export default function YatraList() {
     });
   };
 
-  const has24HoursPassed = (approvedAt) => {
-    if (!approvedAt) return false;
-    console.log("Approved at:", approvedAt);
-    const approvedTime = new Date(approvedAt).getTime();
-    const now = Date.now();
-    const diffHours = (now - approvedTime) / (1000 * 60 * 60);
-    return diffHours >= 24;
-  };
-
   const handleOpenClick = (e, yatra) => {
-    console.log("Profile stage on Yatra open click:", profileStage);
-    if (profileStage === "guest") {
+    const requiresApproval = yatra.registration_policy?.requires_approval !== false;
+
+    if (requiresApproval) {
+      if (profileStage === "guest") {
+        e.preventDefault();
+        setOpenApprovalModal(true);
+        return;
+      }
+      if (profileStage === "approval") {
+        e.preventDefault();
+        setOpenPendingModal(true);
+        return;
+      }
+    }
+
+    const minRounds = yatra.registration_policy?.min_chanting_rounds || 0;
+    if (minRounds > 0 && (profile?.no_of_chanting_rounds || 0) < minRounds) {
       e.preventDefault();
-      setOpenApprovalModal(true);
-    } else if (profileStage === "approval") {
-      e.preventDefault();
-      setOpenPendingModal(true);
-    } else if (
-       LOCK_24HR &&
-      profileStage === "devotee" &&
-      !has24HoursPassed(profile?.profile_approved_at)
-    ) {
-      e.preventDefault();
-      setOpen24HrModal(true);
+      alert(`You need a minimum of ${minRounds} chanting rounds to register for this Yatra. You currently have ${profile?.no_of_chanting_rounds || 0} rounds.`);
     }
   };
 
@@ -209,22 +202,6 @@ export default function YatraList() {
         </div>
       </Modal>
 
-      <Modal open={open24HrModal} onClose={() => setOpen24HrModal(false)}>
-        <div style={{ textAlign: "center", padding: 20 }}>
-          <h3 style={{ color: "#1E3A8A" }}>Profile Activation</h3>
-
-          <p style={{ fontSize: 15, marginBottom: 10 }}>
-            Profile Activation require 24 hrs after approval by counseller.
-          </p>
-
-          {profile?.profile_approved_at && (
-            <p style={{ fontSize: 12, color: "#555" }}>
-              <strong>Approved At:</strong>{" "}
-              {formatDateTime(profile.profile_approved_at)}
-            </p>
-          )}
-        </div>
-      </Modal>
     </div>
   );
 }

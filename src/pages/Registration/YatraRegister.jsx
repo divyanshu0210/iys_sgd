@@ -18,6 +18,8 @@ function useStepStatus() {
   const eligible   = eligibilityData.profiles || [];
   const registered = registerData.profiles    || [];
 
+  const requiresApproval = eligibilityData.yatra?.requires_approval ?? true;
+
   const pendingApproval      = eligible.filter(p => !p.is_approved).length;
   const approvedCount        = eligible.filter(p => p.is_approved).length;
   const approvedNotReg       = registered.filter(p => p.is_eligible && !p.is_registered).length;
@@ -30,12 +32,15 @@ function useStepStatus() {
               :                                               "pending";
   const step3 = registeredCount > 0 ? "active" : "pending";
 
+  const allSteps = [
+    { id: "approve",    label: "Approve",  sublabel: "Review members",    status: step1, badge: pendingApproval  },
+    { id: "newReg",     label: "Register", sublabel: "Register approved", status: step2, badge: approvedNotReg  },
+    { id: "registered", label: "Status",   sublabel: "Monitor payments",  status: step3, badge: registeredCount },
+  ];
+
   return {
-    steps: [
-      { id: "approve",    label: "Approve",  sublabel: "Review members",     status: step1, badge: pendingApproval   },
-      { id: "newReg",     label: "Register", sublabel: "Register approved",  status: step2, badge: approvedNotReg   },
-      { id: "registered", label: "Status",    sublabel: "Monitor payments",   status: step3, badge: registeredCount  },
-    ]
+    requiresApproval,
+    steps: requiresApproval ? allSteps : allSteps.filter(s => s.id !== "approve"),
   };
 }
 
@@ -140,6 +145,7 @@ export default function YatraRegister() {
 
     const eligible    = eligibilityData.profiles || [];
     const registered  = registerData.profiles    || [];
+    const requiresApproval = eligibilityData.yatra?.requires_approval ?? true;
 
     defaultSet.current = true;
 
@@ -148,18 +154,20 @@ export default function YatraRegister() {
     const registeredCount = registered.filter(p => p.is_registered).length;
 
     // Action-oriented: land where work is needed most
-    if (approvedNotReg > 0)      setActiveTab("newReg");      // approved but not registered → register them
-    else if (pendingApproval > 0) setActiveTab("approve");     // waiting for approval → approve them
-    else if (registeredCount > 0) setActiveTab("registered");  // all done → Status
-    else                          setActiveTab("approve");      // fresh start → approve
+    if (approvedNotReg > 0)                        setActiveTab("newReg");
+    else if (pendingApproval > 0 && requiresApproval) setActiveTab("approve");
+    else if (registeredCount > 0)                  setActiveTab("registered");
+    else                                           setActiveTab(requiresApproval ? "approve" : "newReg");
   }, [initialDataLoaded, eligibilityData, registerData, setActiveTab]);
+
+  const requiresApproval = eligibilityData.yatra?.requires_approval ?? true;
 
   const renderActiveTab = () => {
     switch (activeTab) {
       case "registered": return <RegisteredTab />;
-      case "approve":    return <ApproveTab />;
+      case "approve":    return requiresApproval ? <ApproveTab /> : <NewRegistrationTab />;
       case "newReg":     return <NewRegistrationTab />;
-      default:           return <ApproveTab />;
+      default:           return requiresApproval ? <ApproveTab /> : <NewRegistrationTab />;
     }
   };
 
