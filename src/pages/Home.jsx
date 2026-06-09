@@ -169,6 +169,12 @@ export default function Home() {
   const galleryRef = useAutoSlider(3600);
   const [actIdx, setActIdx] = useState(0);
   const [galIdx, setGalIdx] = useState(0);
+  const [imgOrient, setImgOrient] = useState({});
+
+  const handleImgLoad = (id, e) => {
+    const { naturalWidth: w, naturalHeight: h } = e.target;
+    setImgOrient(prev => ({ ...prev, [id]: w >= h ? "landscape" : "portrait" }));
+  };
 
   const handleSliderScroll = (e, setter) => {
     const el = e.currentTarget;
@@ -179,15 +185,29 @@ export default function Home() {
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "";
   const fmtDateShort = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "";
 
-  const featuredEvent = events[0] || null;
-  const sideEvents = events.slice(1, 3);
-  const announcementEvents = events.slice(3, 6);
+  // Image cards: future events first (soonest → latest), then past events
+  const now = new Date();
+  const imageCards = [...events]
+    .filter(e => !e.category || e.category === "event" || e.category === "workshop")
+    .sort((a, b) => {
+      const aDate = new Date(a.start_datetime);
+      const bDate = new Date(b.start_datetime);
+      const aFuture = aDate >= now;
+      const bFuture = bDate >= now;
+      if (aFuture && !bFuture) return -1;
+      if (!aFuture && bFuture) return 1;
+      return aFuture ? aDate - bDate : bDate - aDate;
+    });
+
+  const announcementEvents = events.filter(
+    e => e.category === "announcement" || e.category === "notice"
+  );
 
   return (
     <div style={{ background: C.cream, color: C.dark, minHeight: "100vh", overflowX: "hidden" }}>
 
       {/* ── Auth banners ─────────────────────────────────────── */}
-      {profileStage === "guest" && (
+      {/* {profileStage === "guest" && (
         <div style={{ background: "#fff3cd", border: "1px solid #ffeaa7", padding: "0.9rem 1.5rem", textAlign: "center" }}>
           <strong>Get Approved!</strong> To access all features, get your profile approved by your mentor.
           <button onClick={() => setOpenApprovalModal(true)} style={{ marginLeft: 12, background: C.orange, color: "#fff", border: "none", padding: "6px 16px", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>
@@ -199,13 +219,13 @@ export default function Home() {
         <div style={{ background: "#fff3cd", border: "1px solid #ffeaa7", padding: "0.9rem 1.5rem", textAlign: "center" }}>
           <strong>Approval Pending:</strong> Your profile has been submitted. You'll get full access once confirmed.
         </div>
-      )}
+      )} */}
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section style={{ position: "relative", width: "100%", minHeight: 620, overflow: "hidden" }} className="hero-section-new">
         <img src={HERO_IMG} alt="Temple" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(10,15,35,0.92) 0%, rgba(10,15,35,0.65) 55%, rgba(10,15,35,0.22) 100%)" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #FDF6EC 0%, transparent 22%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(10,15,35,0.92) 0%, rgba(10,15,35,0.65) 85%, rgba(10,15,35,0.22) 100%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #FDF6EC 0%, transparent 25%)" }} />
 
         <div style={{ position: "relative", zIndex: 2, maxWidth: 1140, margin: "0 auto", padding: "clamp(40px, 8vw, 80px) clamp(16px, 3vw, 24px) clamp(60px, 12vw, 120px)", display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "inherit" }}>
           <div style={{ maxWidth: 640 }}>
@@ -221,15 +241,18 @@ export default function Home() {
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center" }}>
               <button
-                onClick={() => document.getElementById("trips-section")?.scrollIntoView({ behavior: "smooth" })}
+                onClick={() => document.getElementById("centres-section")?.scrollIntoView({ behavior: "smooth" })}
                 style={{ background: C.orange, color: "#FDF6EC", border: "none", borderRadius: 12, padding: "14px 32px", fontWeight: 700, fontSize: 16, cursor: "pointer" }}
               >
                 Explore Programs
               </button>
-              <Link to="/yatras" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(253,246,236,0.1)", color: "#FDF6EC", border: "1px solid rgba(253,246,236,0.3)", borderRadius: 12, padding: "14px 32px", fontWeight: 600, fontSize: 16, textDecoration: "none" }}>
+              <button
+                onClick={() => document.getElementById("trips-section")?.scrollIntoView({ behavior: "smooth" })}
+                style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(253,246,236,0.1)", color: "#FDF6EC", border: "1px solid rgba(253,246,236,0.3)", borderRadius: 12, padding: "14px 32px", fontWeight: 600, fontSize: 16, textDecoration: "none", cursor: "pointer" }}
+              >
                 <Play size={16} fill="#FDF6EC" />
-                View All Yatras
-              </Link>
+                View Upcoming Retreats
+              </button>
             </div>
           </div>
         </div>
@@ -257,136 +280,195 @@ export default function Home() {
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 24 }} className="events-grid">
-          {/* Featured event */}
-          <div style={{ borderRadius: 16, border: `1px solid ${C.orange}33`, overflow: "hidden", background: "#fff", boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }} className="featured-event-card">
-            <div style={{ position: "relative", height: 260, overflow: "hidden" }}>
-              {featuredEvent ? (
-                <img
-                  src={featuredEvent.poster || featuredEvent.youtube_thumbnail || "https://images.unsplash.com/photo-1603228254119-e6a4d095dc59?w=800&q=80"}
-                  alt={featuredEvent.title}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                <div style={{ width: "100%", height: "100%", background: `${C.orange}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ color: C.secondary, fontSize: 14 }}>No upcoming events</span>
+        {(() => {
+          const pillItems = [
+            ...announcementEvents,
+            ...yatras.map(y => ({
+              id: `yatra-${y.id}`,
+              category: "announcement",
+              title: `${y.title} Yatra — Registrations Open${y.start_date ? ` from ${fmtDateShort(y.start_date)}` : ""}!`,
+            })),
+          ];
+
+          const imgCount = imageCards.length;
+          const gridCols =
+            imgCount <= 1 ? "1fr" :
+            imgCount === 2 ? "3fr 2fr" :
+            imgCount <= 4 ? "3fr 2fr" :
+            "repeat(3, 1fr)";
+          const firstRowSpan = imgCount >= 3 ? 2 : 1;
+          const firstColSpan = imgCount >= 5 ? 2 : 1;
+
+          return (
+            <>
+              {/* ── Image cards grid ── */}
+              {imgCount > 0 && (
+                <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, alignItems: "start" }} className="events-image-grid">
+                  {imageCards.map((ev, idx) => {
+                    const isFeatured = idx === 0;
+                    const isPortrait = imgOrient[ev.id] === "portrait";
+                    const imgSrc = ev.poster || ev.youtube_thumbnail ||
+                      (isFeatured
+                        ? "https://images.unsplash.com/photo-1603228254119-e6a4d095dc59?w=800&q=80"
+                        : "https://images.unsplash.com/photo-1651077837628-52b3247550ae?w=600&q=80");
+                    const isUpcoming = new Date(ev.start_datetime) >= now;
+                    const badge = ev.status === "live" ? "🔴 Live Now"
+                      : (isFeatured && isUpcoming) ? "Upcoming Next"
+                      : ev.category === "workshop" ? "Workshop"
+                      : ev.event_type === "online" ? "Online"
+                      : ev.event_type === "hybrid" ? "Hybrid" : "Event";
+                    const cellStyle = {
+                      ...(idx === 0 && firstRowSpan > 1 ? { gridRow: `span ${firstRowSpan}` } : {}),
+                      ...(idx === 0 && firstColSpan > 1 ? { gridColumn: `span ${firstColSpan}` } : {}),
+                    };
+                    const shadow = isFeatured ? "0 4px 16px rgba(0,0,0,0.07)" : "0 2px 8px rgba(0,0,0,0.05)";
+
+                    // Side cards (not upcoming next): always compact horizontal
+                    if (!isFeatured) {
+                      return (
+                        <div key={ev.id} style={{ ...cellStyle, display: "flex", borderRadius: 16, border: `1px solid ${C.orange}33`, overflow: "hidden", background: "#fff", boxShadow: shadow }}>
+                          <div style={{ position: "relative", width: "36%", flexShrink: 0, maxHeight: 160, overflow: "hidden" }}>
+                            <img src={imgSrc} alt={ev.title} onLoad={e => handleImgLoad(ev.id, e)} style={{ width: "100%", height: "auto", display: "block" }} />
+                            <div style={{ position: "absolute", top: 8, left: 8 }}>
+                              <span style={{ background: "rgba(196,160,160,0.9)", color: "#FDF6EC", fontWeight: 700, fontSize: 10, padding: "3px 10px", borderRadius: 999 }}>{badge}</span>
+                            </div>
+                          </div>
+                          <div style={{ flex: 1, background: C.cream, padding: "12px 14px", display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 6 }}>
+                            <div>
+                              <p style={{ fontWeight: 700, color: C.dark, fontSize: 13, letterSpacing: "-0.01em", margin: "0 0 4px", lineHeight: 1.4 }}>{ev.title}</p>
+                              {ev.start_datetime && (
+                                <span style={{ color: C.secondary, fontSize: 11, display: "flex", alignItems: "center", gap: 3 }}>
+                                  <Calendar size={11} /> {fmtDate(ev.start_datetime)}
+                                </span>
+                              )}
+                              <p style={{ color: C.secondary, fontSize: 12, lineHeight: 1.6, margin: "5px 0 0" }}>
+                                {ev.description?.slice(0, 80)}{ev.description?.length > 80 ? "…" : ""}
+                              </p>
+                            </div>
+                            {ev.registration_link && (
+                              <a href={ev.registration_link} target="_blank" rel="noreferrer" style={{ background: `${C.orange}22`, color: C.orange, borderRadius: 6, padding: "4px 12px", fontWeight: 600, fontSize: 11, textDecoration: "none", display: "inline-block", width: "fit-content" }}>Learn More</a>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // Upcoming Next card: portrait or landscape
+                    return isPortrait ? (
+                      <div key={ev.id} style={{ ...cellStyle, display: "flex", borderRadius: 16, border: `1px solid ${C.orange}33`, overflow: "hidden", background: "#fff", boxShadow: shadow }} className="portrait-event-card">
+                        <div style={{ position: "relative", width: "38%", flexShrink: 0 }} className="portrait-img-col">
+                          <img src={imgSrc} alt={ev.title} onLoad={e => handleImgLoad(ev.id, e)} style={{ width: "100%", height: "auto", display: "block" }} />
+                          <div style={{ position: "absolute", top: 12, left: 12 }}>
+                            <span style={{ background: C.orange, color: "#FDF6EC", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999 }}>{badge}</span>
+                          </div>
+                        </div>
+                        <div style={{ flex: 1, background: C.cream, padding: 24, display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 16 }}>
+                          <div>
+                            <h3 style={{ fontWeight: 700, color: C.dark, fontSize: 20, letterSpacing: "-0.02em", margin: "0 0 10px" }}>{ev.title}</h3>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
+                              {ev.start_datetime && (
+                                <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                                  <Calendar size={12} /> {fmtDate(ev.start_datetime)}
+                                </span>
+                              )}
+                              {ev.location_name && (
+                                <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                                  <MapPin size={12} /> {ev.location_name}
+                                </span>
+                              )}
+                            </div>
+                            <p style={{ color: C.secondary, fontSize: 14, lineHeight: 1.75, margin: 0 }}>
+                              {ev.description?.slice(0, 180)}{ev.description?.length > 180 ? "…" : ""}
+                            </p>
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                            {ev.registration_link
+                              ? <a href={ev.registration_link} target="_blank" rel="noreferrer" style={{ background: C.orange, color: "#FDF6EC", borderRadius: 8, padding: "8px 24px", fontWeight: 600, fontSize: 14, textDecoration: "none", display: "inline-block" }}>Register Now</a>
+                              : <span style={{ background: `${C.orange}18`, color: C.orange, border: `1px solid ${C.orange}44`, borderRadius: 8, padding: "8px 24px", fontWeight: 600, fontSize: 14, display: "inline-block" }}>Open to All</span>
+                            }
+                            {ev.end_datetime && <span style={{ color: C.secondary, fontSize: 12 }}>Ends {fmtDate(ev.end_datetime)}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div key={ev.id} style={{ ...cellStyle, display: "flex", flexDirection: "column", borderRadius: 16, border: `1px solid ${C.orange}33`, overflow: "hidden", background: "#fff", boxShadow: shadow }}>
+                        <div style={{ position: "relative" }}>
+                          <img src={imgSrc} alt={ev.title} onLoad={e => handleImgLoad(ev.id, e)} style={{ width: "100%", height: "auto", display: "block" }} />
+                          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(10,15,35,0.80) 0%, transparent 55%)" }} />
+                          <div style={{ position: "absolute", top: 12, left: 12 }}>
+                            <span style={{ background: C.orange, color: "#FDF6EC", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999 }}>{badge}</span>
+                          </div>
+                          <div style={{ position: "absolute", bottom: 12, left: 14, right: 14 }}>
+                            <h3 style={{ fontWeight: 700, color: "#FDF6EC", fontSize: 21, letterSpacing: "-0.02em", margin: 0 }}>{ev.title}</h3>
+                            <div style={{ display: "flex", gap: 14, marginTop: 6, flexWrap: "wrap" }}>
+                              {ev.start_datetime && (
+                                <span style={{ color: "rgba(253,246,236,0.75)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                                  <Calendar size={12} /> {fmtDate(ev.start_datetime)}
+                                </span>
+                              )}
+                              {ev.location_name && (
+                                <span style={{ color: "rgba(253,246,236,0.75)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                                  <MapPin size={12} /> {ev.location_name}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ background: C.cream, padding: 24, display: "flex", flexDirection: "column", gap: 14, justifyContent: "space-between" }}>
+                          <p style={{ color: C.secondary, fontSize: 15, lineHeight: 1.75, margin: 0 }}>
+                            {ev.description?.slice(0, 180)}{ev.description?.length > 180 ? "…" : ""}
+                          </p>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+                            {ev.registration_link
+                              ? <a href={ev.registration_link} target="_blank" rel="noreferrer" style={{ background: C.orange, color: "#FDF6EC", borderRadius: 8, padding: "8px 24px", fontWeight: 600, fontSize: 14, textDecoration: "none", display: "inline-block" }}>Register Now</a>
+                              : <span style={{ background: `${C.orange}18`, color: C.orange, border: `1px solid ${C.orange}44`, borderRadius: 8, padding: "8px 24px", fontWeight: 600, fontSize: 14, display: "inline-block" }}>Open to All</span>
+                            }
+                            {ev.end_datetime && <span style={{ color: C.secondary, fontSize: 12 }}>Ends {fmtDate(ev.end_datetime)}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(10,15,35,0.80) 0%, transparent 60%)" }} />
-              {featuredEvent && (
-                <>
-                  <div style={{ position: "absolute", top: 16, left: 16 }}>
-                    <span style={{ background: C.orange, color: "#FDF6EC", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999 }}>
-                      {featuredEvent.status === "live" ? "🔴 Live Now" : "Featured Event"}
-                    </span>
-                  </div>
-                  <div style={{ position: "absolute", bottom: 16, left: 16, right: 16 }}>
-                    <h3 style={{ fontWeight: 700, color: "#FDF6EC", fontSize: 21, letterSpacing: "-0.02em", margin: 0 }}>{featuredEvent.title}</h3>
-                    <div style={{ display: "flex", gap: 16, marginTop: 8, flexWrap: "wrap" }}>
-                      {featuredEvent.start_datetime && (
-                        <span style={{ color: "rgba(253,246,236,0.7)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                          <Calendar size={12} /> {fmtDate(featuredEvent.start_datetime)}
-                        </span>
-                      )}
-                      {featuredEvent.location_name && (
-                        <span style={{ color: "rgba(253,246,236,0.7)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                          <MapPin size={12} /> {featuredEvent.location_name}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </>
+
+              {/* ── Pills row (announcements, notices, yatras) ── */}
+              {pillItems.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginTop: imgCount > 0 ? 20 : 0 }}>
+                  {pillItems.map(ev => {
+                    const isNotice = ev.category === "notice";
+                    return (
+                      <div key={ev.id} style={{ flex: "1 1 280px", borderRadius: 12, border: `1px solid ${isNotice ? C.rose : C.orange}33`, background: C.cream, padding: 16, display: "flex", alignItems: "flex-start", gap: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                        <div style={{ flexShrink: 0, background: isNotice ? `${C.rose}25` : `${C.orange}22`, borderRadius: 8, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          {isNotice ? <Megaphone size={16} color={C.rose} /> : <Bell size={16} color={C.orange} />}
+                        </div>
+                        <div>
+                          <span style={{ color: C.secondary, fontSize: 12 }}>{isNotice ? "Notice" : "Announcement"}</span>
+                          <h4 style={{ fontWeight: 600, color: C.dark, fontSize: 15, letterSpacing: "-0.01em", margin: "3px 0 0" }}>{ev.title}</h4>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-            </div>
-            {featuredEvent && (
-              <div style={{ background: C.cream, padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
-                <p style={{ color: C.secondary, fontSize: 15, lineHeight: 1.75, margin: 0 }}>
-                  {featuredEvent.description?.slice(0, 180)}{featuredEvent.description?.length > 180 ? "…" : ""}
-                </p>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-                  {featuredEvent.registration_link ? (
-                    <a href={featuredEvent.registration_link} target="_blank" rel="noreferrer"
-                      style={{ background: C.orange, color: "#FDF6EC", border: "none", borderRadius: 8, padding: "8px 24px", fontWeight: 600, fontSize: 14, textDecoration: "none", display: "inline-block" }}>
-                      Register Now
-                    </a>
-                  ) : (
-                    <span style={{ color: C.secondary, fontSize: 13 }}>Open to all — no registration needed</span>
-                  )}
-                  {featuredEvent.end_datetime && (
-                    <span style={{ color: C.secondary, fontSize: 12 }}>Ends {fmtDate(featuredEvent.end_datetime)}</span>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
 
-          {/* Side column */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }} className="events-side">
-            {/* Smaller event cards */}
-            {sideEvents.map(ev => (
-              <div key={ev.id} style={{ borderRadius: 16, border: `1px solid ${C.orange}33`, overflow: "hidden", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                <div style={{ position: "relative", height: 140, overflow: "hidden" }}>
-                  <img
-                    src={ev.poster || ev.youtube_thumbnail || "https://images.unsplash.com/photo-1651077837628-52b3247550ae?w=600&q=80"}
-                    alt={ev.title}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(10,15,35,0.75) 0%, transparent 60%)" }} />
-                  <div style={{ position: "absolute", top: 10, left: 10 }}>
-                    <span style={{ background: "rgba(196,160,160,0.9)", color: "#FDF6EC", fontWeight: 700, fontSize: 10, padding: "3px 10px", borderRadius: 999 }}>
-                      {ev.event_type === "online" ? "Online" : ev.event_type === "hybrid" ? "Hybrid" : "Event"}
-                    </span>
+              {/* ── Empty state ── */}
+              {events.length === 0 && yatras.length === 0 && (
+                <div style={{ borderRadius: 12, border: `1px solid ${C.orange}33`, background: C.cream, padding: 20, display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ flexShrink: 0, background: `${C.rose}25`, borderRadius: 8, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Megaphone size={16} color={C.rose} />
                   </div>
-                  <div style={{ position: "absolute", bottom: 10, left: 10, right: 10 }}>
-                    <p style={{ fontWeight: 700, color: "#FDF6EC", fontSize: 15, letterSpacing: "-0.01em", margin: 0 }}>{ev.title}</p>
-                    {ev.start_datetime && (
-                      <p style={{ color: "rgba(253,246,236,0.6)", fontSize: 12, margin: "3px 0 0" }}>{fmtDate(ev.start_datetime)}</p>
-                    )}
+                  <div>
+                    <span style={{ color: C.secondary, fontSize: 11 }}>Notice</span>
+                    <h4 style={{ fontWeight: 600, color: C.dark, fontSize: 13, margin: "2px 0 0" }}>Stay tuned for upcoming announcements</h4>
                   </div>
                 </div>
-                <div style={{ background: C.cream, padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
-                  <p style={{ color: C.secondary, fontSize: 13, lineHeight: 1.65, margin: 0 }}>
-                    {ev.description?.slice(0, 100)}{ev.description?.length > 100 ? "…" : ""}
-                  </p>
-                  {ev.registration_link && (
-                    <a href={ev.registration_link} target="_blank" rel="noreferrer"
-                      style={{ background: `${C.orange}22`, color: C.orange, border: "none", borderRadius: 6, padding: "6px 16px", fontWeight: 600, fontSize: 12, textDecoration: "none", display: "inline-block", width: "fit-content" }}>
-                      Learn More
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
+              )}
+            </>
+          );
+        })()}
 
-            {/* Announcement pills */}
-            {announcementEvents.map(ev => (
-              <div key={ev.id} style={{ borderRadius: 12, border: `1px solid ${C.orange}33`, background: C.cream, padding: 16, display: "flex", alignItems: "flex-start", gap: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-                <div style={{ flexShrink: 0, background: `${C.orange}22`, borderRadius: 8, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Bell size={16} color={C.orange} />
-                </div>
-                <div>
-                  <span style={{ color: C.secondary, fontSize: 12 }}>Announcement</span>
-                  <h4 style={{ fontWeight: 600, color: C.dark, fontSize: 15, letterSpacing: "-0.01em", margin: "3px 0 0" }}>{ev.title}</h4>
-                </div>
-              </div>
-            ))}
-
-            {/* If no events at all */}
-            {events.length === 0 && (
-              <div style={{ borderRadius: 12, border: `1px solid ${C.orange}33`, background: C.cream, padding: 20, display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ flexShrink: 0, background: `${C.rose}25`, borderRadius: 8, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Megaphone size={16} color={C.rose} />
-                </div>
-                <div>
-                  <span style={{ color: C.secondary, fontSize: 11 }}>Notice</span>
-                  <h4 style={{ fontWeight: 600, color: C.dark, fontSize: 13, margin: "2px 0 0" }}>Stay tuned for upcoming announcements</h4>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(0px, 4vw, 48px)" }}>
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(25px, 4vw, 48px)" }}>
           <OutlineBtn>
             View All Events <ArrowRight size={16} />
           </OutlineBtn>
@@ -475,6 +557,9 @@ export default function Home() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 28 }}>
               {yatras.map(y => {
                 const isOpen = Boolean(y.is_registration_open);
+                const durationDays = y.start_date && y.end_date
+                  ? Math.max(1, Math.round((new Date(y.end_date) - new Date(y.start_date)) / 86400000) + 1)
+                  : null;
                 return (
                   <div key={y.id} style={{ borderRadius: 16, background: C.cream, border: `1px solid ${C.orange}33`, overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column" }}>
                     <div style={{ position: "relative", height: 200, overflow: "hidden" }}>
@@ -492,16 +577,28 @@ export default function Home() {
                       </div>
                     </div>
                     <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
+                      <div>
                       <h3 style={{ fontWeight: 700, color: C.dark, fontSize: 19, letterSpacing: "-0.02em", margin: 0 }}>{y.title || "Untitled Yatra"}</h3>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+                        {y.description && (
+                          <p style={{ color: C.secondary, fontSize: 14, lineHeight: 1.7, margin: 0 }}>
+                          {y.description.slice(0, 120)}{y.description.length > 120 ? "…" : ""}
+                        </p>
+                      )}
+                           {y.location && (
+                          <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                            <MapPin size={12} /> {y.location}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", justifyContent:'space-between', gap: 12 }}>
                         {y.start_date && (
                           <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
                             <Calendar size={12} /> {fmtDateShort(y.start_date)}–{fmtDateShort(y.end_date)}
                           </span>
                         )}
-                        {y.location && (
+                        {durationDays && (
                           <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                            <MapPin size={12} /> {y.location}
+                            <Clock size={12} /> {durationDays} day{durationDays > 1 ? "s" : ""}
                           </span>
                         )}
                         {y.capacity && (
@@ -509,13 +606,8 @@ export default function Home() {
                             <Users size={12} /> {y.capacity} seats
                           </span>
                         )}
-                      </div>
-                      {y.description && (
-                        <p style={{ color: C.secondary, fontSize: 14, lineHeight: 1.7, margin: 0 }}>
-                          {y.description.slice(0, 120)}{y.description.length > 120 ? "…" : ""}
-                        </p>
-                      )}
-                      <div style={{ borderTop: `1px solid ${C.orange}22`, paddingTop: 16, display: "flex", justifyContent: "flex-end", alignItems: "center", marginTop: "auto" }}>
+                        </div>
+                      <div style={{ borderTop: `1px solid ${C.orange}62`, paddingTop: 16, display: "flex", justifyContent: "center", alignItems: "center", marginTop: "auto" }}>
                         <Link
                           to={`/yatra/${y.id}/register`}
                           state={{ yatra: y }}
@@ -533,15 +625,18 @@ export default function Home() {
           )}
 
           <div style={{ display: "flex", justifyContent: "center", marginTop: 48 }}>
-            <Link to="/yatras" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 28px", borderRadius: 12, fontWeight: 600, fontSize: 14, background: C.cream, color: C.dark, border: `1px solid ${C.orange}4D`, textDecoration: "none" }}>
+            <button
+              onClick={() => document.getElementById("trips-section")?.scrollIntoView({ behavior: "smooth" })}
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 28px", borderRadius: 12, fontWeight: 600, fontSize: 14, background: C.cream, color: C.dark, border: `1px solid ${C.orange}4D`, textDecoration: "none", cursor: "pointer" }}
+            >
               View All Yatras <ArrowRight size={16} />
-            </Link>
+            </button>
           </div>
         </div>
       </section>
 
       {/* ── CENTRES ──────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1140, margin: "0 auto", padding: "clamp(36px, 8vw, 80px) clamp(16px, 3vw, 24px)" }}>
+      <section id="centres-section" style={{ maxWidth: 1140, margin: "0 auto", padding: "clamp(36px, 8vw, 80px) clamp(16px, 3vw, 24px)" }}>
         <div style={{ textAlign: "center", marginBottom: "clamp(28px, 5vw, 56px)" }}>
           <SectionLabel text="Find Us Near You" />
           <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)", letterSpacing: "-0.03em", marginBottom: 16 }}>Our Centres</h2>
@@ -592,8 +687,10 @@ export default function Home() {
         .hero-section-new { height: 85vh; }
         @media (max-width: 768px) { .hero-section-new { height: 72vh; min-height: 560px; } }
 
-        .events-grid { grid-template-columns: 2fr 1fr; }
-        @media (max-width: 900px) { .events-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .events-image-grid { grid-template-columns: 1fr !important; } }
+        @media (max-width: 768px) { .events-image-grid > * { grid-row: auto !important; grid-column: auto !important; } }
+        @media (max-width: 768px) { .portrait-event-card { flex-direction: column !important; } }
+        @media (max-width: 768px) { .portrait-img-col { width: 100% !important; } }
 
         /* Slider dots — mobile only */
         .slider-dots {
