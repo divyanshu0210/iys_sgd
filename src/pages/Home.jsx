@@ -165,6 +165,16 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    const el = document.getElementById("navbar");
+    if (el) {
+      const update = () => document.documentElement.style.setProperty("--navbar-h", `${el.offsetHeight}px`);
+      update();
+      window.addEventListener("resize", update);
+      return () => window.removeEventListener("resize", update);
+    }
+  }, []);
+
   const activitiesRef = useAutoSlider(3200);
   const galleryRef = useAutoSlider(3600);
   const [actIdx, setActIdx] = useState(0);
@@ -222,12 +232,12 @@ export default function Home() {
       )} */}
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section style={{ position: "relative", width: "100%", minHeight: 620, overflow: "hidden" }} className="hero-section-new">
+      <section style={{ position: "relative", width: "100%", display: "flex", flexDirection: "column" }} className="hero-section-new">
         <img src={HERO_IMG} alt="Temple" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(10,15,35,0.82) 0%, rgba(10,15,35,0.55) 85%, rgba(10,15,35,0.18) 100%)" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(253,246,236,0.65) 0%, transparent 25%)" }} />
 
-        <div style={{ position: "relative", zIndex: 2, maxWidth: 1140, margin: "0 auto", padding: "clamp(40px, 8vw, 80px) clamp(16px, 3vw, 24px) clamp(60px, 12vw, 120px)", display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "inherit" }} className="hero-content">
+        <div style={{ position: "relative", zIndex: 2, flex: 1, maxWidth: 1140, width: "100%", margin: "0 auto", padding: "clamp(40px, 8vw, 80px) clamp(16px, 3vw, 24px) clamp(24px, 4vw, 40px)", display: "flex", flexDirection: "column", justifyContent: "center" }} className="hero-content">
           <div style={{ maxWidth: 640 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
               <span style={{ fontWeight: 600, textTransform: "uppercase", color: C.orange, fontSize: 11, letterSpacing: "3.2px" }}>ISKCON Youth Services · Sri Govind Dham</span>
@@ -257,9 +267,9 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Stats bar */}
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 2, padding: "0 24px 32px" }} className="hero-stats-bar">
-          <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, textAlign: "center" }}>
+        {/* Stats bar — in flow, always visible */}
+        <div style={{ position: "relative", zIndex: 2, padding: "16px clamp(16px, 3vw, 24px) clamp(20px, 4vw, 36px)" }} className="hero-stats-bar">
+          <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, textAlign: "center" }} className="hero-stats-grid">
             {[["500+", "Youth Members"], ["20+", "Sacred Trips"], ["3", "Active Centres"], ["50+", "Events Yearly"]].map(([num, label]) => (
               <div key={label}>
                 <p style={{ fontWeight: 800, color: "#FDF6EC", fontSize: "clamp(1.4rem, 3vw, 1.9rem)", margin: 0 }}>{num}</p>
@@ -684,11 +694,8 @@ export default function Home() {
       </Modal>
 
       <style>{`
-        .hero-section-new { height: 85vh; }
-        @media (max-width: 768px) { .hero-section-new { height: auto; min-height: 560px; display: flex; flex-direction: column; } }
-        @media (max-width: 768px) { .hero-content { flex: 1; padding-bottom: 24px !important; } }
-        @media (max-width: 768px) { .hero-stats-bar { position: relative !important; bottom: auto !important; padding: 20px 16px 28px !important; } }
-        @media (max-width: 768px) { .hero-stats-bar > div { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; } }
+        .hero-section-new { height: calc(100vh - var(--navbar-h, 64px)); height: calc(100dvh - var(--navbar-h, 64px)); min-height: 500px; }
+        @media (max-width: 600px) { .hero-stats-grid { grid-template-columns: repeat(2, 1fr) !important; } }
 
         @media (max-width: 768px) { .events-image-grid { grid-template-columns: 1fr !important; } }
         @media (max-width: 768px) { .events-image-grid > * { grid-row: auto !important; grid-column: auto !important; } }
