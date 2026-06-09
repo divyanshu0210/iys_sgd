@@ -4,6 +4,7 @@ import "../../css/profiledisplay.css";
 import FullPageLoader from "../../components/FullPageLoader";
 import { SPIRITUAL_MASTERS, CENTER_OPTIONS, GENDER_OPTIONS, MARITAL_OPTIONS, validateInitiationFields } from "./data";
 import { Check, X, Pencil, Camera } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const CENTER_OPTS = CENTER_OPTIONS.map((c) => ({ value: c, label: c }));
 
@@ -114,6 +115,7 @@ function Row({ label, value, field, type = "text", options, editable = true }) {
 
 // ── Main component ───────────────────────────────────────────────
 export default function Profile() {
+  const { fetchProfile: refreshAuthProfile } = useAuth();
   const [profile, setProfile] = useState(null);
   const [activeTab, setActiveTab] = useState("basic");
   const [isEditing, setIsEditing] = useState(false);
@@ -218,6 +220,7 @@ export default function Profile() {
       setProfile(res.data);
       setIsEditing(false);
       setSaveStatus({ type: "success", msg: "Profile updated!" });
+      refreshAuthProfile();
       setTimeout(() => setSaveStatus(null), 3000);
     } catch (err) {
       const data = err.response?.data;

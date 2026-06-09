@@ -146,64 +146,75 @@ export default function Navbar() {
         onClick={() => setProfileDropdownOpen((v) => !v)}
         aria-label="Profile menu"
         style={{
-          padding: 0,
-          background: "transparent",
-          border: "none",
+          padding: "4px 8px 4px 4px",
+          background: "rgba(255,255,255,0.08)",
+          border: "1px solid rgba(255,255,255,0.18)",
+          borderRadius: 20,
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
+          gap: 8,
           flexShrink: 0,
-          borderRadius: "50%",
         }}
       >
-        <AvatarCircle size={36} fontSize={15} />
+        <AvatarCircle size={28} fontSize={13} />
+        <span style={{ color: "#fff", fontWeight: 500, fontSize: 14, whiteSpace: "nowrap" }}>
+          {displayName}
+        </span>
       </button>
 
       {profileDropdownOpen && (
         <div
           style={{
             position: "absolute",
-            top: "calc(100% + 8px)",
+            top: "calc(100% + 10px)",
             right: 0,
             background: "#fff",
-            borderRadius: 10,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
-            minWidth: 180,
+            borderRadius: 12,
+            boxShadow: "0 12px 32px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08)",
+            padding: "6px",
             zIndex: 3000,
-            overflow: "hidden",
+            minWidth: 140,
+            border: "1px solid rgba(0,0,0,0.06)",
           }}
         >
-          <div
-            style={{
-              padding: "12px 16px",
-              borderBottom: "1px solid #f0f0f0",
-              color: "#1e293b",
-              fontWeight: 600,
-              fontSize: 14,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {displayName}
-          </div>
+          {/* caret */}
+          <div style={{
+            position: "absolute",
+            top: -6,
+            right: 16,
+            width: 12,
+            height: 12,
+            background: "#fff",
+            border: "1px solid rgba(0,0,0,0.06)",
+            borderBottom: "none",
+            borderRight: "none",
+            transform: "rotate(45deg)",
+          }} />
           <button
             onClick={handleLogout}
             style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
               width: "100%",
-              padding: "10px 16px",
+              padding: "9px 14px",
               background: "transparent",
+              color: "#dc2626",
               border: "none",
-              textAlign: "left",
+              borderRadius: 8,
               cursor: "pointer",
-              color: "#e63946",
               fontWeight: 600,
               fontSize: 14,
+              whiteSpace: "nowrap",
+              transition: "background 0.15s",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#fff5f5")}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#fef2f2")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
             Logout
           </button>
         </div>
