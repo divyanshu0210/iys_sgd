@@ -227,7 +227,7 @@ export default function Home() {
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(10,15,35,0.82) 0%, rgba(10,15,35,0.55) 85%, rgba(10,15,35,0.18) 100%)" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(253,246,236,0.65) 0%, transparent 25%)" }} />
 
-        <div style={{ position: "relative", zIndex: 2, maxWidth: 1140, margin: "0 auto", padding: "clamp(40px, 8vw, 80px) clamp(16px, 3vw, 24px) clamp(60px, 12vw, 120px)", display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "inherit" }}>
+        <div style={{ position: "relative", zIndex: 2, maxWidth: 1140, margin: "0 auto", padding: "clamp(40px, 8vw, 80px) clamp(16px, 3vw, 24px) clamp(60px, 12vw, 120px)", display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "inherit" }} className="hero-content">
           <div style={{ maxWidth: 640 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
               <span style={{ fontWeight: 600, textTransform: "uppercase", color: C.orange, fontSize: 11, letterSpacing: "3.2px" }}>ISKCON Youth Services · Sri Govind Dham</span>
@@ -258,7 +258,7 @@ export default function Home() {
         </div>
 
         {/* Stats bar */}
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 2, padding: "0 24px 32px" }}>
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 2, padding: "0 24px 32px" }} className="hero-stats-bar">
           <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, textAlign: "center" }}>
             {[["500+", "Youth Members"], ["20+", "Sacred Trips"], ["3", "Active Centres"], ["50+", "Events Yearly"]].map(([num, label]) => (
               <div key={label}>
@@ -685,7 +685,10 @@ export default function Home() {
 
       <style>{`
         .hero-section-new { height: 85vh; }
-        @media (max-width: 768px) { .hero-section-new { height: 72vh; min-height: 560px; } }
+        @media (max-width: 768px) { .hero-section-new { height: auto; min-height: 560px; display: flex; flex-direction: column; } }
+        @media (max-width: 768px) { .hero-content { flex: 1; padding-bottom: 24px !important; } }
+        @media (max-width: 768px) { .hero-stats-bar { position: relative !important; bottom: auto !important; padding: 20px 16px 28px !important; } }
+        @media (max-width: 768px) { .hero-stats-bar > div { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; } }
 
         @media (max-width: 768px) { .events-image-grid { grid-template-columns: 1fr !important; } }
         @media (max-width: 768px) { .events-image-grid > * { grid-row: auto !important; grid-column: auto !important; } }
