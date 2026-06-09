@@ -224,8 +224,8 @@ export default function Home() {
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section style={{ position: "relative", width: "100%", minHeight: 620, overflow: "hidden" }} className="hero-section-new">
         <img src={HERO_IMG} alt="Temple" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(10,15,35,0.92) 0%, rgba(10,15,35,0.65) 85%, rgba(10,15,35,0.22) 100%)" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #FDF6EC 0%, transparent 25%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(10,15,35,0.82) 0%, rgba(10,15,35,0.55) 85%, rgba(10,15,35,0.18) 100%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(253,246,236,0.65) 0%, transparent 25%)" }} />
 
         <div style={{ position: "relative", zIndex: 2, maxWidth: 1140, margin: "0 auto", padding: "clamp(40px, 8vw, 80px) clamp(16px, 3vw, 24px) clamp(60px, 12vw, 120px)", display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "inherit" }}>
           <div style={{ maxWidth: 640 }}>
@@ -625,12 +625,12 @@ export default function Home() {
           )}
 
           <div style={{ display: "flex", justifyContent: "center", marginTop: 48 }}>
-            <button
-              onClick={() => document.getElementById("trips-section")?.scrollIntoView({ behavior: "smooth" })}
-              style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 28px", borderRadius: 12, fontWeight: 600, fontSize: 14, background: C.cream, color: C.dark, border: `1px solid ${C.orange}4D`, textDecoration: "none", cursor: "pointer" }}
+            <Link
+              to="/yatras"
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 28px", borderRadius: 12, fontWeight: 600, fontSize: 14, background: C.cream, color: C.dark, border: `1px solid ${C.orange}4D`, textDecoration: "none" }}
             >
               View All Yatras <ArrowRight size={16} />
-            </button>
+            </Link>
           </div>
         </div>
       </section>

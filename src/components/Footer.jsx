@@ -5,7 +5,7 @@ import "../css/Footer.css";
 
 const WA_URL = "https://wa.me/919075080391";
 const YT_URL = "https://youtube.com/@iysgovinddham?si=cWnX_jBTMgBpDLGS";
-const IG_URL = "https://www.instagram.com/iys.srigovinddham";
+const IG_URL = "https://www.instagram.com/iys_govinddham";
 
 function WhatsAppIcon() {
   return (
