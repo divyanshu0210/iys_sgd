@@ -13,11 +13,13 @@ export default function Navbar() {
   } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [prevScrollPos, setPrevScrollPos] = useState(window.pageYOffset);
   const [visible, setVisible] = useState(true);
   const menuRef = useRef();
+  const dropdownRef = useRef();
 
-  // Close menu when clicking outside
+  // Close hamburger menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -28,6 +30,18 @@ export default function Navbar() {
     else document.removeEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen]);
+
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    if (profileDropdownOpen) document.addEventListener("mousedown", handleClickOutside);
+    else document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileDropdownOpen]);
 
   // Scroll handler to hide/show navbar
   useEffect(() => {
@@ -68,18 +82,146 @@ export default function Navbar() {
     </Link>
   );
 
+  const handleLogout = () => {
+    if (isNavigationLocked) {
+      alert("Please complete or cancel the payment before logging out.");
+      return;
+    }
+    logout();
+    setIsMenuOpen(false);
+    setProfileDropdownOpen(false);
+    navigate("/");
+  };
+
+  const initials = profile?.first_name
+    ? profile.first_name.charAt(0).toUpperCase()
+    : user?.email?.charAt(0).toUpperCase() || "?";
+
+  const displayName = profile?.initiated_name
+    || (profile?.first_name
+      ? `${profile.first_name}${profile.last_name ? " " + profile.last_name : ""}`
+      : user?.email || "User");
+
+  const photoUrl = profile?.profile_picture_url || null;
+
+  const AvatarCircle = ({ size = 36, fontSize = 15 }) =>
+    photoUrl ? (
+      <img
+        src={photoUrl}
+        alt="Profile"
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "50%",
+          objectFit: "cover",
+          border: "2px solid rgba(255,255,255,0.4)",
+          display: "block",
+          flexShrink: 0,
+        }}
+      />
+    ) : (
+      <div
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "50%",
+          background: "#3b82f6",
+          border: "2px solid rgba(255,255,255,0.4)",
+          color: "#fff",
+          fontWeight: 700,
+          fontSize,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        {initials}
+      </div>
+    );
+
+  const ProfileAvatar = () => (
+    <div ref={dropdownRef} style={{ position: "relative" }}>
+      <button
+        onClick={() => setProfileDropdownOpen((v) => !v)}
+        aria-label="Profile menu"
+        style={{
+          padding: 0,
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          borderRadius: "50%",
+        }}
+      >
+        <AvatarCircle size={36} fontSize={15} />
+      </button>
+
+      {profileDropdownOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 8px)",
+            right: 0,
+            background: "#fff",
+            borderRadius: 10,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+            minWidth: 180,
+            zIndex: 3000,
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              padding: "12px 16px",
+              borderBottom: "1px solid #f0f0f0",
+              color: "#1e293b",
+              fontWeight: 600,
+              fontSize: 14,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {displayName}
+          </div>
+          <button
+            onClick={handleLogout}
+            style={{
+              width: "100%",
+              padding: "10px 16px",
+              background: "transparent",
+              border: "none",
+              textAlign: "left",
+              cursor: "pointer",
+              color: "#e63946",
+              fontWeight: 600,
+              fontSize: 14,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#fff5f5")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+          >
+            Logout
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <nav
       id="navbar"
       style={{
-        // padding: "0px 12px",
         padding: "0px 5px 0px 5px",
         background: "#2c3e50",
         color: "#fff",
         borderBottom: "1px solid #34495e",
         position: "sticky",
         width: "100%",
-        top: visible ? 0 : "-100px", // hide/show based on scroll
+        top: visible ? 0 : "-100px",
         zIndex: 1000,
         transition: "top 0.3s",
       }}
@@ -128,7 +270,6 @@ export default function Navbar() {
             }}
           >
             <span className="logo-main">IYS</span>
-
             <span
               style={{
                 fontWeight: 400,
@@ -145,7 +286,6 @@ export default function Navbar() {
         {/* Desktop Menu */}
         <div className={`desktop-menu ${!user ? "always-visible" : ""}`}>
           <NavLink to="/donate">Donate</NavLink>
-          {/* <NavLink to="/">Home</NavLink> */}
           {user ? (
             profileStage !== "not-exists" ? (
               <>
@@ -155,40 +295,12 @@ export default function Navbar() {
                 <NavLink to="/yatras">Yatras</NavLink>
                 <NavLink to="/resources">Resources</NavLink>
                 <NavLink to="/profile">Profile</NavLink>
-                <button
-                  onClick={() => {
-                    if (isNavigationLocked) {
-                      alert(
-                        "Please complete or cancel the payment before logging out."
-                      );
-                      return;
-                    }
-                    logout();
-                    navigate("/");
-                  }}
-                  className="logout-btn"
-                >
-                  Logout
-                </button>
+                <ProfileAvatar />
               </>
             ) : (
               <>
                 <NavLink to="/complete-profile">Profile</NavLink>
-                <button
-                  onClick={() => {
-                    if (isNavigationLocked) {
-                      alert(
-                        "Please complete or cancel the payment before logging out."
-                      );
-                      return;
-                    }
-                    logout();
-                    navigate("/");
-                  }}
-                  className="logout-btn"
-                >
-                  Logout
-                </button>
+                <ProfileAvatar />
               </>
             )
           ) : (
@@ -204,16 +316,17 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Hamburger */}
+        {/* Mobile: Donate + Hamburger (when logged in) */}
         {user && (
           <div
             style={{
               display: "flex",
               justifyContent: "right",
               alignItems: "center",
+              gap: 8,
             }}
           >
-            <div className="mobile-only" style={{ paddingRight: 15 }}>
+            <div className="mobile-only" style={{ paddingRight: 4 }}>
               <NavLink to="/donate">Donate</NavLink>
             </div>
             <div
@@ -228,7 +341,7 @@ export default function Navbar() {
                   setIsMenuOpen(true);
                 }
               }}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: "pointer", paddingRight: 10 }}
             >
               <div className="bar"></div>
               <div className="bar"></div>
@@ -246,7 +359,32 @@ export default function Navbar() {
               ✕
             </button>
 
-            {/* <NavLink to="/">Home</NavLink> */}
+            {/* Profile header in mobile menu */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "4px 0 16px 0",
+                borderBottom: "1px solid rgba(255,255,255,0.15)",
+                marginBottom: 4,
+              }}
+            >
+              <AvatarCircle size={38} fontSize={16} />
+              <span
+                style={{
+                  color: "#fff",
+                  fontWeight: 600,
+                  fontSize: 15,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {displayName}
+              </span>
+            </div>
+
             {profileStage !== "not-exists" ? (
               <>
                 {(profileStage === "devotee" || profileStage === "mentor") && (
@@ -254,7 +392,6 @@ export default function Navbar() {
                 )}
                 <NavLink to="/yatras">Yatras</NavLink>
                 <NavLink to="/resources">Resources</NavLink>
-
                 <NavLink to="/profile">Profile</NavLink>
               </>
             ) : (
@@ -263,20 +400,7 @@ export default function Navbar() {
                 <NavLink to="/complete-profile">Profile</NavLink>
               </>
             )}
-            <button
-              onClick={() => {
-                if (isNavigationLocked) {
-                  alert(
-                    "Please complete or cancel the payment before logging out."
-                  );
-                  return;
-                }
-                logout();
-                setIsMenuOpen(false);
-                navigate("/");
-              }}
-              className="logout-btn"
-            >
+            <button onClick={handleLogout} className="logout-btn">
               Logout
             </button>
           </div>
@@ -312,14 +436,13 @@ export default function Navbar() {
       margin: 4px 0;
     }
 
-    /* Overlay & Mobile Menu - unchanged */
     .overlay {
       position: fixed;
       top: 0;
       right: 0;
       bottom: 0;
       left: 0;
-      background: rgba(0, 0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.4);
       display: flex;
       justify-content: flex-end;
       z-index: 2000;
@@ -349,49 +472,41 @@ export default function Navbar() {
     }
 
     .logo-main {
-  font-weight: 800;
-  font-size: clamp(1.2rem, 4vw, 1.8rem);
-  letter-spacing: clamp(0.2rem, 1.5vw, 0.6rem);
-}
-
+      font-weight: 800;
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      letter-spacing: clamp(0.2rem, 1.5vw, 0.6rem);
+    }
 
     @keyframes slideIn {
       from { transform: translateX(100%); }
       to   { transform: translateX(0); }
     }
 
-    /* Responsive adjustments */
     @media (max-width: 768px) {
       .desktop-menu:not(.always-visible) {
-    display: none;
-  }
-
-
-      /* When NOT logged in → show links inline, smaller */
-      .desktop-menu.always-visible {
-        display: flex !important;
-      
-         flex-wrap: nowrap;
-  white-space: nowrap;
-  gap: clamp(6px, 1vw, 10px);
+        display: none;
       }
 
-      /* Reduce logo size only when not signed in */
+      .desktop-menu.always-visible {
+        display: flex !important;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        gap: clamp(6px, 1vw, 10px);
+      }
+
       .logo-text {
-   flex-shrink: 0;
+        flex-shrink: 0;
         font-weight: 600;
       }
 
-#navbar > div {
-  flex-wrap: nowrap;
-}
+      #navbar > div {
+        flex-wrap: nowrap;
+      }
 
-
-      /* Smaller padding on links when in always-visible mode */
-    .desktop-menu.always-visible a {
-  font-size: clamp(0.75rem, 2.8vw, 0.9rem);
-  padding: clamp(4px, 1vw, 8px) clamp(6px, 1.5vw, 12px) !important;
-}
+      .desktop-menu.always-visible a {
+        font-size: clamp(0.75rem, 2.8vw, 0.9rem);
+        padding: clamp(4px, 1vw, 8px) clamp(6px, 1.5vw, 12px) !important;
+      }
 
       .mobile-only {
         display: block;

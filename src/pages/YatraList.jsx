@@ -119,6 +119,19 @@ export default function YatraList() {
                 (e.currentTarget.style.transform = "translateY(0)")
               }
             >
+              {y.poster && (
+                <img
+                  src={y.poster}
+                  alt={y.title}
+                  style={{
+                    width: "100%",
+                    borderRadius: "8px",
+                    objectFit: "cover",
+                    maxHeight: "160px",
+                    marginBottom: "8px",
+                  }}
+                />
+              )}
               <h2
                 style={{
                   color: "#1E3A8A",
