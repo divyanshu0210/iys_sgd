@@ -210,7 +210,7 @@ export async function generateRCS(profile,authProfile, yatra) {
     ["Email", profile.email],
     ["Member ID", profile.member_id],
     ["Center", profile.center],
-    ["Counselor", `${profile.mentor_name} (${profile.approved_by})` || "—"],
+    ["Counsellor", `${profile.mentor_name} (${profile.approved_by})` || "—"],
     ["Registration ID", profile.registration_id],
     [
       "Status",

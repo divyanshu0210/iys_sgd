@@ -535,7 +535,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                     onClick={() => {
                       if (
                         window.confirm(
-                          "Can't unapprove yourself. Contact your mentor to unapprove."
+                          "Can't unapprove yourself. Contact your counsellor to unapprove."
                         )
                       ) {
                       }

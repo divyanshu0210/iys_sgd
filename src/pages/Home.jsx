@@ -153,6 +153,7 @@ export default function Home() {
   }, []);
 
   const handleYatraClick = (e, yatra) => {
+    if (!user) { e.preventDefault(); navigate("/signin"); return; }
     const requiresApproval = yatra.registration_policy?.requires_approval !== false;
     if (requiresApproval) {
       if (profileStage === "guest") { e.preventDefault(); setOpenApprovalModal(true); return; }
@@ -205,7 +206,7 @@ export default function Home() {
       {/* ── Auth banners ─────────────────────────────────────── */}
       {/* {profileStage === "guest" && (
         <div style={{ background: "#fff3cd", border: "1px solid #ffeaa7", padding: "0.9rem 1.5rem", textAlign: "center" }}>
-          <strong>Get Approved!</strong> To access all features, get your profile approved by your mentor.
+          <strong>Get Approved!</strong> To access all features, get your profile approved by your counsellor.
           <button onClick={() => setOpenApprovalModal(true)} style={{ marginLeft: 12, background: C.orange, color: "#fff", border: "none", padding: "6px 16px", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>
             Get Approved
           </button>
@@ -423,15 +424,16 @@ export default function Home() {
           {yatras.length === 0 ? (
             <p style={{ textAlign: "center", color: C.secondary }}>No upcoming yatras at the moment.</p>
           ) : (
-            <div className="yatra-masonry">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 28, alignItems: "start" }}>
               {yatras.map(y => {
                 const isOpen = Boolean(y.is_registration_open);
+                const requiresApproval = y.registration_policy?.requires_approval !== false;
+                const minRounds = y.registration_policy?.min_chanting_rounds || 0;
                 const durationDays = y.start_date && y.end_date
                   ? Math.max(1, Math.round((new Date(y.end_date) - new Date(y.start_date)) / 86400000) + 1)
                   : null;
                 return (
-                  <div key={y.id} style={{ breakInside: "avoid", marginBottom: 28 }}>
-                  <div style={{ borderRadius: 16, background: C.cream, border: `1px solid ${C.orange}33`, overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column" }}>
+                  <div key={y.id} style={{ borderRadius: 16, background: C.cream, border: `1px solid ${C.orange}33`, overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column" }}>
                     <div style={{ position: "relative" }}>
                       {y.poster ? (
                         <img src={y.poster} alt={y.title} style={{ width: "100%", height: "auto", display: "block" }} />
@@ -440,10 +442,25 @@ export default function Home() {
                           <MapPin size={40} color={`${C.orange}66`} />
                         </div>
                       )}
+                      {/* Open / Closed badge — top right */}
                       <div style={{ position: "absolute", top: 12, right: 12, zIndex: 2 }}>
                         <span style={{ background: isOpen ? C.orange : "rgba(26,39,68,0.8)", color: "#FDF6EC", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999 }}>
-                          {isOpen ? "Open" : "Closed"}
+                          {isOpen ? "Registration Open" : "Registration Closed"}
                         </span>
+                      </div>
+                      {/* Access indicator — top left */}
+                      <div style={{ position: "absolute", top: 12, left: 12, zIndex: 2 }}>
+                        {requiresApproval ? (
+                          <span style={{ background: "rgba(10,15,35,0.72)", color: "#fff", fontWeight: 600, fontSize: 10, padding: "3px 10px", borderRadius: 999, display: "flex", alignItems: "center", gap: 4, backdropFilter: "blur(4px)" }}>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Counsellor Required
+                          </span>
+                        ) : (
+                          <span style={{ background: "rgba(34,197,94,0.85)", color: "#fff", fontWeight: 600, fontSize: 10, padding: "3px 10px", borderRadius: 999, display: "flex", alignItems: "center", gap: 4 }}>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Open to All
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
@@ -488,7 +505,6 @@ export default function Home() {
                         </Link>
                       </div>
                     </div>
-                  </div>
                   </div>
                 );
               })}
@@ -549,16 +565,13 @@ export default function Home() {
         <div style={{ textAlign: "center", padding: 24 }}>
           <h3 style={{ color: "#1E3A8A", marginBottom: 12 }}>Approval Pending</h3>
           <p style={{ fontSize: 15, color: "#444", lineHeight: 1.6 }}>
-            Your profile has been submitted for approval. You'll get full access once your mentor confirms it.
+            Your profile has been submitted for approval. You'll get full access once your counsellor confirms it.
           </p>
         </div>
       </Modal>
 
       <style>{`
         .hero-section-new { min-height: calc(100vh - var(--navbar-h, 64px)); min-height: calc(100dvh - var(--navbar-h, 64px)); }
-        .yatra-masonry { columns: 3; column-gap: 28px; }
-        @media (max-width: 900px) { .yatra-masonry { columns: 2; } }
-        @media (max-width: 560px) { .yatra-masonry { columns: 1; } }
         @media (max-width: 600px) { .hero-stats-grid { grid-template-columns: repeat(2, 1fr) !important; } }
 
         @media (max-width: 768px) { .events-image-grid { grid-template-columns: 1fr !important; } }

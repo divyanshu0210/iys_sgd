@@ -28,7 +28,7 @@ export default function BasicMemberCard({ m }) {
 
         <p className="member-line">
           {m.user_type === "mentor"
-            ? "Mentor"
+            ? "Counsellor"
             : m.user_type === "guest"
             ? "Guest"
             : "Devotee"}

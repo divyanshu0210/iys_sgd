@@ -347,7 +347,7 @@ export default function Profile() {
                 <Row label="First connected center" field="first_connected_center"   value={profile.first_connected_center} />
                 <Row label="Daily chanting rounds"  field="no_of_chanting_rounds"
                   value={`${profile.no_of_chanting_rounds ?? profile.daily_chanting_rounds ?? 0} round(s)`} type="number" />
-                <Row label="Mentor / Counsellor" value={profile.mentor_name || profile.mentor || "-"} editable={false} />
+                <Row label="Counsellor" value={profile.mentor_name || profile.mentor || "-"} editable={false} />
               </div>
             </div>
           )}

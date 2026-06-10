@@ -132,7 +132,7 @@ export const YatraRegistrationProvider = ({ children }) => {
         profile_ids: [profile.id],
         action: "request_approval",
       });
-      alert("Approval request sent to your mentor!");
+      alert("Approval request sent to your counsellor!");
       const res = await API.get(`/yatras/${yatra_id}/eligibility/`);
       setEligibilityData(res.data);
     } catch (err) {

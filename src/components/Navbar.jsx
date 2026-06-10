@@ -376,7 +376,7 @@ export default function Navbar() {
                         {profileStage === "guest" && (
                           <div style={{ borderLeft: "3px solid #f97316", paddingLeft: 10 }}>
                             <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Profile Approval</div>
-                            <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5, marginBottom: 10 }}>Get approved by your mentor to unlock full access.</div>
+                            <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5, marginBottom: 10 }}>Get approved by your counsellor to unlock full access.</div>
                             <button
                               onClick={() => { setNotifOpen(false); setOpenApprovalModal(true); }}
                               style={{ background: "#f97316", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontWeight: 600, fontSize: 12 }}
@@ -388,7 +388,7 @@ export default function Navbar() {
                         {profileStage === "approval" && (
                           <div style={{ borderLeft: "3px solid #f59e0b", paddingLeft: 10 }}>
                             <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Pending Review</div>
-                            <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5 }}>Your profile is awaiting confirmation from your mentor.</div>
+                            <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5 }}>Your profile is awaiting confirmation from your counsellor.</div>
                           </div>
                         )}
                       </div>
@@ -480,7 +480,7 @@ export default function Navbar() {
                     {profileStage === "guest" && (
                       <div style={{ borderLeft: "3px solid #f97316", paddingLeft: 10 }}>
                         <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Profile Approval</div>
-                        <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5, marginBottom: 10 }}>Get approved by your mentor to unlock full access.</div>
+                        <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5, marginBottom: 10 }}>Get approved by your counsellor to unlock full access.</div>
                         <button
                           onClick={() => { setNotifOpen(false); setOpenApprovalModal(true); }}
                           style={{ background: "#f97316", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontWeight: 600, fontSize: 12 }}
@@ -492,7 +492,7 @@ export default function Navbar() {
                     {profileStage === "approval" && (
                       <div style={{ borderLeft: "3px solid #f59e0b", paddingLeft: 10 }}>
                         <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Pending Review</div>
-                        <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5 }}>Your profile is awaiting confirmation from your mentor.</div>
+                        <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5 }}>Your profile is awaiting confirmation from your counsellor.</div>
                       </div>
                     )}
                   </div>
