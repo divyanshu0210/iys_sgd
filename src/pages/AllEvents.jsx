@@ -18,8 +18,8 @@ export default function AllEvents() {
   }, []);
 
   return (
-    <div style={{ background: C.cream, minHeight: "100vh" }}>
-      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "clamp(32px, 6vw, 64px) clamp(16px, 3vw, 24px)" }}>
+    <div style={{ background: C.cream, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <div style={{ flex: 1, maxWidth: 1140, width: "100%", margin: "0 auto", padding: "clamp(32px, 6vw, 64px) clamp(16px, 3vw, 24px)" }}>
         <div style={{ marginBottom: 36 }}>
           <h1 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, fontSize: "clamp(2rem, 4vw, 3rem)", letterSpacing: "-0.02em", margin: "0 0 8px" }}>
             All Events

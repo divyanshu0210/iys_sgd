@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Bell, Clock, Megaphone } from "lucide-react";
+import { Bell, Clock, MapPin, Megaphone } from "lucide-react";
+import { Link } from "react-router-dom";
 import API from "../services/api";
 import EventCard from "./EventCard";
 
@@ -15,8 +16,12 @@ const TABS = ["All", "Events", "Workshops"];
 
 // preview=true  → Home: max 3 upcoming, no tabs
 // preview=false → AllEvents: all events, category tabs
+const fmtDateShort = (d) =>
+  d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "";
+
 export default function EventsSection({ preview = false }) {
   const [events, setEvents] = useState([]);
+  const [yatras, setYatras] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("All");
 
@@ -25,6 +30,9 @@ export default function EventsSection({ preview = false }) {
       .then(r => setEvents(r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
+    API.get("/yatra/list/")
+      .then(r => setYatras(r.data.filter(y => !y.close_yatra && y.is_registration_open)))
+      .catch(() => {});
   }, []);
 
   const now = new Date();
@@ -41,7 +49,14 @@ export default function EventsSection({ preview = false }) {
         : new Date(b.start_datetime) - new Date(a.start_datetime);
     });
 
-  const sideItems = events.filter(e => e.category === "announcement" || e.category === "notice");
+  const announcements = events.filter(e => e.category === "announcement" || e.category === "notice");
+  const yatraItems = yatras.map(y => ({
+    id: `yatra-${y.id}`,
+    yatraId: y.id,
+    category: "yatra",
+    title: `${y.title} — Registrations Open${y.start_date ? ` from ${fmtDateShort(y.start_date)}` : ""}!`,
+  }));
+  const sideItems = [...announcements, ...yatraItems];
 
   const filtered = preview
     ? imageEvents.filter(e => new Date(e.start_datetime) >= now).slice(0, 3)
@@ -112,14 +127,18 @@ export default function EventsSection({ preview = false }) {
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {sideItems.map((item, i) => {
                   const isNotice = item.category === "notice";
-                  return (
-                    <div key={item.id} style={{ padding: "14px 18px", borderBottom: i < sideItems.length - 1 ? `1px solid ${C.orange}18` : "none", display: "flex", gap: 12, alignItems: "flex-start" }}>
-                      <div style={{ flexShrink: 0, background: isNotice ? `${C.rose}25` : `${C.orange}22`, borderRadius: 8, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
-                        {isNotice ? <Megaphone size={14} color={C.rose} /> : <Bell size={14} color={C.orange} />}
+                  const isYatra = item.category === "yatra";
+                  const accentColor = isNotice ? C.rose : isYatra ? "#7C3AED" : C.orange;
+                  const bgColor = isNotice ? `${C.rose}25` : isYatra ? "#7C3AED22" : `${C.orange}22`;
+                  const label = isNotice ? "Notice" : isYatra ? "Yatra" : "Announcement";
+                  const inner = (
+                    <>
+                      <div style={{ flexShrink: 0, background: bgColor, borderRadius: 8, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
+                        {isNotice ? <Megaphone size={14} color={accentColor} /> : isYatra ? <MapPin size={14} color={accentColor} /> : <Bell size={14} color={accentColor} />}
                       </div>
                       <div style={{ minWidth: 0 }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: isNotice ? C.rose : C.orange, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                          {isNotice ? "Notice" : "Announcement"}
+                        <span style={{ fontSize: 11, fontWeight: 600, color: accentColor, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                          {label}
                         </span>
                         <p style={{ fontWeight: 600, color: C.dark, fontSize: 13, margin: "3px 0 0", lineHeight: 1.45 }}>{item.title}</p>
                         {item.description && (
@@ -128,7 +147,17 @@ export default function EventsSection({ preview = false }) {
                           </p>
                         )}
                       </div>
-                    </div>
+                    </>
+                  );
+                  const rowStyle = { padding: "14px 18px", borderBottom: i < sideItems.length - 1 ? `1px solid ${C.orange}18` : "none", display: "flex", gap: 12, alignItems: "flex-start" };
+                  return isYatra ? (
+                    <Link key={item.id} to="/yatras" style={{ ...rowStyle, textDecoration: "none", transition: "background 0.15s" }}
+                      onMouseEnter={e => e.currentTarget.style.background = `${C.orange}08`}
+                      onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                      {inner}
+                    </Link>
+                  ) : (
+                    <div key={item.id} style={rowStyle}>{inner}</div>
                   );
                 })}
               </div>
