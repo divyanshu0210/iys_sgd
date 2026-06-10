@@ -5,6 +5,7 @@ import API from "../services/api";
 import Modal from "../components/Modal";
 import ProfileApprovalForm from "./Profile/ProfileApprovalForm";
 import Footer from "../components/Footer";
+import EventCard from "../components/EventCard";
 import {
   ArrowRight, Bell, BookOpen, Building2, Calendar, Clock,
   Globe, Heart, Images, Leaf, MapPin, Megaphone, Mic, Music,
@@ -178,13 +179,6 @@ export default function Home() {
   const galleryRef = useAutoSlider(3600);
   const [actIdx, setActIdx] = useState(0);
   const [galIdx, setGalIdx] = useState(0);
-  const [imgOrient, setImgOrient] = useState({});
-
-  const handleImgLoad = (id, e) => {
-    const { naturalWidth: w, naturalHeight: h } = e.target;
-    setImgOrient(prev => ({ ...prev, [id]: w >= h ? "landscape" : "portrait" }));
-  };
-
   const handleSliderScroll = (e, setter) => {
     const el = e.currentTarget;
     const itemW = el.firstElementChild?.offsetWidth || 1;
@@ -193,12 +187,6 @@ export default function Home() {
 
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "";
   const fmtDateShort = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "";
-  const getDaysToGo = (dateStr) => {
-    const diff = new Date(dateStr) - new Date();
-    if (diff <= 0) return null;
-    const days = Math.floor(diff / 86400000);
-    return days === 0 ? "Today" : `${days} day${days > 1 ? "s" : ""} to go`;
-  };
 
   // Home: upcoming events/workshops only, soonest first, max 3
   const now = new Date();
@@ -299,154 +287,15 @@ export default function Home() {
           ];
 
           const imgCount = imageCards.length;
-          const gridCols =
-            imgCount <= 1 ? "1fr" :
-            imgCount === 2 ? "3fr 2fr" :
-            imgCount <= 4 ? "3fr 2fr" :
-            "repeat(3, 1fr)";
-          const firstRowSpan = imgCount >= 3 ? 2 : 1;
-          const firstColSpan = imgCount >= 5 ? 2 : 1;
 
           return (
             <>
               {/* ── Image cards grid ── */}
               {imgCount > 0 && (
-                <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 20, alignItems: "start" }} className="events-image-grid">
-                  {imageCards.map((ev, idx) => {
-                    const isFeatured = idx === 0;
-                    const isPortrait = imgOrient[ev.id] === "portrait";
-                    const imgSrc = ev.poster || ev.youtube_thumbnail ||
-                      (isFeatured
-                        ? "https://images.unsplash.com/photo-1603228254119-e6a4d095dc59?w=800&q=80"
-                        : "https://images.unsplash.com/photo-1651077837628-52b3247550ae?w=600&q=80");
-                    const isUpcoming = new Date(ev.start_datetime) >= now;
-                    const badge = ev.status === "live" ? "🔴 Live Now"
-                      : (isFeatured && isUpcoming) ? "Upcoming Next"
-                      : ev.category === "workshop" ? "Workshop"
-                      : ev.event_type === "online" ? "Online"
-                      : ev.event_type === "hybrid" ? "Hybrid" : "Event";
-                    const cellStyle = {
-                      ...(idx === 0 && firstRowSpan > 1 ? { gridRow: `span ${firstRowSpan}` } : {}),
-                      ...(idx === 0 && firstColSpan > 1 ? { gridColumn: `span ${firstColSpan}` } : {}),
-                    };
-                    const shadow = isFeatured ? "0 4px 16px rgba(0,0,0,0.07)" : "0 2px 8px rgba(0,0,0,0.05)";
-
-                    // Side cards (not upcoming next): always compact horizontal
-                    if (!isFeatured) {
-                      return (
-                        <div key={ev.id} style={{ ...cellStyle, display: "flex", borderRadius: 16, border: `1px solid ${C.orange}33`, overflow: "hidden", background: "#fff", boxShadow: shadow }}>
-                          <div style={{ position: "relative", width: "36%", flexShrink: 0, maxHeight: 160, overflow: "hidden" }}>
-                            <img src={imgSrc} alt={ev.title} onLoad={e => handleImgLoad(ev.id, e)} style={{ width: "100%", height: "auto", display: "block" }} />
-                            <div style={{ position: "absolute", top: 8, left: 8 }}>
-                              <span style={{ background: "rgba(196,160,160,0.9)", color: "#FDF6EC", fontWeight: 700, fontSize: 10, padding: "3px 10px", borderRadius: 999 }}>{badge}</span>
-                            </div>
-                          </div>
-                          <div style={{ flex: 1, background: C.cream, padding: "12px 14px", display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 6 }}>
-                            <div>
-                              <p style={{ fontWeight: 700, color: C.dark, fontSize: 13, letterSpacing: "-0.01em", margin: "0 0 4px", lineHeight: 1.4 }}>{ev.title}</p>
-                              {ev.start_datetime && (
-                                <span style={{ color: C.secondary, fontSize: 11, display: "flex", alignItems: "center", gap: 3 }}>
-                                  <Calendar size={11} /> {fmtDate(ev.start_datetime)}
-                                </span>
-                              )}
-                              <p style={{ color: C.secondary, fontSize: 12, lineHeight: 1.6, margin: "5px 0 0" }}>
-                                {ev.description?.slice(0, 80)}{ev.description?.length > 80 ? "…" : ""}
-                              </p>
-                            </div>
-                            {ev.registration_link && (
-                              <a href={ev.registration_link} target="_blank" rel="noreferrer" style={{ background: `${C.orange}22`, color: C.orange, borderRadius: 6, padding: "4px 12px", fontWeight: 600, fontSize: 11, textDecoration: "none", display: "inline-block", width: "fit-content" }}>Learn More</a>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    // Upcoming Next card: portrait or landscape
-                    return isPortrait ? (
-                      <div key={ev.id} style={{ ...cellStyle, display: "flex", borderRadius: 16, border: `1px solid ${C.orange}33`, overflow: "hidden", background: "#fff", boxShadow: shadow }} className="portrait-event-card">
-                        <div style={{ position: "relative", width: "38%", flexShrink: 0 }} className="portrait-img-col">
-                          <img src={imgSrc} alt={ev.title} onLoad={e => handleImgLoad(ev.id, e)} style={{ width: "100%", height: "auto", display: "block" }} />
-                          <div style={{ position: "absolute", top: 12, left: 12 }}>
-                            <span style={{ background: C.orange, color: "#FDF6EC", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999 }}>{badge}</span>
-                          </div>
-                          {ev.status === "upcoming" && ev.start_datetime && getDaysToGo(ev.start_datetime) && (
-                            <div style={{ position: "absolute", top: 12, right: 12, background: "rgba(52,152,219,0.92)", color: "#fff", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999, display: "flex", alignItems: "center", gap: 5 }}>
-                              <Calendar size={11} /> {getDaysToGo(ev.start_datetime)}
-                            </div>
-                          )}
-                        </div>
-                        <div style={{ flex: 1, background: C.cream, padding: 24, display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 16 }}>
-                          <div>
-                            <h3 style={{ fontWeight: 700, color: C.dark, fontSize: 20, letterSpacing: "-0.02em", margin: "0 0 10px" }}>{ev.title}</h3>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
-                              {ev.start_datetime && (
-                                <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                                  <Calendar size={12} /> {fmtDate(ev.start_datetime)}
-                                </span>
-                              )}
-                              {ev.location_name && (
-                                <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                                  <MapPin size={12} /> {ev.location_name}
-                                </span>
-                              )}
-                            </div>
-                            <p style={{ color: C.secondary, fontSize: 14, lineHeight: 1.75, margin: 0 }}>
-                              {ev.description?.slice(0, 180)}{ev.description?.length > 180 ? "…" : ""}
-                            </p>
-                          </div>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-                            {ev.registration_link
-                              ? <a href={ev.registration_link} target="_blank" rel="noreferrer" style={{ background: C.orange, color: "#FDF6EC", borderRadius: 8, padding: "8px 24px", fontWeight: 600, fontSize: 14, textDecoration: "none", display: "inline-block" }}>Register Now</a>
-                              : <span style={{ background: `${C.orange}18`, color: C.orange, border: `1px solid ${C.orange}44`, borderRadius: 8, padding: "8px 24px", fontWeight: 600, fontSize: 14, display: "inline-block" }}>Open to All</span>
-                            }
-                            {ev.end_datetime && <span style={{ color: C.secondary, fontSize: 12 }}>Ends {fmtDate(ev.end_datetime)}</span>}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div key={ev.id} style={{ ...cellStyle, display: "flex", flexDirection: "column", borderRadius: 16, border: `1px solid ${C.orange}33`, overflow: "hidden", background: "#fff", boxShadow: shadow }}>
-                        <div style={{ position: "relative" }}>
-                          <img src={imgSrc} alt={ev.title} onLoad={e => handleImgLoad(ev.id, e)} style={{ width: "100%", height: "auto", display: "block" }} />
-                          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(10,15,35,0.80) 0%, transparent 55%)" }} />
-                          <div style={{ position: "absolute", top: 12, left: 12 }}>
-                            <span style={{ background: C.orange, color: "#FDF6EC", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999 }}>{badge}</span>
-                          </div>
-                          {ev.status === "upcoming" && ev.start_datetime && getDaysToGo(ev.start_datetime) && (
-                            <div style={{ position: "absolute", top: 12, right: 12, background: "rgba(52,152,219,0.92)", color: "#fff", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999, display: "flex", alignItems: "center", gap: 5 }}>
-                              <Calendar size={11} /> {getDaysToGo(ev.start_datetime)}
-                            </div>
-                          )}
-                          <div style={{ position: "absolute", bottom: 12, left: 14, right: 14 }}>
-                            <h3 style={{ fontWeight: 700, color: "#FDF6EC", fontSize: 21, letterSpacing: "-0.02em", margin: 0 }}>{ev.title}</h3>
-                            <div style={{ display: "flex", gap: 14, marginTop: 6, flexWrap: "wrap" }}>
-                              {ev.start_datetime && (
-                                <span style={{ color: "rgba(253,246,236,0.75)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                                  <Calendar size={12} /> {fmtDate(ev.start_datetime)}
-                                </span>
-                              )}
-                              {ev.location_name && (
-                                <span style={{ color: "rgba(253,246,236,0.75)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                                  <MapPin size={12} /> {ev.location_name}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div style={{ background: C.cream, padding: 24, display: "flex", flexDirection: "column", gap: 14, justifyContent: "space-between" }}>
-                          <p style={{ color: C.secondary, fontSize: 15, lineHeight: 1.75, margin: 0 }}>
-                            {ev.description?.slice(0, 180)}{ev.description?.length > 180 ? "…" : ""}
-                          </p>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-                            {ev.registration_link
-                              ? <a href={ev.registration_link} target="_blank" rel="noreferrer" style={{ background: C.orange, color: "#FDF6EC", borderRadius: 8, padding: "8px 24px", fontWeight: 600, fontSize: 14, textDecoration: "none", display: "inline-block" }}>Register Now</a>
-                              : <span style={{ background: `${C.orange}18`, color: C.orange, border: `1px solid ${C.orange}44`, borderRadius: 8, padding: "8px 24px", fontWeight: 600, fontSize: 14, display: "inline-block" }}>Open to All</span>
-                            }
-                            {ev.end_datetime && <span style={{ color: C.secondary, fontSize: 12 }}>Ends {fmtDate(ev.end_datetime)}</span>}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20, alignItems: "start" }}>
+                  {imageCards.map((ev, idx) => (
+                    <EventCard key={ev.id} ev={ev} isFeatured={idx === 0} />
+                  ))}
                 </div>
               )}
 
@@ -574,23 +423,24 @@ export default function Home() {
           {yatras.length === 0 ? (
             <p style={{ textAlign: "center", color: C.secondary }}>No upcoming yatras at the moment.</p>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 28 }}>
+            <div className="yatra-masonry">
               {yatras.map(y => {
                 const isOpen = Boolean(y.is_registration_open);
                 const durationDays = y.start_date && y.end_date
                   ? Math.max(1, Math.round((new Date(y.end_date) - new Date(y.start_date)) / 86400000) + 1)
                   : null;
                 return (
-                  <div key={y.id} style={{ borderRadius: 16, background: C.cream, border: `1px solid ${C.orange}33`, overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column" }}>
-                    <div style={{ position: "relative", height: 200, overflow: "hidden" }}>
+                  <div key={y.id} style={{ breakInside: "avoid", marginBottom: 28 }}>
+                  <div style={{ borderRadius: 16, background: C.cream, border: `1px solid ${C.orange}33`, overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column" }}>
+                    <div style={{ position: "relative" }}>
                       {y.poster ? (
-                        <img src={y.poster} alt={y.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={y.poster} alt={y.title} style={{ width: "100%", height: "auto", display: "block" }} />
                       ) : (
-                        <div style={{ width: "100%", height: "100%", background: `${C.orange}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ aspectRatio: "4/3", background: `${C.orange}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                           <MapPin size={40} color={`${C.orange}66`} />
                         </div>
                       )}
-                      <div style={{ position: "absolute", top: 12, right: 12 }}>
+                      <div style={{ position: "absolute", top: 12, right: 12, zIndex: 2 }}>
                         <span style={{ background: isOpen ? C.orange : "rgba(26,39,68,0.8)", color: "#FDF6EC", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999 }}>
                           {isOpen ? "Open" : "Closed"}
                         </span>
@@ -638,6 +488,7 @@ export default function Home() {
                         </Link>
                       </div>
                     </div>
+                  </div>
                   </div>
                 );
               })}
@@ -705,6 +556,9 @@ export default function Home() {
 
       <style>{`
         .hero-section-new { min-height: calc(100vh - var(--navbar-h, 64px)); min-height: calc(100dvh - var(--navbar-h, 64px)); }
+        .yatra-masonry { columns: 3; column-gap: 28px; }
+        @media (max-width: 900px) { .yatra-masonry { columns: 2; } }
+        @media (max-width: 560px) { .yatra-masonry { columns: 1; } }
         @media (max-width: 600px) { .hero-stats-grid { grid-template-columns: repeat(2, 1fr) !important; } }
 
         @media (max-width: 768px) { .events-image-grid { grid-template-columns: 1fr !important; } }

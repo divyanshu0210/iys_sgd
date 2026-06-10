@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Calendar, MapPin, PlayCircle, CheckCircle, Video, Clock, Bell, Megaphone } from "lucide-react";
+import { Bell, Megaphone, Clock } from "lucide-react";
 import API from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
+import EventCard from "../components/EventCard";
 
 const C = {
   cream: "#FDF6EC",
@@ -11,102 +12,6 @@ const C = {
   secondary: "#5A5A6A",
   rose: "#C4A0A0",
 };
-
-const fmtDate = (d) =>
-  d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "";
-
-const getDaysToGo = (dateStr) => {
-  const diff = new Date(dateStr) - new Date();
-  if (diff <= 0) return null;
-  const days = Math.floor(diff / 86400000);
-  return days === 0 ? "Today" : `${days} day${days > 1 ? "s" : ""} to go`;
-};
-
-function EventCard({ ev, isFeatured }) {
-  const imgSrc = ev.poster || ev.youtube_thumbnail;
-  const daysToGo = isFeatured && ev.start_datetime ? getDaysToGo(ev.start_datetime) : null;
-  const badge = ev.status === "live" ? "live"
-    : isFeatured ? "Upcoming"
-    : ev.category === "workshop" ? "Workshop"
-    : ev.event_type === "online" ? "Online"
-    : ev.event_type === "hybrid" ? "Hybrid"
-    : "Event";
-
-  return (
-    <div style={{ borderRadius: 16, border: `1px solid ${C.orange}33`, overflow: "hidden", background: "#fff", boxShadow: "0 2px 10px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column" }}>
-      {imgSrc && (
-        <div style={{ position: "relative" }}>
-          <img src={imgSrc} alt={ev.title} style={{ width: "100%", height: 200, objectFit: "cover", display: "block" }} />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(10,15,35,0.55) 0%, transparent 50%)" }} />
-
-          {/* category badge top-left */}
-          <div style={{ position: "absolute", top: 10, left: 10 }}>
-            {badge === "live" ? (
-              <span style={{ background: "#e74c3c", color: "#fff", fontWeight: 700, fontSize: 11, padding: "3px 10px", borderRadius: 999, display: "flex", alignItems: "center", gap: 4 }}>
-                <PlayCircle size={11} /> LIVE
-              </span>
-            ) : badge === "Upcoming" ? (
-              <span style={{ background: C.orange, color: "#FDF6EC", fontWeight: 700, fontSize: 11, padding: "3px 10px", borderRadius: 999 }}>Upcoming</span>
-            ) : (
-              <span style={{ background: "rgba(90,90,106,0.82)", color: "#fff", fontWeight: 700, fontSize: 11, padding: "3px 10px", borderRadius: 999 }}>{badge}</span>
-            )}
-          </div>
-
-          {/* days to go top-right */}
-          {daysToGo && (
-            <div style={{ position: "absolute", top: 10, right: 10, background: "rgba(52,152,219,0.92)", color: "#fff", fontWeight: 700, fontSize: 11, padding: "3px 10px", borderRadius: 999, display: "flex", alignItems: "center", gap: 4 }}>
-              <Calendar size={11} /> {daysToGo}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div style={{ flex: 1, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 10, background: C.cream }}>
-        <h3 style={{ fontWeight: 700, color: C.dark, fontSize: 15, letterSpacing: "-0.01em", margin: 0, lineHeight: 1.4 }}>{ev.title}</h3>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          {ev.start_datetime && (
-            <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}>
-              <Calendar size={12} color={C.orange} /> {fmtDate(ev.start_datetime)}
-            </span>
-          )}
-          {ev.location_name && (
-            <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}>
-              <MapPin size={12} color={C.orange} /> {ev.location_name}
-            </span>
-          )}
-        </div>
-
-        {ev.description && (
-          <p style={{ color: C.secondary, fontSize: 13, lineHeight: 1.65, margin: 0 }}>
-            {ev.description.slice(0, 120)}{ev.description.length > 120 ? "…" : ""}
-          </p>
-        )}
-
-        <div style={{ marginTop: "auto", paddingTop: 8, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {ev.status === "live" && ev.youtube_live_url && (
-            <a href={ev.youtube_live_url} target="_blank" rel="noreferrer"
-              style={{ background: "#e74c3c", color: "#fff", borderRadius: 8, padding: "6px 16px", fontWeight: 600, fontSize: 13, textDecoration: "none", display: "flex", alignItems: "center", gap: 5 }}>
-              <PlayCircle size={13} /> Watch Live
-            </a>
-          )}
-          {ev.status === "completed" && ev.youtube_replay_url && (
-            <a href={ev.youtube_replay_url} target="_blank" rel="noreferrer"
-              style={{ background: C.dark, color: "#fff", borderRadius: 8, padding: "6px 16px", fontWeight: 600, fontSize: 13, textDecoration: "none", display: "flex", alignItems: "center", gap: 5 }}>
-              <Video size={13} /> Watch Replay
-            </a>
-          )}
-          {ev.status === "upcoming" && ev.registration_link && (
-            <a href={ev.registration_link} target="_blank" rel="noreferrer"
-              style={{ background: C.orange, color: "#FDF6EC", borderRadius: 8, padding: "6px 16px", fontWeight: 600, fontSize: 13, textDecoration: "none", display: "flex", alignItems: "center", gap: 5 }}>
-              <CheckCircle size={13} /> Register
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const TABS = ["All", "Events", "Workshops"];
 
@@ -187,11 +92,15 @@ export default function AllEvents() {
                 <p>No events found.</p>
               </div>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 20 }}>
+              <div className="events-masonry">
                 {(() => {
                   const now = new Date();
                   const featuredIdx = filtered.findIndex(e => new Date(e.start_datetime) >= now);
-                  return filtered.map((ev, i) => <EventCard key={ev.id} ev={ev} isFeatured={i === featuredIdx} />);
+                  return filtered.map((ev, i) => (
+                    <div key={ev.id} style={{ breakInside: "avoid", marginBottom: 20 }}>
+                      <EventCard ev={ev} isFeatured={i === featuredIdx} />
+                    </div>
+                  ));
                 })()}
               </div>
             )}
@@ -238,9 +147,10 @@ export default function AllEvents() {
       </div>
 
       <style>{`
-        @media (max-width: 768px) {
-          .events-page-layout { grid-template-columns: 1fr !important; }
-        }
+        .events-masonry { columns: 3; column-gap: 20px; }
+        @media (max-width: 900px) { .events-masonry { columns: 2; } }
+        @media (max-width: 560px) { .events-masonry { columns: 1; } }
+        @media (max-width: 768px) { .events-page-layout { grid-template-columns: 1fr !important; } }
       `}</style>
       <Footer />
     </div>
