@@ -21,8 +21,7 @@ const C = {
   rose: "#C4A0A0",
 };
 
-const HERO_IMG =
-  "https://images.unsplash.com/photo-1647443670050-b108739e1e60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1400";
+const HERO_IMG = "/hero.png";
 
 const GALLERY = [
   {
@@ -133,8 +132,9 @@ function OutlineBtn({ children, onClick, style }) {
 }
 
 export default function Home() {
-  const { user, profile, profileStage, loading, setDonatePage, openApprovalModal, setOpenApprovalModal } = useAuth();
+  const { user, profile, profileStage, loading, setDonatePage } = useAuth();
   const navigate = useNavigate();
+  const [openApprovalModal, setOpenApprovalModal] = useState(false);
   const [openPendingModal, setOpenPendingModal] = useState(false);
   const [events, setEvents] = useState([]);
   const [yatras, setYatras] = useState([]);
@@ -663,13 +663,13 @@ export default function Home() {
                 <h3 style={{ fontWeight: 700, color: C.dark, fontSize: 16, letterSpacing: "-0.01em", margin: 0 }}>{c.name}</h3>
               </div>
               <p style={{ color: C.secondary, fontSize: 14, lineHeight: 1.65, margin: 0 }}>{c.desc}</p>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, width: "100%" }}>
-                <a href={`tel:${c.phone}`} style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 6, textDecoration: "none", minWidth: 0 }}>
-                  <Phone size={12} color={C.orange} style={{ flexShrink: 0 }} /> {c.phone}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, width: "100%" }}>
+                <a href={`tel:${c.phone}`} style={{ borderRadius: 8, background: C.cream, color: C.dark, border: `1px solid ${C.orange}4D`, padding: "6px 10px", fontWeight: 600, fontSize: 12, textDecoration: "none", display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+                  <Phone size={12} color={C.orange} style={{ flexShrink: 0 }} /> <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.phone}</span>
                 </a>
                 <a href={c.map} target="_blank" rel="noreferrer"
-                  style={{ borderRadius: 8, background: C.cream, color: C.dark, border: `1px solid ${C.orange}4D`, padding: "6px 14px", fontWeight: 600, fontSize: 12, textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}>
-                  Directions
+                  style={{ borderRadius: 8, background: C.cream, color: C.dark, border: `1px solid ${C.orange}4D`, padding: "6px 14px", fontWeight: 600, fontSize: 12, textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0, display: "flex", alignItems: "center", gap: 6 }}>
+                  <MapPin size={12} color={C.orange} style={{ flexShrink: 0 }} /> Directions
                 </a>
               </div>
             </div>
@@ -680,6 +680,9 @@ export default function Home() {
       <Footer />
 
       {/* ── MODALS ───────────────────────────────────────────── */}
+      <Modal open={openApprovalModal} onClose={() => setOpenApprovalModal(false)}>
+        <ProfileApprovalForm onClose={() => setOpenApprovalModal(false)} />
+      </Modal>
       <Modal open={openPendingModal} onClose={() => setOpenPendingModal(false)}>
         <div style={{ textAlign: "center", padding: 24 }}>
           <h3 style={{ color: "#1E3A8A", marginBottom: 12 }}>Approval Pending</h3>
