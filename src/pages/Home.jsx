@@ -132,7 +132,7 @@ function OutlineBtn({ children, onClick, style }) {
 }
 
 export default function Home() {
-  const { user, profile, profileStage, loading, setDonatePage } = useAuth();
+  const { user, profile, profileStage, loading, setUseFullWidth } = useAuth();
   const navigate = useNavigate();
   const [openApprovalModal, setOpenApprovalModal] = useState(false);
   const [openPendingModal, setOpenPendingModal] = useState(false);
@@ -140,10 +140,10 @@ export default function Home() {
   const [yatras, setYatras] = useState([]);
 
   useEffect(() => {
-    setDonatePage(true);
+    setUseFullWidth(true);
     if (loading) return;
     if (user && profileStage === "not-exists") navigate("/complete-profile", { replace: true });
-    return () => setDonatePage(false);
+    return () => setUseFullWidth(false);
   }, [user, profileStage, loading, navigate]);
 
   useEffect(() => {
@@ -200,19 +200,12 @@ export default function Home() {
     return days === 0 ? "Today" : `${days} day${days > 1 ? "s" : ""} to go`;
   };
 
-  // Image cards: future events first (soonest → latest), then past events
+  // Home: upcoming events/workshops only, soonest first, max 3
   const now = new Date();
   const imageCards = [...events]
-    .filter(e => !e.category || e.category === "event" || e.category === "workshop")
-    .sort((a, b) => {
-      const aDate = new Date(a.start_datetime);
-      const bDate = new Date(b.start_datetime);
-      const aFuture = aDate >= now;
-      const bFuture = bDate >= now;
-      if (aFuture && !bFuture) return -1;
-      if (!aFuture && bFuture) return 1;
-      return aFuture ? aDate - bDate : bDate - aDate;
-    });
+    .filter(e => (!e.category || e.category === "event" || e.category === "workshop") && new Date(e.start_datetime) >= now)
+    .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
+    .slice(0, 3);
 
   const announcementEvents = events.filter(
     e => e.category === "announcement" || e.category === "notice"
@@ -494,9 +487,11 @@ export default function Home() {
         })()}
 
         <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(25px, 4vw, 48px)" }}>
-          <OutlineBtn>
-            View All Events <ArrowRight size={16} />
-          </OutlineBtn>
+          <Link to="/events" style={{ textDecoration: "none" }}>
+            <OutlineBtn>
+              View All Events <ArrowRight size={16} />
+            </OutlineBtn>
+          </Link>
         </div>
       </section>
 

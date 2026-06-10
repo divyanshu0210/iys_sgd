@@ -23,6 +23,7 @@ import ResetPassword from "../pages/Auth/ResetPassword";
 import PasswordResetSuccess from "../pages/Auth/PasswordResetSuccess";
 import DonationDetailsPage from "../pages/Donate/DonationDetailsPage";
 import ResourcesPage from "../pages/Resources/ResourcesPage";
+import AllEvents from "../pages/AllEvents";
 
 export default function AppRoutes() {
   return (
@@ -69,6 +70,7 @@ export default function AppRoutes() {
       <Route path="/donate" element={<DonatePage />} />
       <Route path="/donate/details" element={<DonationDetailsPage />} />
       <Route path="/resources" element={<ResourcesPage />} />
+      <Route path="/events" element={<AllEvents />} />
 
       {/* Role Protected */}
       <Route

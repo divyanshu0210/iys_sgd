@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [profileStage, setProfileStage] = useState("not-exists"); // "not-exists", "guest", "approval", "devotee"
   const [loading, setLoading] = useState(true);
-  const [donatePage, setDonatePage] = useState(false);
+  const [useFullWidth, setUseFullWidth] = useState(false);
   const [isNavigationLocked, setIsNavigationLocked] = useState(false);
   const [openApprovalModal, setOpenApprovalModal] = useState(false);
 
@@ -126,8 +126,8 @@ export function AuthProvider({ children }) {
         setProfileStage,
         isNavigationLocked,
         setIsNavigationLocked,
-        donatePage,
-        setDonatePage,
+        useFullWidth,
+        setUseFullWidth,
         openApprovalModal,
         setOpenApprovalModal,
       }}

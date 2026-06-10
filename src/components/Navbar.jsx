@@ -9,7 +9,7 @@ export default function Navbar() {
     profileStage,
     logout,
     isNavigationLocked,
-    donatePage,
+    useFullWidth,
     setOpenApprovalModal,
   } = useAuth();
   const navigate = useNavigate();
@@ -61,7 +61,7 @@ export default function Navbar() {
 
   // Scroll handler to hide/show navbar
   useEffect(() => {
-    if (!donatePage) return;
+    if (!useFullWidth) return;
 
     const handleScroll = () => {
       const currentScrollPos = window.pageYOffset;
@@ -71,7 +71,7 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [prevScrollPos, donatePage]);
+  }, [prevScrollPos, useFullWidth]);
 
   const NavLink = ({ to, replace = false, children, style: styleOverride }) => (
     <Link

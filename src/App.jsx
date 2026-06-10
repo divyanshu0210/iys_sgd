@@ -9,7 +9,7 @@ import Modal from "./components/Modal";
 import ProfileApprovalForm from "./pages/Profile/ProfileApprovalForm";
 
 export default function App() {
-  const { loading, donatePage, openApprovalModal, setOpenApprovalModal } = useAuth();
+  const { loading, useFullWidth, openApprovalModal, setOpenApprovalModal } = useAuth();
   useEffect(() => {
   const handleFocus = (e) => {
     if (
@@ -35,7 +35,7 @@ export default function App() {
       {loading && <FullPageLoader />}
       <Navbar />
       <main>
-        <div className={donatePage ? "full-width-page" : "normal-page"}>
+        <div className={useFullWidth ? "full-width-page" : "normal-page"}>
           <AppRoutes />
         </div>
       </main>
