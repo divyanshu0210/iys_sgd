@@ -193,6 +193,12 @@ export default function Home() {
 
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "";
   const fmtDateShort = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "";
+  const getDaysToGo = (dateStr) => {
+    const diff = new Date(dateStr) - new Date();
+    if (diff <= 0) return null;
+    const days = Math.floor(diff / 86400000);
+    return days === 0 ? "Today" : `${days} day${days > 1 ? "s" : ""} to go`;
+  };
 
   // Image cards: future events first (soonest → latest), then past events
   const now = new Date();
@@ -253,7 +259,7 @@ export default function Home() {
                 onClick={() => document.getElementById("centres-section")?.scrollIntoView({ behavior: "smooth" })}
                 style={{ background: C.orange, color: "#FDF6EC", border: "none", borderRadius: 12, padding: "14px 32px", fontWeight: 700, fontSize: 16, cursor: "pointer" }}
               >
-                Explore Programs
+                Join Youth Programs
               </button>
               <button
                 onClick={() => document.getElementById("trips-section")?.scrollIntoView({ behavior: "smooth" })}
@@ -370,6 +376,11 @@ export default function Home() {
                           <div style={{ position: "absolute", top: 12, left: 12 }}>
                             <span style={{ background: C.orange, color: "#FDF6EC", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999 }}>{badge}</span>
                           </div>
+                          {ev.status === "upcoming" && ev.start_datetime && getDaysToGo(ev.start_datetime) && (
+                            <div style={{ position: "absolute", top: 12, right: 12, background: "rgba(52,152,219,0.92)", color: "#fff", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999, display: "flex", alignItems: "center", gap: 5 }}>
+                              <Calendar size={11} /> {getDaysToGo(ev.start_datetime)}
+                            </div>
+                          )}
                         </div>
                         <div style={{ flex: 1, background: C.cream, padding: 24, display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 16 }}>
                           <div>
@@ -407,6 +418,11 @@ export default function Home() {
                           <div style={{ position: "absolute", top: 12, left: 12 }}>
                             <span style={{ background: C.orange, color: "#FDF6EC", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999 }}>{badge}</span>
                           </div>
+                          {ev.status === "upcoming" && ev.start_datetime && getDaysToGo(ev.start_datetime) && (
+                            <div style={{ position: "absolute", top: 12, right: 12, background: "rgba(52,152,219,0.92)", color: "#fff", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999, display: "flex", alignItems: "center", gap: 5 }}>
+                              <Calendar size={11} /> {getDaysToGo(ev.start_datetime)}
+                            </div>
+                          )}
                           <div style={{ position: "absolute", bottom: 12, left: 14, right: 14 }}>
                             <h3 style={{ fontWeight: 700, color: "#FDF6EC", fontSize: 21, letterSpacing: "-0.02em", margin: 0 }}>{ev.title}</h3>
                             <div style={{ display: "flex", gap: 14, marginTop: 6, flexWrap: "wrap" }}>
@@ -693,7 +709,7 @@ export default function Home() {
       </Modal>
 
       <style>{`
-        .hero-section-new { height: calc(100vh - var(--navbar-h, 64px)); height: calc(100dvh - var(--navbar-h, 64px)); min-height: 500px; }
+        .hero-section-new { min-height: calc(100vh - var(--navbar-h, 64px)); min-height: calc(100dvh - var(--navbar-h, 64px)); }
         @media (max-width: 600px) { .hero-stats-grid { grid-template-columns: repeat(2, 1fr) !important; } }
 
         @media (max-width: 768px) { .events-image-grid { grid-template-columns: 1fr !important; } }
