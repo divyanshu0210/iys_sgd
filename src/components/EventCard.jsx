@@ -19,7 +19,8 @@ const getDaysToGo = (dateStr) => {
   return days === 0 ? "Today" : `${days} day${days > 1 ? "s" : ""} to go`;
 };
 
-export default function EventCard({ ev, isFeatured }) {
+// horizontal=true → image left, content right (for single-column wide layout)
+export default function EventCard({ ev, isFeatured, horizontal = false }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const imgSrc = ev.poster || ev.youtube_thumbnail;
@@ -32,10 +33,17 @@ export default function EventCard({ ev, isFeatured }) {
     : "Event";
 
   return (
-    <div style={{ borderRadius: 16, border: `1px solid ${C.orange}33`, overflow: "hidden", background: C.cream, boxShadow: "0 2px 10px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column" }}>
+    <div
+      className={horizontal ? "ev-card ev-card-h" : "ev-card"}
+      style={{ borderRadius: 16, border: `1px solid ${C.orange}33`, overflow: "hidden", background: C.cream, boxShadow: "0 2px 10px rgba(0,0,0,0.06)", display: "flex", flexDirection: horizontal ? "row" : "column" }}
+    >
       {imgSrc && (
-        <div style={{ position: "relative" }}>
-          <img src={imgSrc} alt={ev.title} style={{ width: "100%", height: "auto", display: "block" }} />
+        <div className={horizontal ? "ev-card-img" : ""} style={{ position: "relative", ...(horizontal ? { width: "42%", flexShrink: 0 } : {}) }}>
+          <img
+            src={imgSrc}
+            alt={ev.title}
+            style={{ width: "100%", display: "block", ...(horizontal ? { height: "100%", objectFit: "cover" } : { height: "auto" }) }}
+          />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(10,15,35,0.45) 0%, transparent 50%)" }} />
 
           <div style={{ position: "absolute", top: 10, left: 10, zIndex: 3 }}>
@@ -76,7 +84,7 @@ export default function EventCard({ ev, isFeatured }) {
 
         {ev.description && (
           <p style={{ color: C.secondary, fontSize: 13, lineHeight: 1.65, margin: 0 }}>
-            {ev.description.slice(0, 120)}{ev.description.length > 120 ? "…" : ""}
+            {ev.description.slice(0, horizontal ? 300 : 120)}{ev.description.length > (horizontal ? 300 : 120) ? "…" : ""}
           </p>
         )}
 
@@ -105,6 +113,14 @@ export default function EventCard({ ev, isFeatured }) {
           )}
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 480px) {
+          .ev-card-h { flex-direction: column !important; }
+          .ev-card-h .ev-card-img { width: 100% !important; }
+          .ev-card-h .ev-card-img img { height: auto !important; object-fit: unset !important; }
+        }
+      `}</style>
     </div>
   );
 }

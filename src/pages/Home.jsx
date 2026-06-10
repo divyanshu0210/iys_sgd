@@ -5,10 +5,12 @@ import API from "../services/api";
 import Modal from "../components/Modal";
 import ProfileApprovalForm from "./Profile/ProfileApprovalForm";
 import Footer from "../components/Footer";
-import EventCard from "../components/EventCard";
+import EventsSection from "../components/EventsSection";
+import YatraCard from "../components/YatraCard";
+import useYatraClickHandler from "../hooks/useYatraClickHandler";
 import {
-  ArrowRight, Bell, BookOpen, Building2, Calendar, Clock,
-  Globe, Heart, Images, Leaf, MapPin, Megaphone, Mic, Music,
+  ArrowRight, BookOpen, Building2, Calendar, Clock,
+  Globe, Heart, Images, Leaf, MapPin, Mic, Music,
   Phone, Play, Users, Utensils, Zap,
 } from "lucide-react";
 
@@ -133,11 +135,9 @@ function OutlineBtn({ children, onClick, style }) {
 }
 
 export default function Home() {
-  const { user, profile, profileStage, loading, setUseFullWidth } = useAuth();
+  const { user, profileStage, loading, setUseFullWidth } = useAuth();
   const navigate = useNavigate();
-  const [openApprovalModal, setOpenApprovalModal] = useState(false);
-  const [openPendingModal, setOpenPendingModal] = useState(false);
-  const [events, setEvents] = useState([]);
+  const { handleYatraClick, modals: yatraModals } = useYatraClickHandler();
   const [yatras, setYatras] = useState([]);
 
   useEffect(() => {
@@ -148,23 +148,8 @@ export default function Home() {
   }, [user, profileStage, loading, navigate]);
 
   useEffect(() => {
-    API.get("/announcements/events/home/").then(r => setEvents(r.data)).catch(() => {});
     API.get("/yatra/list/").then(r => setYatras(r.data.filter(y => !y.close_yatra).slice(0, 3))).catch(() => {});
   }, []);
-
-  const handleYatraClick = (e, yatra) => {
-    if (!user) { e.preventDefault(); navigate("/signin"); return; }
-    const requiresApproval = yatra.registration_policy?.requires_approval !== false;
-    if (requiresApproval) {
-      if (profileStage === "guest") { e.preventDefault(); setOpenApprovalModal(true); return; }
-      if (profileStage === "approval") { e.preventDefault(); setOpenPendingModal(true); return; }
-    }
-    const minRounds = yatra.registration_policy?.min_chanting_rounds || 0;
-    if (minRounds > 0 && (profile?.no_of_chanting_rounds || 0) < minRounds) {
-      e.preventDefault();
-      alert(`You need a minimum of ${minRounds} chanting rounds to register for this Yatra. You currently have ${profile?.no_of_chanting_rounds || 0} rounds.`);
-    }
-  };
 
   useEffect(() => {
     const el = document.getElementById("navbar");
@@ -189,34 +174,8 @@ export default function Home() {
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "";
   const fmtDateShort = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "";
 
-  // Home: upcoming events/workshops only, soonest first, max 3
-  const now = new Date();
-  const imageCards = [...events]
-    .filter(e => (!e.category || e.category === "event" || e.category === "workshop") && new Date(e.start_datetime) >= now)
-    .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
-    .slice(0, 3);
-
-  const announcementEvents = events.filter(
-    e => e.category === "announcement" || e.category === "notice"
-  );
-
   return (
     <div style={{ background: C.cream, color: C.dark, minHeight: "100vh", overflowX: "hidden" }}>
-
-      {/* ── Auth banners ─────────────────────────────────────── */}
-      {/* {profileStage === "guest" && (
-        <div style={{ background: "#fff3cd", border: "1px solid #ffeaa7", padding: "0.9rem 1.5rem", textAlign: "center" }}>
-          <strong>Get Approved!</strong> To access all features, get your profile approved by your counsellor.
-          <button onClick={() => setOpenApprovalModal(true)} style={{ marginLeft: 12, background: C.orange, color: "#fff", border: "none", padding: "6px 16px", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>
-            Get Approved
-          </button>
-        </div>
-      )}
-      {profileStage === "approval" && (
-        <div style={{ background: "#fff3cd", border: "1px solid #ffeaa7", padding: "0.9rem 1.5rem", textAlign: "center" }}>
-          <strong>Approval Pending:</strong> Your profile has been submitted. You'll get full access once confirmed.
-        </div>
-      )} */}
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section style={{ position: "relative", width: "100%", display: "flex", flexDirection: "column" }} className="hero-section-new">
@@ -277,64 +236,7 @@ export default function Home() {
           </p>
         </div>
 
-        {(() => {
-          const pillItems = [
-            ...announcementEvents,
-            ...yatras.map(y => ({
-              id: `yatra-${y.id}`,
-              category: "announcement",
-              title: `${y.title} Yatra — Registrations Open${y.start_date ? ` from ${fmtDateShort(y.start_date)}` : ""}!`,
-            })),
-          ];
-
-          const imgCount = imageCards.length;
-
-          return (
-            <>
-              {/* ── Image cards grid ── */}
-              {imgCount > 0 && (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20, alignItems: "start" }}>
-                  {imageCards.map((ev, idx) => (
-                    <EventCard key={ev.id} ev={ev} isFeatured={idx === 0} />
-                  ))}
-                </div>
-              )}
-
-              {/* ── Pills row (announcements, notices, yatras) ── */}
-              {pillItems.length > 0 && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginTop: imgCount > 0 ? 20 : 0 }}>
-                  {pillItems.map(ev => {
-                    const isNotice = ev.category === "notice";
-                    return (
-                      <div key={ev.id} style={{ flex: "1 1 280px", borderRadius: 12, border: `1px solid ${isNotice ? C.rose : C.orange}33`, background: C.cream, padding: 16, display: "flex", alignItems: "flex-start", gap: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-                        <div style={{ flexShrink: 0, background: isNotice ? `${C.rose}25` : `${C.orange}22`, borderRadius: 8, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          {isNotice ? <Megaphone size={16} color={C.rose} /> : <Bell size={16} color={C.orange} />}
-                        </div>
-                        <div>
-                          <span style={{ color: C.secondary, fontSize: 12 }}>{isNotice ? "Notice" : "Announcement"}</span>
-                          <h4 style={{ fontWeight: 600, color: C.dark, fontSize: 15, letterSpacing: "-0.01em", margin: "3px 0 0" }}>{ev.title}</h4>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* ── Empty state ── */}
-              {events.length === 0 && yatras.length === 0 && (
-                <div style={{ borderRadius: 12, border: `1px solid ${C.orange}33`, background: C.cream, padding: 20, display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ flexShrink: 0, background: `${C.rose}25`, borderRadius: 8, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Megaphone size={16} color={C.rose} />
-                  </div>
-                  <div>
-                    <span style={{ color: C.secondary, fontSize: 11 }}>Notice</span>
-                    <h4 style={{ fontWeight: 600, color: C.dark, fontSize: 13, margin: "2px 0 0" }}>Stay tuned for upcoming announcements</h4>
-                  </div>
-                </div>
-              )}
-            </>
-          );
-        })()}
+        <EventsSection preview />
 
         <div style={{ display: "flex", justifyContent: "center", marginTop: "clamp(25px, 4vw, 48px)" }}>
           <Link to="/events" style={{ textDecoration: "none" }}>
@@ -425,89 +327,9 @@ export default function Home() {
             <p style={{ textAlign: "center", color: C.secondary }}>No upcoming yatras at the moment.</p>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 28, alignItems: "start" }}>
-              {yatras.map(y => {
-                const isOpen = Boolean(y.is_registration_open);
-                const requiresApproval = y.registration_policy?.requires_approval !== false;
-                const minRounds = y.registration_policy?.min_chanting_rounds || 0;
-                const durationDays = y.start_date && y.end_date
-                  ? Math.max(1, Math.round((new Date(y.end_date) - new Date(y.start_date)) / 86400000) + 1)
-                  : null;
-                return (
-                  <div key={y.id} style={{ borderRadius: 16, background: C.cream, border: `1px solid ${C.orange}33`, overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column" }}>
-                    <div style={{ position: "relative" }}>
-                      {y.poster ? (
-                        <img src={y.poster} alt={y.title} style={{ width: "100%", height: "auto", display: "block" }} />
-                      ) : (
-                        <div style={{ aspectRatio: "4/3", background: `${C.orange}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <MapPin size={40} color={`${C.orange}66`} />
-                        </div>
-                      )}
-                      {/* Open / Closed badge — top right */}
-                      <div style={{ position: "absolute", top: 12, right: 12, zIndex: 2 }}>
-                        <span style={{ background: isOpen ? C.orange : "rgba(26,39,68,0.8)", color: "#FDF6EC", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999 }}>
-                          {isOpen ? "Registration Open" : "Registration Closed"}
-                        </span>
-                      </div>
-                      {/* Access indicator — top left */}
-                      <div style={{ position: "absolute", top: 12, left: 12, zIndex: 2 }}>
-                        {requiresApproval ? (
-                          <span style={{ background: "rgba(10,15,35,0.72)", color: "#fff", fontWeight: 600, fontSize: 10, padding: "3px 10px", borderRadius: 999, display: "flex", alignItems: "center", gap: 4, backdropFilter: "blur(4px)" }}>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                            Counsellor Required
-                          </span>
-                        ) : (
-                          <span style={{ background: "rgba(34,197,94,0.85)", color: "#fff", fontWeight: 600, fontSize: 10, padding: "3px 10px", borderRadius: 999, display: "flex", alignItems: "center", gap: 4 }}>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            Open to All
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
-                      <div>
-                      <h3 style={{ fontWeight: 700, color: C.dark, fontSize: 19, letterSpacing: "-0.02em", margin: 0 }}>{y.title || "Untitled Yatra"}</h3>
-                        {y.description && (
-                          <p style={{ color: C.secondary, fontSize: 14, lineHeight: 1.7, margin: 0 }}>
-                          {y.description.slice(0, 120)}{y.description.length > 120 ? "…" : ""}
-                        </p>
-                      )}
-                           {y.location && (
-                          <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                            <MapPin size={12} /> {y.location}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ display: "flex", flexWrap: "wrap", justifyContent:'space-between', gap: 12 }}>
-                        {y.start_date && (
-                          <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                            <Calendar size={12} /> {fmtDateShort(y.start_date)}–{fmtDateShort(y.end_date)}
-                          </span>
-                        )}
-                        {durationDays && (
-                          <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                            <Clock size={12} /> {durationDays} day{durationDays > 1 ? "s" : ""}
-                          </span>
-                        )}
-                        {y.capacity && (
-                          <span style={{ color: C.secondary, fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                            <Users size={12} /> {y.capacity} seats
-                          </span>
-                        )}
-                        </div>
-                      <div style={{ borderTop: `1px solid ${C.orange}62`, paddingTop: 16, display: "flex", justifyContent: "center", alignItems: "center", marginTop: "auto" }}>
-                        <Link
-                          to={`/yatra/${y.id}/register`}
-                          state={{ yatra: y }}
-                          onClick={e => handleYatraClick(e, y)}
-                          style={{ background: isOpen ? C.orange : "transparent", color: isOpen ? "#FDF6EC" : C.orange, border: isOpen ? "none" : `1px solid ${C.orange}`, borderRadius: 10, padding: "8px 24px", fontWeight: 600, fontSize: 14, textDecoration: "none" }}
-                        >
-                          {isOpen ? "Register Now" : "View Details"}
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {yatras.map(y => (
+                <YatraCard key={y.id} y={y} onRegisterClick={e => handleYatraClick(e, y)} />
+              ))}
             </div>
           )}
 
@@ -558,17 +380,7 @@ export default function Home() {
       <Footer />
 
       {/* ── MODALS ───────────────────────────────────────────── */}
-      <Modal open={openApprovalModal} onClose={() => setOpenApprovalModal(false)}>
-        <ProfileApprovalForm onClose={() => setOpenApprovalModal(false)} />
-      </Modal>
-      <Modal open={openPendingModal} onClose={() => setOpenPendingModal(false)}>
-        <div style={{ textAlign: "center", padding: 24 }}>
-          <h3 style={{ color: "#1E3A8A", marginBottom: 12 }}>Approval Pending</h3>
-          <p style={{ fontSize: 15, color: "#444", lineHeight: 1.6 }}>
-            Your profile has been submitted for approval. You'll get full access once your counsellor confirms it.
-          </p>
-        </div>
-      </Modal>
+      {yatraModals}
 
       <style>{`
         .hero-section-new { min-height: calc(100vh - var(--navbar-h, 64px)); min-height: calc(100dvh - var(--navbar-h, 64px)); }
@@ -576,6 +388,7 @@ export default function Home() {
 
         @media (max-width: 768px) { .events-image-grid { grid-template-columns: 1fr !important; } }
         @media (max-width: 768px) { .events-image-grid > * { grid-row: auto !important; grid-column: auto !important; } }
+
         @media (max-width: 768px) { .portrait-event-card { flex-direction: column !important; } }
         @media (max-width: 768px) { .portrait-img-col { width: 100% !important; } }
 

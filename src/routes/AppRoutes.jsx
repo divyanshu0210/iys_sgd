@@ -31,6 +31,7 @@ export default function AppRoutes() {
       {/* Public */}
       <Route element={<PendingPaymentGuard />}>
         <Route path="/" element={<Home />} />
+        <Route path="/yatras" element={<YatraList />} />
       </Route>
 
       {/* Public-only (blocked if logged in) */}
@@ -53,7 +54,6 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<PendingPaymentGuard />}>
           <Route path="/complete-profile" element={<BasicProfile />} />
-          <Route path="/yatras" element={<YatraList />} />
 
           <Route element={<YatraRegistrationLayout />}>
             <Route
