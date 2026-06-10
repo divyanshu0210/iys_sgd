@@ -10,6 +10,7 @@ export default function Navbar() {
     logout,
     isNavigationLocked,
     donatePage,
+    setOpenApprovalModal,
   } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,6 +19,9 @@ export default function Navbar() {
   const [visible, setVisible] = useState(true);
   const menuRef = useRef();
   const dropdownRef = useRef();
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef();
+  const mobileNotifRef = useRef();
 
   // Close hamburger menu when clicking outside
   useEffect(() => {
@@ -43,6 +47,18 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [profileDropdownOpen]);
 
+  // Close notification dropdown when clicking outside
+  useEffect(() => {
+    const handle = (e) => {
+      const inDesktop = notifRef.current && notifRef.current.contains(e.target);
+      const inMobile = mobileNotifRef.current && mobileNotifRef.current.contains(e.target);
+      if (!inDesktop && !inMobile) setNotifOpen(false);
+    };
+    if (notifOpen) document.addEventListener("mousedown", handle);
+    else document.removeEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [notifOpen]);
+
   // Scroll handler to hide/show navbar
   useEffect(() => {
     if (!donatePage) return;
@@ -57,7 +73,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [prevScrollPos, donatePage]);
 
-  const NavLink = ({ to, replace = false, children }) => (
+  const NavLink = ({ to, replace = false, children, style: styleOverride }) => (
     <Link
       to={to}
       replace={replace}
@@ -76,6 +92,7 @@ export default function Navbar() {
         padding: "10px 14px",
         display: "block",
         background: "transparent",
+        ...styleOverride,
       }}
     >
       {children}
@@ -222,6 +239,8 @@ export default function Navbar() {
     </div>
   );
 
+  const hasNotif = user && (profileStage === "guest" || profileStage === "approval");
+
   return (
     <nav
       id="navbar"
@@ -306,6 +325,76 @@ export default function Navbar() {
                 <NavLink to="/yatras">Yatras</NavLink>
                 <NavLink to="/resources">Resources</NavLink>
                 <NavLink to="/profile">Profile</NavLink>
+                {hasNotif && (
+                  <div ref={notifRef} style={{ position: "relative" }}>
+                    <button
+                      onClick={() => setNotifOpen(v => !v)}
+                      aria-label="Notifications"
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        width: 36,
+                        height: 36,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        position: "relative",
+                        flexShrink: 0,
+                        padding: 0,
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                      </svg>
+                      <span style={{
+                        position: "absolute",
+                        top: 6,
+                        right: 6,
+                        width: 7,
+                        height: 7,
+                        background: "#ef4444",
+                        borderRadius: "50%",
+                        border: "1.5px solid #2c3e50",
+                      }} />
+                    </button>
+                    {notifOpen && (
+                      <div style={{
+                        position: "absolute",
+                        top: "calc(100% + 8px)",
+                        right: 0,
+                        background: "#fff",
+                        borderRadius: 10,
+                        boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                        zIndex: 3000,
+                        width: 280,
+                        border: "1px solid #e5e7eb",
+                        padding: "14px 16px",
+                      }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.5px" }}>Notifications</div>
+                        {profileStage === "guest" && (
+                          <div style={{ borderLeft: "3px solid #f97316", paddingLeft: 10 }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Profile Approval</div>
+                            <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5, marginBottom: 10 }}>Get approved by your mentor to unlock full access.</div>
+                            <button
+                              onClick={() => { setNotifOpen(false); setOpenApprovalModal(true); }}
+                              style={{ background: "#f97316", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontWeight: 600, fontSize: 12 }}
+                            >
+                              Get Approved
+                            </button>
+                          </div>
+                        )}
+                        {profileStage === "approval" && (
+                          <div style={{ borderLeft: "3px solid #f59e0b", paddingLeft: 10 }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Pending Review</div>
+                            <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5 }}>Your profile is awaiting confirmation from your mentor.</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <ProfileAvatar />
               </>
             ) : (
@@ -334,12 +423,82 @@ export default function Navbar() {
               display: "flex",
               justifyContent: "right",
               alignItems: "center",
-              gap: 8,
+              gap: 2,
             }}
           >
-            <div className="mobile-only" style={{ paddingRight: 4 }}>
-              <NavLink to="/donate">Donate</NavLink>
+            <div className="mobile-only">
+              <NavLink to="/donate" style={{ padding: "10px 6px" }}>Donate</NavLink>
             </div>
+            {hasNotif && (
+              <div ref={mobileNotifRef} className="mobile-only" style={{ position: "relative" }}>
+                <button
+                  onClick={() => setNotifOpen(v => !v)}
+                  aria-label="Notifications"
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    width: 36,
+                    height: 36,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    position: "relative",
+                    padding: "0 6px",
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                  <span style={{
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                    width: 7,
+                    height: 7,
+                    background: "#ef4444",
+                    borderRadius: "50%",
+                    border: "1.5px solid #2c3e50",
+                  }} />
+                </button>
+                {notifOpen && (
+                  <div style={{
+                    position: "fixed",
+                    top: 56,
+                    right: 10,
+                    background: "#fff",
+                    borderRadius: 10,
+                    boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                    zIndex: 3000,
+                    width: 280,
+                    maxWidth: "calc(100vw - 20px)",
+                    border: "1px solid #e5e7eb",
+                    padding: "14px 16px",
+                  }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.5px" }}>Notifications</div>
+                    {profileStage === "guest" && (
+                      <div style={{ borderLeft: "3px solid #f97316", paddingLeft: 10 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Profile Approval</div>
+                        <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5, marginBottom: 10 }}>Get approved by your mentor to unlock full access.</div>
+                        <button
+                          onClick={() => { setNotifOpen(false); setOpenApprovalModal(true); }}
+                          style={{ background: "#f97316", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontWeight: 600, fontSize: 12 }}
+                        >
+                          Get Approved
+                        </button>
+                      </div>
+                    )}
+                    {profileStage === "approval" && (
+                      <div style={{ borderLeft: "3px solid #f59e0b", paddingLeft: 10 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Pending Review</div>
+                        <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5 }}>Your profile is awaiting confirmation from your mentor.</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
             <div
               className="mobile-only"
               onClick={(e) => {
@@ -352,7 +511,7 @@ export default function Navbar() {
                   setIsMenuOpen(true);
                 }
               }}
-              style={{ cursor: "pointer", paddingRight: 10 }}
+              style={{ cursor: "pointer", padding: "0 6px" }}
             >
               <div className="bar"></div>
               <div className="bar"></div>

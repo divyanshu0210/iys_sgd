@@ -133,9 +133,8 @@ function OutlineBtn({ children, onClick, style }) {
 }
 
 export default function Home() {
-  const { user, profile, profileStage, loading, setDonatePage } = useAuth();
+  const { user, profile, profileStage, loading, setDonatePage, openApprovalModal, setOpenApprovalModal } = useAuth();
   const navigate = useNavigate();
-  const [openApprovalModal, setOpenApprovalModal] = useState(false);
   const [openPendingModal, setOpenPendingModal] = useState(false);
   const [events, setEvents] = useState([]);
   const [yatras, setYatras] = useState([]);
@@ -681,9 +680,6 @@ export default function Home() {
       <Footer />
 
       {/* ── MODALS ───────────────────────────────────────────── */}
-      <Modal open={openApprovalModal} onClose={() => setOpenApprovalModal(false)}>
-        <ProfileApprovalForm onClose={() => setOpenApprovalModal(false)} />
-      </Modal>
       <Modal open={openPendingModal} onClose={() => setOpenPendingModal(false)}>
         <div style={{ textAlign: "center", padding: 24 }}>
           <h3 style={{ color: "#1E3A8A", marginBottom: 12 }}>Approval Pending</h3>

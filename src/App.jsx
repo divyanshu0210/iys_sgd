@@ -5,9 +5,11 @@ import FullPageLoader from "./components/FullPageLoader";
 import AppRoutes from "./routes/AppRoutes";
 import { useAuth } from "./context/AuthContext";
 import { useEffect } from "react";
+import Modal from "./components/Modal";
+import ProfileApprovalForm from "./pages/Profile/ProfileApprovalForm";
 
 export default function App() {
-  const { loading, donatePage } = useAuth();
+  const { loading, donatePage, openApprovalModal, setOpenApprovalModal } = useAuth();
   useEffect(() => {
   const handleFocus = (e) => {
     if (
@@ -37,6 +39,9 @@ export default function App() {
           <AppRoutes />
         </div>
       </main>
+      <Modal open={openApprovalModal} onClose={() => setOpenApprovalModal(false)}>
+        <ProfileApprovalForm onClose={() => setOpenApprovalModal(false)} />
+      </Modal>
     </>
   );
 }

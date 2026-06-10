@@ -11,6 +11,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [donatePage, setDonatePage] = useState(false);
   const [isNavigationLocked, setIsNavigationLocked] = useState(false);
+  const [openApprovalModal, setOpenApprovalModal] = useState(false);
 
   const determineProfileStage = (data) => {
     if (!data.mobile) return "not-exists";
@@ -126,7 +127,9 @@ export function AuthProvider({ children }) {
         isNavigationLocked,
         setIsNavigationLocked,
         donatePage,
-        setDonatePage
+        setDonatePage,
+        openApprovalModal,
+        setOpenApprovalModal,
       }}
     >
       {children}
