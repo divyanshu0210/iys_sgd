@@ -128,8 +128,8 @@ export default function EventsSection({ preview = false }) {
                 {sideItems.map((item, i) => {
                   const isNotice = item.category === "notice";
                   const isYatra = item.category === "yatra";
-                  const accentColor = isNotice ? C.rose : isYatra ? "#7C3AED" : C.orange;
-                  const bgColor = isNotice ? `${C.rose}25` : isYatra ? "#7C3AED22" : `${C.orange}22`;
+                  const accentColor = isNotice ? C.rose : isYatra ? "#4A6FA5" : C.orange;
+                  const bgColor = isNotice ? `${C.rose}25` : isYatra ? "#4A6FA520" : `${C.orange}22`;
                   const label = isNotice ? "Notice" : isYatra ? "Yatra" : "Announcement";
                   const inner = (
                     <>
@@ -137,7 +137,7 @@ export default function EventsSection({ preview = false }) {
                         {isNotice ? <Megaphone size={14} color={accentColor} /> : isYatra ? <MapPin size={14} color={accentColor} /> : <Bell size={14} color={accentColor} />}
                       </div>
                       <div style={{ minWidth: 0 }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: accentColor, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: accentColor, letterSpacing: "0.5px" }}>
                           {label}
                         </span>
                         <p style={{ fontWeight: 600, color: C.dark, fontSize: 13, margin: "3px 0 0", lineHeight: 1.45 }}>{item.title}</p>
