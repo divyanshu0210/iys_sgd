@@ -1,5 +1,5 @@
 // src/components/RegistrationFormModal.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useYatraRegistration } from "../context/YatraRegistrationContext";
 import "../css/registrationFormModal.css";
 
@@ -12,9 +12,7 @@ function RegistrationFormModal({ profile, onClose }) {
     registerData,
     yatra,
   } = useYatraRegistration();
-  const FULL_PAYMENT_CUTOFF_DATE = yatra.accept_full_payment_only_date || "2099-01-07";
-
-  const today = new Date();
+  const today = useMemo(() => new Date(), []);
 
   const profileId = profile.id || profile.profile_id;
   const existing = registrations[profileId];
@@ -29,10 +27,69 @@ function RegistrationFormModal({ profile, onClose }) {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const hasPaidInstallments = installmentsPaid.length > 0;
   const isReadOnly = existing?.hasProof || false; // Only disable for proof, not paid installments
-  const installments = yatra?.installments || [];
-  console.log("Existing registration data:", existing, yatra, installments);
+  const existingHasPhaseInstallment = Boolean(
+    existing?.installments_info?.length
+  );
+  const registrationPhase =
+    (existingHasPhaseInstallment ? existing?.phase : null) ||
+    profile?.registration_phase ||
+    null;
+  const configuredPhaseInstallments = useMemo(
+    () =>
+      yatra?.registration_phases?.find(
+        (phase) => String(phase.id) === String(registrationPhase?.id)
+      )?.installments || [],
+    [yatra?.registration_phases, registrationPhase?.id]
+  );
+  const installments = useMemo(
+    () =>
+      existing?.installments_info?.length > 0
+        ? existing.installments_info
+        : profile?.installments_info?.length > 0
+        ? profile.installments_info
+        : !existing?.registration_id && configuredPhaseInstallments.length > 0
+        ? configuredPhaseInstallments
+        : registrationPhase
+        ? []
+        : (yatra?.installments || []).filter(
+            (installment) => !installment.phase_id && !installment.phase
+          ),
+    [
+      existing?.installments_info,
+      existing?.registration_id,
+      profile?.installments_info,
+      configuredPhaseInstallments,
+      registrationPhase,
+      yatra?.installments,
+    ]
+  );
+  const phaseEnded = Boolean(
+    registrationPhase?.end_date &&
+      new Date(`${registrationPhase.end_date}T23:59:59`) < today
+  );
+  const hasPendingInstallments = installments.some((installment) => {
+    const match = existing?.installments_details?.find(
+      (item) => item.label === installment.label
+    );
+    return !(
+      match?.is_paid ||
+      (match?.proof && match?.status !== "rejected")
+    );
+  });
+  const registrationClosedForPending = phaseEnded && hasPendingInstallments;
+
+  const nextPhase = useMemo(() => {
+    const phases = (yatra?.registration_phases || [])
+      .filter((phase) => phase.start_date)
+      .sort((a, b) => a.start_date.localeCompare(b.start_date));
+    const upcomingIndex = phases.findIndex(
+      (phase) => new Date(`${phase.start_date}T00:00:00`) > today
+    );
+    return upcomingIndex >= 0
+      ? { phase: phases[upcomingIndex], isFirst: upcomingIndex === 0 }
+      : null;
+  }, [yatra?.registration_phases, today]);
 
   useEffect(() => {
     setFormFields(existing?.form_fields || {});
@@ -40,26 +97,26 @@ function RegistrationFormModal({ profile, onClose }) {
     setInstallmentsPaid(existing?.installments_paid || []);
   }, [existing, yatra]);
 
-  const isFullPaymentOnly =
-    today >= new Date(FULL_PAYMENT_CUTOFF_DATE) && !hasPaidInstallments && installments.length > 1;
+  const isInstallmentMandatory = (installment) => {
+    if (!installment.start_date) return false;
+    const startDate = new Date(`${installment.start_date}T00:00:00`);
+    return startDate <= new Date();
+  };
 
   useEffect(() => {
-    if (!isFullPaymentOnly) return;
+    const mandatoryIndexes = installments
+      .map((installment, index) => (isInstallmentMandatory(installment) ? index : -1))
+      .filter((index) => index >= 0);
+    if (!mandatoryIndexes.length) return;
 
-    const unpaidInstallments = installments
-      .filter((inst) => {
-        const match = existing?.installments_details?.find(
-          (i) => i.label === inst.label
-        );
-        return !(
-          match?.is_paid ||
-          (match?.proof && match?.status !== "rejected")
-        );
-      })
-      .map((inst) => inst.label);
+    const mandatoryLabels = installments
+      .slice(0, Math.max(...mandatoryIndexes) + 1)
+      .map((installment) => installment.label);
 
-    setInstallmentsSelected(unpaidInstallments);
-  }, [isFullPaymentOnly, installments, existing]);
+    setInstallmentsSelected((previous) => [
+      ...new Set([...previous, ...mandatoryLabels]),
+    ]);
+  }, [existing, installments]);
 
   const handleFieldChange = (e) => {
     if (isReadOnly) return;
@@ -70,8 +127,53 @@ function RegistrationFormModal({ profile, onClose }) {
     }));
   };
 
+  const isInstallmentSatisfied = (installment) => {
+    const match = existing?.installments_details?.find(
+      (item) => item.label === installment.label
+    );
+
+    return (
+      installmentsSelected.includes(installment.label) ||
+      installmentsPaid.includes(installment.label) ||
+      match?.is_paid ||
+      (match?.proof && match?.status !== "rejected")
+    );
+  };
+
+  const getMissingPrerequisite = (index) =>
+    installments
+      .slice(0, index)
+      .find((installment) => !isInstallmentSatisfied(installment));
+
   const handleInstallmentToggle = (label) => {
-    if (isFullPaymentOnly) return;
+
+    const index = installments.findIndex((installment) => installment.label === label);
+    const missingPrerequisite = getMissingPrerequisite(index);
+
+    if (
+      !installmentsSelected.includes(label) &&
+      missingPrerequisite
+    ) {
+      alert(`Please select ${missingPrerequisite.label} before selecting ${label}.`);
+      return;
+    }
+
+    if (installmentsSelected.includes(label)) {
+      const installment = installments.find((item) => item.label === label);
+      if (installment && isInstallmentMandatory(installment)) {
+        alert(`${label} is now mandatory and cannot be deselected.`);
+        return;
+      }
+
+      const higherSelected = installments
+        .slice(index + 1)
+        .find((installment) => installmentsSelected.includes(installment.label));
+
+      if (higherSelected) {
+        // alert(`Please deselect ${higherSelected.label} before deselecting ${label}.`);
+        return;
+      }
+    }
 
     const match = existing?.installments_details?.find(
       (i) => i.label === label
@@ -100,6 +202,8 @@ function RegistrationFormModal({ profile, onClose }) {
           installments_paid: installments_paid || [],
           amount,
           registration_id: profileObj.registration_id,
+          phase: prev[profileId]?.phase || registrationPhase,
+          phase_id: prev[profileId]?.phase_id || registrationPhase?.id || null,
         },
       }));
 
@@ -131,30 +235,12 @@ function RegistrationFormModal({ profile, onClose }) {
       return;
     }
 
-    if (isFullPaymentOnly) {
-      const unpaidInstallments = installments.filter((inst) => {
-        const match = existing?.installments_details?.find(
-          (i) => i.label === inst.label
-        );
-        return !(
-          match?.is_paid ||
-          (match?.proof && match?.status !== "rejected")
-        );
-      });
-
-      if (installmentsSelected.length !== unpaidInstallments.length) {
-        alert(
-          "Full payment is mandatory. Partial installment payment is not allowed."
-        );
-        return;
-      }
-    }
     const amount = installmentsSelected
       .filter((label) => {
-        const inst = profile?.installments_info.find((i) => i.label === label);
+        const inst = installments.find((i) => i.label === label);
         return inst && ["due", "rejected"].includes(inst.tag.toLowerCase());
       })
-      .reduce((sum, label) => sum + getInstallmentAmount(label), 0);
+      .reduce((sum, label) => sum + getInstallmentAmount(label, installments), 0);
 
     setIsSubmitting(true);
     try {
@@ -173,7 +259,7 @@ function RegistrationFormModal({ profile, onClose }) {
   };
 
   const totalSelectedAmount = installmentsSelected.reduce(
-    (sum, label) => sum + getInstallmentAmount(label),
+    (sum, label) => sum + getInstallmentAmount(label, installments),
     0
   );
 
@@ -207,6 +293,11 @@ function RegistrationFormModal({ profile, onClose }) {
           ) : (
             <p className="info-banner">Form can only be filled once.</p>
           ))}
+        {registrationPhase?.name && (
+          <div className="info-banner phase-banner">
+            Registration phase: <strong>{registrationPhase.name}</strong>
+          </div>
+        )}
         <form className="form-body" onSubmit={handleSubmit}>
           {/* --- Dynamic Fields --- */}
           {(yatra.form_fields || []).length > 0 && (
@@ -282,26 +373,48 @@ function RegistrationFormModal({ profile, onClose }) {
 
           {/* --- Installments Section --- */}
           <div className="form-section">
-            <h3 className="section-title">
-              {isReadOnly
-                ? "Payment"
-                : "Choose Installments (multiple allowed)"}
-            </h3>
-            {isFullPaymentOnly && (
-              <div className="info-banner warning">
-                ⚠️ Partial payment window is closed.<br/> Full payment of all installments
-                is mandatory.
-              </div>
+            {installments.length > 0 && (
+              <h3 className="section-title">
+                {isReadOnly
+                  ? "Payment"
+                  : "Choose Installments (multiple allowed)"}
+              </h3>
             )}
-
             {!isReadOnly && totalSelectedAmount > 0 && (
               <div className="amount-banner">
                 Total Selected: ₹{totalSelectedAmount}
               </div>
             )}
 
+            {!installments.length && nextPhase && (
+              <div className="info-banner phase-banner">
+                Yatra Registration will {nextPhase.isFirst ? "start" : "resume"} from{" "}
+                <strong>
+                  {new Date(`${nextPhase.phase.start_date}T00:00:00`).toLocaleDateString(
+                    "en-IN",
+                    { day: "2-digit", month: "short", year: "numeric" }
+                  )}
+                </strong>
+              </div>
+            )}
+
+            {!installments.length &&
+              !nextPhase &&
+              !registrationPhase &&
+              yatra?.registration_phases?.length > 0 && (
+                <div className="info-banner phase-banner">
+                  Registration has been closed to new users.
+                </div>
+              )}
+
+            {registrationClosedForPending && (
+              <div className="info-banner phase-banner">
+                Registration has closed.This yatra is no more accepting payments.
+              </div>
+            )}
+
             <div className="installment-list">
-              {installments.map((instBase) => {
+              {installments.map((instBase, index) => {
                 const match = existing?.installments_details?.find(
                   (e) => e.label === instBase.label
                 );
@@ -310,9 +423,14 @@ function RegistrationFormModal({ profile, onClose }) {
                 const label = inst.label;
                 const isPaid = inst.is_paid;
                 const isSelected = installmentsSelected.includes(label);
-                const amount = inst.amount || getInstallmentAmount(label);
+                const amount = inst.amount || getInstallmentAmount(label, installments);
                 const hasProof = !!inst.proof;
                 const isRejected = inst.status === "rejected";
+                const isMandatory = isInstallmentMandatory(inst);
+                const missingPrerequisite = getMissingPrerequisite(index);
+                const orderBlocked = Boolean(
+                  !isPaid && !isReadOnly && missingPrerequisite
+                );
 
                 return (
                   <div
@@ -330,7 +448,19 @@ function RegistrationFormModal({ profile, onClose }) {
                         type="checkbox"
                         checked={isSelected || isPaid}
                         onChange={() => handleInstallmentToggle(label)}
-                        disabled={isPaid || (hasProof && !isRejected)}
+                        disabled={
+                          isPaid ||
+                          (hasProof && !isRejected) ||
+                          isMandatory ||
+                          orderBlocked
+                        }
+                        title={
+                          isMandatory
+                            ? "Mandatory installment"
+                            : orderBlocked
+                            ? `Select ${missingPrerequisite.label} first`
+                            : ""
+                        }
                         // disabled={isPaid}
                       />
                       <span>
@@ -382,7 +512,11 @@ function RegistrationFormModal({ profile, onClose }) {
             <button
               type="submit"
               className="btn-primary"
-              disabled={isSubmitting || unpaidInstallmentsSelected.length === 0}
+              disabled={
+                isSubmitting ||
+                registrationClosedForPending ||
+                unpaidInstallmentsSelected.length === 0
+              }
             >
               {isSubmitting ? "Saving..." : "Save & Continue"}
             </button>

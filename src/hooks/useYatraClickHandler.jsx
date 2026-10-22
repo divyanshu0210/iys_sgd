@@ -1,17 +1,24 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Modal from "../components/Modal";
-import ProfileApprovalForm from "../pages/Profile/ProfileApprovalForm";
+import ProfileApprovalForm from "../pages/Profile/ProfileVerificationStatus";
 
 export default function useYatraClickHandler() {
   const { user, profileStage, profile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [openApprovalModal, setOpenApprovalModal] = useState(false);
   const [openPendingModal, setOpenPendingModal] = useState(false);
 
   const handleYatraClick = (e, yatra) => {
-    if (!user) { e.preventDefault(); navigate("/signin"); return; }
+    if (!user) {
+      e.preventDefault();
+      navigate("/signin", {
+        state: { from: `${location.pathname}${location.search}${location.hash}` },
+      });
+      return;
+    }
     const requiresApproval = yatra.registration_policy?.requires_approval !== false;
     if (requiresApproval) {
       if (profileStage === "guest") { e.preventDefault(); setOpenApprovalModal(true); return; }

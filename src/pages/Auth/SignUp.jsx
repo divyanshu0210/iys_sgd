@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import "../../css/signIn.css";
 import GoogleBtn from "../../components/GoogleBtn";
 import API from "../../services/api";
@@ -11,8 +11,10 @@ const isEmailVerificationMandatoryForSignUp =
 export default function SignUp() {
   const [form, setForm] = useState({ email: "", password: "" });
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = location.state?.from || sessionStorage.getItem("authReturnTo") || "/";
   const [status, setStatus] = useState(null); // { type, msg }
-  const { loading, setLoading } = useAuth();
+  const { loading, setLoading, login, fetchProfile } = useAuth();
 
   // Email/Password Sign Up
   const handleSubmit = async (e) => {
@@ -33,13 +35,18 @@ export default function SignUp() {
       await API.post("api/auth/register/", formData);
       setStatus({
         type: "success",
-        // msg: "Verification email sent! Redirecting...",
-        msg: "Signup Successful....",
+        msg: isEmailVerificationMandatoryForSignUp
+          ? "Signup successful. Please verify your email."
+          : "Signup successful. Signing you in...",
       });
       if (isEmailVerificationMandatoryForSignUp) {
-        setTimeout(() => navigate("/email-sent"), 1000);
+        setTimeout(() => navigate("/email-sent", { state: { from: returnTo } }), 1000);
       } else {
-        setTimeout(() => navigate("/signin"), 1000);
+        await login(form.email, form.password);
+        await fetchProfile();
+        sessionStorage.removeItem("authReturnTo");
+        sessionStorage.removeItem("authReturnToAt");
+        navigate(returnTo, { replace: true });
       }
     } catch (err) {
       const msg =
@@ -123,7 +130,7 @@ export default function SignUp() {
           }}
         >
           Already have an account?{" "}
-          <Link replace to="/signin" className="btn-link">
+          <Link replace to="/signin" state={{ from: returnTo }} className="btn-link">
             Sign in
           </Link>
         </p>

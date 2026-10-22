@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Users } from "lucide-react";
+import { getYatraRegistrationStatus } from "../hooks/yatraRegistrationStatus";
 
 const C = {
   cream: "#FDF6EC",
@@ -12,7 +13,10 @@ const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "";
 
 export default function YatraCard({ y, onRegisterClick }) {
-  const isOpen = Boolean(y.is_registration_open);
+  const registrationStatus = getYatraRegistrationStatus(y);
+  const isOpen = registrationStatus.canRegister;
+  const canViewExistingProcess = Boolean(y.registration_in_progress);
+  const canOpenRegistration = isOpen || canViewExistingProcess;
   const requiresApproval = y.registration_policy?.requires_approval !== false;
   const durationDays = y.start_date && y.end_date
     ? Math.max(1, Math.round((new Date(y.end_date) - new Date(y.start_date)) / 86400000) + 1)
@@ -30,9 +34,9 @@ export default function YatraCard({ y, onRegisterClick }) {
         )}
 
         {/* Registration status — top right */}
-        <div style={{ position: "absolute", top: 12, right: 12, zIndex: 2 }}>
-          <span style={{ background: isOpen ? C.orange : "rgba(26,39,68,0.8)", color: "#FDF6EC", fontWeight: 700, fontSize: 11, padding: "4px 12px", borderRadius: 999 }}>
-            {isOpen ? "Registration Open" : "Registration Closed"}
+        <div style={{ position: "absolute", top: 12, right: 12, maxWidth: "52%", zIndex: 2, textAlign: "center" }}>
+          <span style={{ background: "rgba(10,15,35,0.72)", color: "#FDF6EC", fontWeight: 700, fontSize: 11, lineHeight: 1.2, padding: "4px 10px", borderRadius: 999, display: "inline-block", whiteSpace: "normal" }}>
+            {registrationStatus.label}
           </span>
         </div>
 
@@ -88,14 +92,24 @@ export default function YatraCard({ y, onRegisterClick }) {
         </div>
 
         <div style={{ borderTop: `1px solid ${C.orange}62`, paddingTop: 16, display: "flex", justifyContent: "center", marginTop: "auto" }}>
-          <Link
-            to={`/yatra/${y.id}/register`}
-            state={{ yatra: y }}
-            onClick={onRegisterClick}
-            style={{ background: isOpen ? C.orange : "transparent", color: isOpen ? "#FDF6EC" : C.orange, border: isOpen ? "none" : `1px solid ${C.orange}`, borderRadius: 10, padding: "8px 24px", fontWeight: 600, fontSize: 14, textDecoration: "none" }}
-          >
-            {isOpen ? "Register Now" : "View Details"}
-          </Link>
+          {canOpenRegistration ? (
+            <Link
+              to={`/yatra/${y.id}/register`}
+              state={{ yatra: y }}
+              onClick={onRegisterClick}
+              style={{ background: isOpen ? C.orange : "transparent", color: isOpen ? "#FDF6EC" : C.orange, border: isOpen ? "none" : `1px solid ${C.orange}`, borderRadius: 10, padding: "8px 24px", fontWeight: 600, fontSize: 14, textDecoration: "none" }}
+            >
+              {isOpen ? "Register Now" : "View Details"}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              style={{ background: C.orange, color: "#FDF6EC", border: "none", borderRadius: 10, padding: "8px 24px", fontWeight: 600, fontSize: 14, cursor: "not-allowed", opacity: 0.55 }}
+            >
+              {registrationStatus.buttonLabel || "Registration Closed"}
+            </button>
+          )}
         </div>
       </div>
     </div>

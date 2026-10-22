@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import API from "../../services/api";
 import "../../css/profiledisplay.css";
+import "../../css/profileTabs.css";
+import "../../css/registration.css";
 import FullPageLoader from "../../components/FullPageLoader";
 import { SPIRITUAL_MASTERS, CENTER_OPTIONS, GENDER_OPTIONS, MARITAL_OPTIONS, validateInitiationFields } from "./data";
 import { Check, X, Pencil, Camera } from "lucide-react";
@@ -248,7 +250,7 @@ export default function Profile() {
       <div className="profile-page">
 
         {/* ── Sidebar ── */}
-        <div className="profile-sidebar">
+        <div className="registration-sidebar">
           <div className="profile-header">
             <div style={{ position: "relative", display: "inline-block", verticalAlign: "top" }}>
               <div className="avatar-container">

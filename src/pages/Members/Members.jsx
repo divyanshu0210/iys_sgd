@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import API from "../../services/api";
 import MemberCard from "../../components/MemberCard";
-import "../../css/members.css";
 import FullPageLoader from "../../components/FullPageLoader";
+import { useAuth } from "../../context/AuthContext";
+import "../../css/bulkActions.css";
+import MentorRequestBulkBar from "../../components/MentorRequestBulkBar";
+import useMentorRequestBulkActions from "../../hooks/useMentorRequestBulkActions";
 
 export default function Members() {
+  const { profile: currentProfile } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
@@ -38,6 +42,7 @@ export default function Members() {
             is_pending: true,
             request_id: r.id,
             request_created_at: r.created_at,
+            bace: r.bace,
           })),
         ];
       case "devotee":
@@ -48,6 +53,7 @@ export default function Members() {
           is_pending: true,
           request_id: r.id,
           request_created_at: r.created_at,
+          bace: r.bace,
         }));
       default:
         return [];
@@ -55,6 +61,16 @@ export default function Members() {
   };
 
   const members = getMembersForTab();
+  const isRequestTab = activeTab === "guest";
+  const {
+    selectedIds: selectedRequestIds,
+    allSelected: allRequestsSelected,
+    loading: bulkActionLoading,
+    toggleSelection: toggleRequestSelection,
+    toggleAll: toggleAllRequests,
+    clearSelection: clearRequestSelection,
+    handleAction: handleBulkRequestAction,
+  } = useMentorRequestBulkActions(data?.pending_requests || []);
 
   const totalMentees = data?.approved_mentees?.length || 0;
   const pendingCount = data?.pending_requests?.length || 0;
@@ -69,13 +85,16 @@ export default function Members() {
   return (
     <>
       <div className="profile-page">
-        <div className="profile-sidebar">
+        <div className="registration-sidebar">
           <nav className="vertical-tabs">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 className={`tab-button ${activeTab === tab.id ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  clearRequestSelection();
+                }}
               >
                 {tab.label}
               </button>
@@ -83,7 +102,7 @@ export default function Members() {
           </nav>
         </div>
 
-        <div className="profile-content">
+        <div className={`profile-content ${selectedRequestIds.length ? "has-fixed-bulk-actions" : ""}`}>
           <h3 style={{ marginBottom: 10 }}>
             {activeTab === "all" && "All Members"}
             {activeTab === "devotee" && "Devotees List"}
@@ -98,9 +117,34 @@ export default function Members() {
             {!loading &&
               members.length > 0 &&
               members.map((m) => (
-                <MemberCard key={m.id || m.member_id} m={m} />
+                <MemberCard
+                  key={m.id || m.member_id}
+                  selectable={isRequestTab && m.is_pending}
+                  selected={selectedRequestIds.includes(m.request_id)}
+                  onSelect={() => toggleRequestSelection(m.request_id)}
+                  hideActions={isRequestTab && m.is_pending}
+                  m={{
+                    ...m,
+                    is_self:
+                      m.is_self ||
+                      (currentProfile &&
+                        (m.id === currentProfile.id ||
+                          m.member_id === currentProfile.member_id)),
+                  }}
+                />
               ))}
           </div>
+
+          {isRequestTab && (
+            <MentorRequestBulkBar
+              selectedCount={selectedRequestIds.length}
+              allSelected={allRequestsSelected}
+              loading={bulkActionLoading}
+              onToggleAll={toggleAllRequests}
+              onCancel={clearRequestSelection}
+              onAction={handleBulkRequestAction}
+            />
+          )}
         </div>
       </div>
     </>

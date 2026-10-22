@@ -6,7 +6,7 @@ import AppRoutes from "./routes/AppRoutes";
 import { useAuth } from "./context/AuthContext";
 import { useEffect } from "react";
 import Modal from "./components/Modal";
-import ProfileApprovalForm from "./pages/Profile/ProfileApprovalForm";
+import ProfileApprovalForm from "./pages/Profile/ProfileVerificationStatus";
 
 export default function App() {
   const { loading, useFullWidth, openApprovalModal, setOpenApprovalModal } = useAuth();

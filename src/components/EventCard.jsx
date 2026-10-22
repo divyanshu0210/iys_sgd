@@ -1,5 +1,5 @@
 import { Calendar, MapPin, PlayCircle, CheckCircle, Video } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const C = {
@@ -22,6 +22,7 @@ const getDaysToGo = (dateStr) => {
 // horizontal=true → image left, content right (for single-column wide layout)
 export default function EventCard({ ev, isFeatured, horizontal = false }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const imgSrc = ev.poster || ev.youtube_thumbnail;
   const daysToGo = isFeatured && ev.start_datetime ? getDaysToGo(ev.start_datetime) : null;
@@ -106,7 +107,12 @@ export default function EventCard({ ev, isFeatured, horizontal = false }) {
               href={user ? ev.registration_link : "/signin"}
               target={user ? "_blank" : "_self"}
               rel="noreferrer"
-              onClick={!user ? (e) => { e.preventDefault(); navigate("/signin"); } : undefined}
+              onClick={!user ? (e) => {
+                e.preventDefault();
+                navigate("/signin", {
+                  state: { from: `${location.pathname}${location.search}${location.hash}` },
+                });
+              } : undefined}
               style={{ background: C.orange, color: "#FDF6EC", borderRadius: 8, padding: "6px 16px", fontWeight: 600, fontSize: 13, textDecoration: "none", display: "flex", alignItems: "center", gap: 5 }}>
               <CheckCircle size={13} /> Register
             </a>

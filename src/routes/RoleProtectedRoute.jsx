@@ -1,11 +1,12 @@
 // src/components/RoleProtectedRoute.jsx
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
 import FullPageLoader from "../components/FullPageLoader";
 
 export default function RoleProtectedRoute({ allowedStatuses }) {
   const { user, profileStage,loading } = useAuth();
+  const location = useLocation();
 
 
   if (loading) {
@@ -14,7 +15,9 @@ export default function RoleProtectedRoute({ allowedStatuses }) {
 
   // If no user logged in, redirect to signin
   if (!user) {
-    return <Navigate to="/signin" replace />;
+    return <Navigate to="/signin" replace state={{
+      from: `${location.pathname}${location.search}${location.hash}`,
+    }} />;
   }
 
   // If user does not have the required profileStatus

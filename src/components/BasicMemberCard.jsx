@@ -1,4 +1,4 @@
-import "../css/members.css";
+import "../css/memberCards.css";
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);

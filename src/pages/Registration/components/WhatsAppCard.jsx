@@ -14,13 +14,12 @@ import { STATUS_MAP } from "./YatraRegistrationStatusFilter";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
+const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable = false, selected: isCardSelected = false, onSelect, hideEligibilityActions = false }) => {
   const {
     yatra,
     selected,
     setSelected,
     registrations,
-    computeTotalDueForProfile,
     hasPaidInstallments,
     handleEligibility,
     requestApproval,
@@ -42,8 +41,6 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
     loading?.[`${profileId}-approve`] || loading?.[`${profileId}-unapprove`];
   const isSelfRequesting = loading?.selfRequest && profile.is_self;
   const regData = registrations[profileId];
-  const totalDue =
-    profile?.pending_amount || computeTotalDueForProfile(profile);
   const hasPaid = hasPaidInstallments(profile);
 
   // Check if this profile has existing registration data
@@ -128,6 +125,8 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
       const processedInstallments = data.installments.map((i) => ({
         label: i.label,
         amount: i.amount,
+        order: i.order,
+        start_date: i.start_date,
         is_paid: i.is_paid,
         proof: i.payment?.proof || null,
         status: i.payment?.status || false,
@@ -140,8 +139,10 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
           form_fields: data.form_data || {},
           installments_selected,
           installments_paid,
-          installments_info: profile.installments_info,
+          installments_info: processedInstallments,
           installments_details: processedInstallments,
+          phase: data.phase || null,
+          phase_id: data.phase?.id || null,
           hasProof,
           registration_id: profile.registration_id,
         },
@@ -199,7 +200,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
         }}
       >
         <div
-          className="whatsapp-card-with-register-btn"
+          className={`whatsapp-card-with-register-btn ${isEligibilityCard ? "eligibility-card-header" : ""}`}
           style={{
             backgroundColor: hasSelectableInstallments ? "#f0fdf4" : "white",
             flexDirection: "row",
@@ -215,6 +216,9 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
               // gap: "8px",
             }}
           >
+            {selectable && (
+              <input type="checkbox" checked={isCardSelected} onChange={onSelect} onMouseDown={(event) => event.preventDefault()} onClick={(event) => event.stopPropagation()} className="reg-checkbox" aria-label={`Select ${profile.full_name || "profile"}`} />
+            )}
             {!isEligibilityCard && hasSelectableInstallments && (
               <input
                 type="checkbox"
@@ -232,7 +236,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
               />
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div className="whatsapp-person-info" style={{ display: "flex", flexDirection: "column" }}>
               <div
                 style={{
                   display: "flex",
@@ -241,7 +245,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                 }}
               >
                 <div
-                  className="whatsapp-profileName"
+                  className={`whatsapp-profileName ${profile.is_self ? "is-self-name" : ""}`}
                   style={{
                     marginRight: "6px",
                     whiteSpace: "normal",
@@ -263,6 +267,12 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
             </div>
           </div>
 
+          {isEligibilityCard && (!profile.is_self || isApproved) && (
+            <span className={`eligibility-status-pill ${isApproved ? "approved" : "unapproved"}`}>
+              {isApproved ? "Approved" : "Unapproved"}
+            </span>
+          )}
+
           {!hasSelectableInstallments && !isEligibilityCard && (
             <span
               className="badge-registered"
@@ -276,7 +286,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
             </span>
           )}
 
-          <div className="installmet-edit">
+          {!isEligibilityCard && <div className="installmet-edit">
             {/* === Installments List === */}
             {!isEligibilityCard &&
               !hasSelectableInstallments &&
@@ -352,7 +362,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                     <InstallmentBadge key={inst.label} installment={inst} />
                   ))}
             </div>
-          </div>
+          </div>}
         </div>
         {!isEligibilityCard &&
           !hasSelectableInstallments &&
@@ -486,7 +496,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
           </div>
         )}
 
-        {isEligibilityCard && (
+        {isEligibilityCard && !hideEligibilityActions && (
           <div>
             {isEligibilityCard && !profile.is_self && (
               <button
@@ -514,7 +524,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                   <button
                     onClick={requestApproval}
                     disabled={isSelfRequesting}
-                    className="action-btn request"
+                    className="action-btn request self-request-button"
                   >
                     {isSelfRequesting ? "Sending..." : "Request"}
                   </button>
@@ -525,22 +535,15 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading }) => {
                       window.confirm("Send again?") && requestApproval()
                     }
                     disabled={isSelfRequesting}
-                    className="action-btn pending"
+                    className="action-btn pending self-request-button"
                   >
                     {isSelfRequesting ? "Sending..." : "Request Pending"}
                   </button>
                 )}
                 {profile.is_approved && (
                   <button
-                    onClick={() => {
-                      if (
-                        window.confirm(
-                          "Can't unapprove yourself. Contact your counsellor to unapprove."
-                        )
-                      ) {
-                      }
-                    }}
-                    className="action-btn unapprove"
+                    onClick={() => window.confirm("Can't unapprove yourself. Contact your counsellor to unapprove.")}
+                    className="action-btn unapprove self-request-button"
                   >
                     Unapprove
                   </button>

@@ -1,4 +1,4 @@
-import "../css/members.css";
+import "../css/memberCards.css";
 import MemberActions from "./MemberActions";
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
@@ -10,10 +10,45 @@ const formatDate = (dateStr) => {
   });
 };
 
-export default function MemberDetailsCard({ m }) {
+export default function MemberDetailsCard({ m, hideActions = false }) {
   const isPending = m.is_pending;
+  const verificationStatus = m.profile_verification_status || (isPending ? "pending" : "");
+  const statusMeta = {
+    verified: { label: "Verified", background: "#dcfce7", color: "#166534" },
+    pending: { label: "Pending", background: "#fef3c7", color: "#92400e" },
+    rejected: { label: "Rejected", background: "#fee2e2", color: "#991b1b" },
+    incomplete: { label: "Incomplete", background: "#e5e7eb", color: "#374151" },
+  }[verificationStatus];
+  const displayName = m.is_initiated ? m.initiated_name : m.full_name || "Unnamed";
+
+  const statusPill = statusMeta && (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        borderRadius: 999,
+        padding: "2px 8px",
+        fontSize: 11,
+        fontWeight: 600,
+        background: statusMeta.background,
+        color: statusMeta.color,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {statusMeta.label}
+    </span>
+  );
 
   return (
+    <>
+      <div className="member-mobile-name-row">
+        <div className="member-mobile-name">
+          <p className="member-line name-line">{displayName}</p>
+          {m.is_self && <span className="member-self-badge">You</span>}
+          {statusPill}
+        </div>
+        {isPending && !hideActions && <MemberActions m={m} />}
+      </div>
     <div className="member-content">
       <div className="member-photo">
         <img
@@ -22,48 +57,63 @@ export default function MemberDetailsCard({ m }) {
         />
       </div>
 
-      <div className="member-info">
+      <div className={`member-info ${isPending && !hideActions ? "has-actions" : ""}`}>
         <div className="member-name-row">
-          <div style={{ display: "flex" , flexDirection:"column"}}>
+          <div className="member-name-details">
 
-          <p className="member-line name-line">{m.is_initiated?m.initiated_name:m.full_name || "Unnamed"}</p>
-             {isPending && <span className="pending-label">(Pending)</span>}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <p className="member-line name-line">{displayName}</p>
+            {m.is_self && <span className="member-self-badge">You</span>}
+            {statusPill}
           </div>
-          <MemberActions m={m} />
+          </div>
+          {isPending && !hideActions && (
+            <div className="member-card-actions">
+              <MemberActions m={m} />
+            </div>
+          )}
         </div>
      
         <p className="member-line">
+          <strong className="info-label">Role:</strong>{" "}
           {m.user_type === "mentor"
+            ? "Mentor"
+            : m.user_type === "counsellor"
             ? "Counsellor"
             : m.user_type === "guest"
             ? "Guest"
-            : "Devotee"}
-          : {m.member_id || "N/A"}
-          {m.dob ? `, Born: ${formatDate(m.dob)}` : ""}
-          {m.gender ? `, ${m.gender}` : ""}
-          {m.marital_status ? `, ${m.marital_status}` : ""}
+            : "Devotee"}{" "}
+          <strong className="info-label">ID:</strong> {m.member_id || "N/A"}
+          {m.dob && <>, <strong className="info-label">Born:</strong> {formatDate(m.dob)}</>}
+          {m.gender && <>, <strong className="info-label">Gender:</strong> {m.gender}</>}
+          {m.marital_status && <>, <strong className="info-label">Marital:</strong> {m.marital_status}</>}
         </p>
 
-        {m.center && <p className="member-line">Center: {m.center}</p>}
-        {m.satsanga && <p className="member-line">Satsangas: {m.satsanga}</p>}
+        {(m.center || m.bace) && (
+          <p className="member-line">
+            <strong className="info-label">Center:</strong> {m.center || m.bace}
+          </p>
+        )}
+        {m.satsanga && <p className="member-line"><strong className="info-label">Satsangas:</strong> {m.satsanga}</p>}
         {m.email && (
           <p className="member-line">
-            Email: {m.email}
+            <strong className="info-label">Email:</strong> {m.email}
             {m.email2 ? `, ${m.email2}` : ""} 
           </p>
         )}
         {m.mobile && (
-          <p className="member-line">Mobile: {m.mobile}</p>
+          <p className="member-line"><strong className="info-label">Mobile:</strong> {m.mobile}</p>
         )}
         {isPending && m.request_created_at && (
           <p
             className="member-line"
             style={{ color: "#777", fontStyle: "italic" }}
           >
-            Requested: {formatDate(m.request_created_at)}
+            <strong className="info-label">Requested:</strong> {formatDate(m.request_created_at)}
           </p>
         )}
       </div>
     </div>
+    </>
   );
 }

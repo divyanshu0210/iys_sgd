@@ -110,14 +110,15 @@ export default function Navbar() {
     navigate("/");
   };
 
+  const email = profile?.email || localStorage.getItem("userEmail") || "";
   const initials = profile?.first_name
     ? profile.first_name.charAt(0).toUpperCase()
-    : user?.email?.charAt(0).toUpperCase() || "?";
+    : email.charAt(0).toUpperCase() || "?";
 
   const displayName = profile?.initiated_name
     || (profile?.first_name
       ? `${profile.first_name}${profile.last_name ? " " + profile.last_name : ""}`
-      : user?.email || "User");
+      : email || "User");
 
   const photoUrl = profile?.profile_picture_url || null;
 
@@ -319,7 +320,7 @@ export default function Navbar() {
           {user ? (
             profileStage !== "not-exists" ? (
               <>
-                {(profileStage === "devotee" || profileStage === "mentor") && (
+                {(profileStage === "devotee" || profileStage === "mentor" || profileStage === "counsellor") && (
                   <NavLink to="/members">Members</NavLink>
                 )}
                 <NavLink to="/yatras">Yatras</NavLink>
@@ -376,12 +377,12 @@ export default function Navbar() {
                         {profileStage === "guest" && (
                           <div style={{ borderLeft: "3px solid #f97316", paddingLeft: 10 }}>
                             <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Profile Approval</div>
-                            <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5, marginBottom: 10 }}>Get approved by your counsellor to unlock full access.</div>
+                            <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5, marginBottom: 10 }}>Complete your Bace profile verification to unlock full access.</div>
                             <button
                               onClick={() => { setNotifOpen(false); setOpenApprovalModal(true); }}
                               style={{ background: "#f97316", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontWeight: 600, fontSize: 12 }}
                             >
-                              Get Approved
+                              Profile Verification
                             </button>
                           </div>
                         )}
@@ -399,7 +400,9 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <NavLink to="/complete-profile">Profile</NavLink>
+                <NavLink to="/yatras">Yatras</NavLink>
+                <NavLink to="/resources">Resources</NavLink>
+                <NavLink to="/complete-profile">Complete Profile</NavLink>
                 <ProfileAvatar />
               </>
             )
@@ -485,7 +488,7 @@ export default function Navbar() {
                           onClick={() => { setNotifOpen(false); setOpenApprovalModal(true); }}
                           style={{ background: "#f97316", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontWeight: 600, fontSize: 12 }}
                         >
-                          Get Approved
+                          Profile Verification
                         </button>
                       </div>
                     )}
@@ -557,7 +560,7 @@ export default function Navbar() {
 
             {profileStage !== "not-exists" ? (
               <>
-                {(profileStage === "devotee" || profileStage === "mentor") && (
+            {(profileStage === "devotee" || profileStage === "mentor" || profileStage === "counsellor") && (
                   <NavLink to="/members">Members</NavLink>
                 )}
                 <NavLink to="/yatras">Yatras</NavLink>
@@ -566,8 +569,9 @@ export default function Navbar() {
               </>
             ) : (
               <>
+                <NavLink to="/yatras">Yatras</NavLink>
                 <NavLink to="/resources">Resources</NavLink>
-                <NavLink to="/complete-profile">Profile</NavLink>
+                <NavLink to="/complete-profile">Complete Profile</NavLink>
               </>
             )}
             <button onClick={handleLogout} className="logout-btn">

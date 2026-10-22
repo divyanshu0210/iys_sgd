@@ -74,7 +74,7 @@ export default function AppRoutes() {
 
       {/* Role Protected */}
       <Route
-        element={<RoleProtectedRoute allowedStatuses={["devotee", "mentor"]} />}
+        element={<RoleProtectedRoute allowedStatuses={["devotee", "mentor", "counsellor"]} />}
       >
         <Route path="/members" element={<Members />} />
       </Route>

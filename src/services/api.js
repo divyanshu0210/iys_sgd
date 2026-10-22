@@ -14,9 +14,20 @@ API.interceptors.response.use(
   (response) => response, // if successful, just return response
   (error) => {
     if (error.response && error.response.status === 401) {
-      console.warn("Unauthorized — redirecting to login...");
-      localStorage.removeItem("userToken"); // clear old token
-      window.location.replace("/signin"); // fast redirect without history clutter
+      const requestUrl = error.config?.url || "";
+      const isAuthRequest =
+        requestUrl.includes("/api/auth/login/") ||
+        requestUrl.includes("/api/auth/registration/social/login/");
+
+      // A failed login should be handled by the sign-in form itself.
+      if (!isAuthRequest && window.location.pathname !== "/signin") {
+        const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+        sessionStorage.setItem("authReturnTo", returnTo);
+        sessionStorage.setItem("authReturnToAt", String(Date.now()));
+        console.warn("Unauthorized — redirecting to login...");
+        localStorage.removeItem("userToken"); // clear old token
+        window.location.replace("/signin"); // preserve the original page across the hard redirect
+      }
     }
 
     return Promise.reject(error);

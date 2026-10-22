@@ -3,6 +3,10 @@ import { Bell, Clock, MapPin, Megaphone } from "lucide-react";
 import { Link } from "react-router-dom";
 import API from "../services/api";
 import EventCard from "./EventCard";
+import {
+  getYatraRegistrationStatus,
+  isYatraWithinAnnouncementWindow,
+} from "../hooks/yatraRegistrationStatus";
 
 const C = {
   cream: "#FDF6EC",
@@ -16,9 +20,6 @@ const TABS = ["All", "Events", "Workshops"];
 
 // preview=true  → Home: max 3 upcoming, no tabs
 // preview=false → AllEvents: all events, category tabs
-const fmtDateShort = (d) =>
-  d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "";
-
 export default function EventsSection({ preview = false }) {
   const [events, setEvents] = useState([]);
   const [yatras, setYatras] = useState([]);
@@ -31,7 +32,7 @@ export default function EventsSection({ preview = false }) {
       .catch(() => {})
       .finally(() => setLoading(false));
     API.get("/yatra/list/")
-      .then(r => setYatras(r.data.filter(y => !y.close_yatra && y.is_registration_open)))
+      .then(r => setYatras(r.data.filter(y => !y.close_yatra && isYatraWithinAnnouncementWindow(y))))
       .catch(() => {});
   }, []);
 
@@ -54,7 +55,7 @@ export default function EventsSection({ preview = false }) {
     id: `yatra-${y.id}`,
     yatraId: y.id,
     category: "yatra",
-    title: `${y.title} — Registrations Open${y.start_date ? ` from ${fmtDateShort(y.start_date)}` : ""}!`,
+    title: `${y.title} — ${getYatraRegistrationStatus(y).announcement}`,
   }));
   const sideItems = [...announcements, ...yatraItems];
 

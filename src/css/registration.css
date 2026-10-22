@@ -1,0 +1,138 @@
+/* Registration page layout and Yatra sidebar */
+
+.registration-page {
+  display: flex;
+  /* background: #f0f2f5; */
+}
+
+.registration-sidebar {
+  width: 350px;
+  background: #fff;
+  border-right: 1px solid #e2e8f0;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  z-index: 400;
+}
+
+.registration-header {
+  padding: 1.5rem 1.2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.registration-profile-name {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.registration-profile-username {
+  margin: 0.3rem 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.registration-info-row {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+ .registration-info-row:not(.yatra-title-row) {
+    border-top: 1px dashed #e2e8f0;
+    border-bottom: 1px dashed #e2e8f0;
+  }
+
+@media (min-width: 769px) {
+  .registration-sidebar {
+    position: sticky;
+    top: 95px;
+    height: calc(100vh - 95px);
+    align-self: flex-start;
+    box-sizing: border-box;
+  }
+}
+
+.yatra-title-row .registration-profile-name {
+  margin: 0;
+  line-height: 1.1;
+}
+
+.registration-content {
+  flex: 1;
+  padding: 0.5rem;
+  overflow-y: auto;
+}
+
+.registration-tab-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 768px) {
+  .registration-page {
+    flex-direction: column;
+  }
+
+  .registration-sidebar {
+    width: 100%;
+    height: auto;
+    padding: 0.1rem;
+    border-radius: 5px;
+    overflow-y: visible;
+    margin-bottom: 10px;
+    position: sticky;
+    top: 45px;
+  }
+
+  .registration-sidebar .registration-profile-desc {
+    font-size: 0.72rem;
+    line-height: 1.25;
+  }
+
+  .registration-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 5px;
+    padding: 0.5rem 0;
+  }
+
+  .registration-profile-name {
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  .registration-info-row {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 8px;
+    padding: 5px;
+    width: 100%;
+  }
+
+
+  .registration-info-row:not(.yatra-title-row) .registration-profile-username {
+    font-size: 0.75rem;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .registration-tab-content {
+    padding: 1rem;
+  }
+}

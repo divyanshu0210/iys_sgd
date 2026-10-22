@@ -1,5 +1,6 @@
 // src/context/YatraRegistrationContext.jsx
-import { createContext, useContext, useEffect, useState } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import API from "../../../services/api";
 import { useAuth } from "../../../context/AuthContext";
@@ -20,14 +21,16 @@ export const STORAGE_KEY = "yatra_checkout_session";
 
 export const YatraRegistrationProvider = ({ children }) => {
   const { yatra_id } = useParams();
-  const { profile } = useAuth();
+  const { profile, profileStage } = useAuth();
   const location = useLocation();
 
   //Local storage management
   console.log("From yatra context");
   const [registerData, setRegisterData] = useState({ profiles: [], yatra: {} });
   const [eligibilityData, setEligibilityData] = useState({ profiles: [] });
-  const [activeTab, setActiveTab] = useState("approve");
+  const [activeTab, setActiveTab] = useState(
+    profileStage === "not-exists" ? "profile" : "approve"
+  );
   const [currentStep, setCurrentStep] = useState(1);
 
   const [selected, setSelected] = useState([]);
@@ -42,7 +45,12 @@ export const YatraRegistrationProvider = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const yatra = location.state?.yatra || registerData.yatra;
+  // Prefer the Yatra returned by the registration endpoint. Navigation state
+  // is only an initial snapshot and disappears on refresh or may be stale
+  // after an admin updates phases/installments.
+  const yatra = registerData.yatra?.id
+    ? registerData.yatra
+    : location.state?.yatra || registerData.yatra;
 
   // Fetch registration data
   const fetchRegistrationData = async (loading = false) => {
@@ -71,8 +79,9 @@ export const YatraRegistrationProvider = ({ children }) => {
   };
 
   // Helper functions
-  const getInstallmentAmount = (label) => {
-    const inst = (yatra || registerData.yatra)?.installments?.find(
+  const getInstallmentAmount = (label, installmentList) => {
+    const source = installmentList || (yatra || registerData.yatra)?.installments || [];
+    const inst = source.find(
       (i) => i.label === label
     );
     return inst ? parseFloat(inst.amount) : 0;
@@ -92,17 +101,18 @@ export const YatraRegistrationProvider = ({ children }) => {
   };
 
   const handleEligibility = async (profileId, action) => {
-    const key = `${profileId}-${action}`;
+    const profileIds = Array.isArray(profileId) ? profileId : [profileId];
+    const key = `${profileIds.join(",")}-${action}`;
     setLoading((prev) => ({ ...prev, [key]: true }));
     try {
-      if (action === "unapprove" && registrations[profileId]) {
+      if (action === "unapprove" && profileIds.some((id) => registrations[id])) {
         alert(
           "Cannot unapprove — this profile has already started registration or registered."
         );
         return;
       }
       await API.post(`/yatras/${yatra_id}/eligibility/`, {
-        profile_ids: [profileId],
+        profile_ids: profileIds,
         action,
       });
       const [res1, res2] = await Promise.all([

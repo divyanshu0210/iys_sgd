@@ -5,12 +5,16 @@ import API from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import FullPageLoader from "../../components/FullPageLoader";
 
-export default function ProfileApprovalForm({ onClose }) {
-  const { fetchProfile } = useAuth();
+export default function ProfileApprovalForm({ onClose, onComplete, returnTo = "/" }) {
+  const { profile, fetchProfile } = useAuth();
   const [memberId, setMemberId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
   const navigate = useNavigate();
+
+  // Kept as a compatibility component for any legacy import; the active UI
+  // uses ProfileVerificationStatus and never exposes mentor selection.
+  void profile;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,6 +26,7 @@ export default function ProfileApprovalForm({ onClose }) {
     }
     setSubmitting(true);
     const token = localStorage.getItem("userToken");
+    void token;
 
     try {
       await API.post("/api/profile/", { mentor: memberId });
@@ -32,8 +37,11 @@ export default function ProfileApprovalForm({ onClose }) {
       });
 
       // navigate after short delay
-      const stage = await fetchProfile();
-      setTimeout(() => navigate("/"), 1500);
+      await fetchProfile();
+      setTimeout(() => {
+        if (onComplete) onComplete();
+        else navigate(returnTo, { replace: true });
+      }, 1500);
       onClose?.(); // ✅ close after submit
     } catch (err) {
       const errorMsg =
@@ -49,7 +57,8 @@ export default function ProfileApprovalForm({ onClose }) {
   };
 
   const handleSkip = () => {
-    navigate("/"); // 👈 skip approval and continue
+    if (onComplete) onComplete();
+    else navigate(returnTo, { replace: true }); // continue to the originally requested page
     onClose?.(); // ✅ close after submit
   };
 

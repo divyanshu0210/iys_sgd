@@ -1,21 +1,9 @@
 /* profile.css */
 .profile-page {
   display: flex;
-  /* min-height: 100vh; */
   background: #f7f9fc;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #333;
-}
-
-.profile-sidebar {
-  width: 280px;
-  background: #ffffff;
-  border-right: 1px solid #e2e8f0;
-  padding: 2rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .profile-header {
@@ -264,20 +252,6 @@ textarea.edit-input {
   color: #64748b;
 }
 
-/* ---- Sidebar scroll fix ---- */
-.profile-sidebar {
-  width: 350px;
-  background: #ffffff;
-  border-right: 1px solid #e2e8f0;
-  padding: 2rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  height: 85vh;
-  overflow-y: auto;
-}
-
 .search-and-filter {
   display: flex;
   flex-direction: row;
@@ -291,12 +265,6 @@ textarea.edit-input {
     flex-direction: column;
   }
 
-  .profile-sidebar {
-    width: 100%;
-    height: auto;
-    /* padding: 1.5rem; */
-    overflow-y: visible;
-  }
 
   .info-row {
     flex-direction: row;
@@ -312,12 +280,6 @@ textarea.edit-input {
 
 /* Compact horizontal header on mobile */
 @media (max-width: 768px) {
-  .profile-sidebar {
-    padding: 0.1rem;
-    align-items: "center";
-    justify-content: center;
-  }
-
   .profile-header {
     display: flex;
     flex-direction: row;

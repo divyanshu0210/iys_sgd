@@ -1,23 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
+import { Check, X } from "lucide-react";
 import API from "../services/api";
 
 export default function MemberActions({ m }) {
   const [actionLoading, setActionLoading] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef(null);
   const isPending = m.is_pending;
 
   // 🟢 Detect clicks outside dropdown
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   const handleApprove = async () => {
     setActionLoading("approve");
     try {
@@ -27,7 +16,6 @@ export default function MemberActions({ m }) {
       alert("Failed to approve.");
     } finally {
       setActionLoading(null);
-      setMenuOpen(false);
     }
   };
 
@@ -41,44 +29,68 @@ export default function MemberActions({ m }) {
       alert("Failed to reject.");
     } finally {
       setActionLoading(null);
-      setMenuOpen(false);
     }
-  };
-
-  const handleAction = (action) => {
-    if (action === "approve") handleApprove();
-    if (action === "reject") handleReject();
   };
 
   if (!isPending) return null;
 
   return (
-    <div className="member-actions" ref={menuRef}>
+    <div
+      className="member-actions"
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: "flex-end",
+        gap: 6,
+        flexShrink: 0,
+      }}
+    >
       <button
-        className="action-menu-btn"
-        onClick={() => setMenuOpen(!menuOpen)}
+        className="action-btn approve"
+        onClick={handleApprove}
+        disabled={Boolean(actionLoading)}
+        aria-label="Connect"
+        title="Connect profile"
+        style={{
+          fontSize: 0,
+          width: 30,
+          height: 30,
+          minWidth: 30,
+          maxWidth: 30,
+          padding: 0,
+          border: "1px solid #15803d",
+          background: "#16a34a",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
+        <Check size={17} strokeWidth={3} aria-hidden="true" />
         ⋮
       </button>
 
-      {menuOpen && (
-        <div className="action-dropdown">
-          <button
-            className="action-item"
-            onClick={() => handleAction("approve")}
-            disabled={actionLoading}
-          >
-            {actionLoading === "approve" ? "Approving..." : "Convert to Devotee"}
-          </button>
-          <button
-            className="action-item reject"
-            onClick={() => handleAction("reject")}
-            disabled={actionLoading}
-          >
-            {actionLoading === "reject" ? "Rejecting..." : "Reject"}
-          </button>
-        </div>
-      )}
+      <button
+        className="action-btn reject"
+        onClick={handleReject}
+        disabled={Boolean(actionLoading)}
+        aria-label="Reject"
+        title="Reject profile"
+        style={{
+          width: 30,
+          height: 30,
+          minWidth: 30,
+          maxWidth: 30,
+          padding: 0,
+          border: "1px solid #b91c1c",
+          background: "#dc2626",
+          color: "#fff",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <X size={17} strokeWidth={3} aria-hidden="true" />
+      </button>
     </div>
   );
 }

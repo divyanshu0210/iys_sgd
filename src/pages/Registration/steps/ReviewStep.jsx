@@ -5,6 +5,7 @@ import {
 } from "../context/YatraRegistrationContext";
 import RegistrationFormModal from "./RegistrationFormModal";
 import { useState } from "react";
+import "../../../css/bulkActions.css";
 
 const ReviewStep = () => {
   const [editingProfile, setEditingProfile] = useState(null);
@@ -19,7 +20,15 @@ const ReviewStep = () => {
     yatra,
     yatra_id,
     setCurrentStep,
+    setSelected,
+    setRegistrations,
   } = useYatraRegistration();
+
+  const handleCancelSelection = () => {
+    setSelected([]);
+    setRegistrations({});
+    setCurrentStep(1);
+  };
 
   // Build registration_installments object for backend
   const registrationInstallments = {};
@@ -110,7 +119,7 @@ const ReviewStep = () => {
                             key={instLabel}
                             className="installment-badge-small"
                           >
-                            {instLabel} (₹{getInstallmentAmount(instLabel)})
+                            {instLabel} (₹{getInstallmentAmount(instLabel, data.installments_info)})
                           </span>
                         ))}
                     </div>
@@ -175,7 +184,7 @@ const ReviewStep = () => {
                           key={instLabel}
                           className="installment-badge-small"
                         >
-                          {instLabel} (₹{getInstallmentAmount(instLabel)})
+                          {instLabel} (₹{getInstallmentAmount(instLabel, data.installments_info)})
                         </span>
                       ))}
                   </div>
@@ -204,12 +213,17 @@ const ReviewStep = () => {
           <strong>Total Amount: ₹{totalAmount}</strong>
         </div> */}
 
-        <div className="step-actions fixed">
+        <div className="bulk-actions-bar fixed">
+          <div className="bulk-selection-summary">
+            <span>{selected.length} selected</span>
+          </div>
+          <div className="bulk-action-buttons">
+          <button onClick={handleCancelSelection} className="bulk-cancel">Cancel</button>
           <button
             onClick={() => {
               setCurrentStep(1);
             }}
-            className="btn-back"
+            className="bulk-cancel"
           >
             Back
           </button>
@@ -217,11 +231,12 @@ const ReviewStep = () => {
             onClick={() => {
               handleProceedToCheckout();
             }}
-            className="btn-next"
+            className="bulk-connect"
             disabled={totalAmount === 0}
           >
             Proceed to Pay <span>(Total ₹{totalAmount})</span>
           </button>
+          </div>
         </div>
       </div>
 

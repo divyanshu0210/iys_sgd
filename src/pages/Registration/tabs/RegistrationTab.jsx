@@ -1,12 +1,10 @@
 // src/pages/components/RegistrationTab.jsx
-import { useState } from "react";
 import { useYatraRegistration } from "../context/YatraRegistrationContext";
 import WhatsAppCard from "../components/WhatsAppCard";
 import ReviewStep from "../steps/ReviewStep";
 import CheckoutStep from "../steps/CheckoutStep";
 import "../css/registrationTab.css";
 import FullPageLoader from "../../../components/FullPageLoader";
-import { useNavigate } from "react-router-dom";
 import SubstitutionRequests from "../Substitution/SubstitutionRequests";
 
 const RegistrationTab = ({
@@ -23,13 +21,18 @@ const RegistrationTab = ({
     initialLoading,
     currentStep,
     setCurrentStep,
+    setSelected,
+    setRegistrations,
     applyFilters,
   } = useYatraRegistration();
-  const navigate = useNavigate();
-
   // const profiles = registerData.profiles?.filter(filterFn) || [];
 
   const profiles = applyFilters(registerData.profiles?.filter(filterFn)||[],"registered");
+
+  const handleCancelSelection = () => {
+    setSelected([]);
+    setRegistrations({});
+  };
 
   const defaultEmptyMessage = (
     <p className="empty-msg">
@@ -89,10 +92,14 @@ const RegistrationTab = ({
             )}
 
             {selected.length > 0 && (
-              <div className="step-actions fixed">
-                <button onClick={() => setCurrentStep(2)} className="btn-next">
-                  Review Details ({selected.length})
-                </button>
+              <div className="bulk-actions-bar fixed">
+                <div className="bulk-selection-summary">
+                  <span>{selected.length} selected</span>
+                </div>
+                <div className="bulk-action-buttons">
+                  <button onClick={handleCancelSelection} className="bulk-cancel">Cancel</button>
+                  <button onClick={() => setCurrentStep(2)} className="bulk-connect">Review Details</button>
+                </div>
               </div>
             )}
           </>
@@ -108,7 +115,7 @@ const RegistrationTab = ({
 
   return (
     <>
-      <div className="tab-content">{renderStep()}</div>
+      <div className="registration-tab-content">{renderStep()}</div>
       <SubstitutionRequests />
     </>
   );

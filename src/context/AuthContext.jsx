@@ -14,11 +14,10 @@ export function AuthProvider({ children }) {
   const [openApprovalModal, setOpenApprovalModal] = useState(false);
 
   const determineProfileStage = (data) => {
-    if (!data.mobile) return "not-exists";
     if (data.user_type === "mentor") return "mentor";
-    if (data.mobile && !data.mentor) return "guest";
-    if (data.mentor && !data.is_profile_approved) return "approval";
-    if (data.mentor && data.is_profile_approved) return "devotee";
+    if (data.user_type === "counsellor") return "counsellor";
+    if (!data.mobile) return "not-exists";
+    if (data.profile_verification_status === "verified" || data.user_type === "devotee") return "devotee";
     return "guest";
   };
   // ✅ Fetch profile from API and return success status
@@ -26,6 +25,7 @@ export function AuthProvider({ children }) {
     try {
       const res = await API.get("api/profile/");
       const data = res.data;
+      if (data.email) localStorage.setItem("userEmail", data.email);
       setProfile(data);
       const stage = determineProfileStage(data);
       setProfileStage(stage);
@@ -43,10 +43,11 @@ export function AuthProvider({ children }) {
     const initializeAuth = async () => {
       setLoading(true);
       const token = localStorage.getItem("userToken");
+      const storedEmail = localStorage.getItem("userEmail");
       console.log("AuthProvider mounted, token:", token);
 
       if (token) {
-        setUser(token);
+        setUser(storedEmail || token);
         const stage = await fetchProfile(); // ✅ Wait for result
         console.log("Profile fetched successfully. Profile Type:", stage);
       } else {
@@ -74,6 +75,7 @@ export function AuthProvider({ children }) {
     });
     console.log("Logged In", res.data);
     localStorage.setItem("userToken", res.data.key);
+    localStorage.setItem("userEmail", email);
     setUser(email);
   };
 

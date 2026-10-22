@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import FullPageLoader from "./FullPageLoader";
 
-const GoogleBtn = ({ setStatus }) => {
+const GoogleBtn = ({ setStatus, returnTo = "/" }) => {
   const navigate = useNavigate();
   const { setUser, fetchProfile ,setLoading,loading} = useAuth();
 
@@ -23,16 +23,15 @@ const GoogleBtn = ({ setStatus }) => {
         // Save tokens
         localStorage.setItem("userToken", res.data.key);
         localStorage.setItem("accessToken", tokenResponse.access_token);
+        if (res.data.email) localStorage.setItem("userEmail", res.data.email);
         setUser(res.data.key);
 
-        const stage = await fetchProfile();
+        await fetchProfile();
 
         setTimeout(() => {
-          if (stage !== "not-exists") {
-            navigate("/");
-          } else {
-            navigate("/complete-profile");
-          }
+          sessionStorage.removeItem("authReturnTo");
+          sessionStorage.removeItem("authReturnToAt");
+          navigate(returnTo, { replace: true });
         }, 800);
       } catch (err) {
         console.error("Google login error:", err.response?.data || err.message);

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import API from "../services/api";
 import Modal from "../components/Modal";
-import ProfileApprovalForm from "./Profile/ProfileApprovalForm";
+import ProfileApprovalForm from "./Profile/ProfileVerificationStatus";
 import Footer from "../components/Footer";
 import EventsSection from "../components/EventsSection";
 import YatraCard from "../components/YatraCard";
@@ -135,17 +135,14 @@ function OutlineBtn({ children, onClick, style }) {
 }
 
 export default function Home() {
-  const { user, profileStage, loading, setUseFullWidth } = useAuth();
-  const navigate = useNavigate();
+  const { setUseFullWidth } = useAuth();
   const { handleYatraClick, modals: yatraModals } = useYatraClickHandler();
   const [yatras, setYatras] = useState([]);
 
   useEffect(() => {
     setUseFullWidth(true);
-    if (loading) return;
-    if (user && profileStage === "not-exists") navigate("/complete-profile", { replace: true });
     return () => setUseFullWidth(false);
-  }, [user, profileStage, loading, navigate]);
+  }, [setUseFullWidth]);
 
   useEffect(() => {
     API.get("/yatra/list/").then(r => setYatras(r.data.filter(y => !y.close_yatra).slice(0, 3))).catch(() => {});

@@ -1,19 +1,28 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "../../css/profile.css";
+import "../../css/bulkActions.css";
 import API from "../../services/api";
 import { CENTER_OPTIONS, SPIRITUAL_MASTERS, GENDER_OPTIONS, MARITAL_OPTIONS, validateInitiationFields } from "./data";
-import ProfileApprovalForm from "./ProfileApprovalForm.jsx";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
+import MemberCard from "../../components/MemberCard";
+import MentorRequestBulkBar from "../../components/MentorRequestBulkBar";
+import useMentorRequestBulkActions from "../../hooks/useMentorRequestBulkActions";
 
 const MAX_PHOTO_SIZE = 1 * 1024 * 1024; // 1MB
 
+const resolveProfileImageUrl = (value) => {
+  if (!value || typeof value !== "string") return "";
+  if (/^(https?:|data:|blob:)/i.test(value)) return value;
+  const baseUrl = (API.defaults.baseURL || window.location.origin).replace(/\/$/, "");
+  return `${baseUrl}/${value.replace(/^\//, "")}`;
+};
+
 // ---------------------------------------------------------------
-export default function BasicProfile() {
-  const { user, fetchProfile, profileStage } = useAuth();
-  const navigate = useNavigate();
+export default function BasicProfile({ onComplete }) {
+  const { user, profile, fetchProfile } = useAuth();
   const photoInputRef = useRef(null);
+  const statusRef = useRef(null);
 
   const [details, setDetails] = useState({
     firstName: "",
@@ -42,15 +51,137 @@ export default function BasicProfile() {
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [existingPhotoUrl, setExistingPhotoUrl] = useState("");
+  const [baces, setBaces] = useState([]);
+  const [verificationStatus, setVerificationStatus] = useState("");
+  const [reviewRequests, setReviewRequests] = useState([]);
+  const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [profileResolved, setProfileResolved] = useState(false);
+  const isReviewer = profile?.user_type === "mentor" || profile?.user_type === "counsellor";
+  const isProfileEditable =
+    !isProfileComplete || ["rejected", "incomplete"].includes(verificationStatus);
+  const {
+    selectedIds: selectedReviewRequests,
+    allSelected: allReviewRequestsSelected,
+    loading: bulkReviewLoading,
+    toggleSelection: toggleReviewSelection,
+    toggleAll: toggleAllReviewRequests,
+    clearSelection: clearReviewSelection,
+    handleAction: handleBulkReview,
+  } = useMentorRequestBulkActions(reviewRequests);
+
+  useEffect(() => {
+    if (status?.type === "error") {
+      requestAnimationFrame(() => {
+        statusRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    }
+  }, [status]);
+
+  useEffect(() => {
+    API.get("/api/baces/")
+      .then((res) => setBaces(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setBaces([]));
+  }, []);
+
+  useEffect(() => {
+    if (!isReviewer) return undefined;
+    let cancelled = false;
+    API.get("/api/mentor/requests/")
+      .then((res) => {
+        if (!cancelled) setReviewRequests(res.data?.pending_requests || []);
+      })
+      .catch(() => {
+        if (!cancelled) setReviewRequests([]);
+      });
+    return () => { cancelled = true; };
+  }, [isReviewer]);
+
+  // Load any profile data already saved for this account so completion can
+  // be resumed without re-entering everything.
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadExistingProfile = async () => {
+      try {
+        const res = await API.get("/api/profile/");
+        if (cancelled || !res.data) return;
+
+        const data = res.data;
+        const savedCenter = data.center || "";
+        const baceNames = baces.map((bace) => bace.name);
+        const isKnownCenter = baceNames.includes(savedCenter);
+        const existingPhoto = resolveProfileImageUrl(
+          data.profile_picture_url || data.profile_picture || data.profile_image
+        );
+
+        setDetails((current) => ({
+          ...current,
+          firstName: data.first_name || "",
+          lastName: data.last_name || "",
+          dob: data.dob ? String(data.dob).slice(0, 10) : "",
+          gender: data.gender
+            ? String(data.gender).charAt(0).toUpperCase() + String(data.gender).slice(1).toLowerCase()
+            : "",
+          mobile: data.mobile || "",
+          maritalStatus: data.marital_status || "",
+          center: isKnownCenter ? savedCenter : savedCenter ? "Others" : "",
+          customCenter: "",
+          aadhaarNumber: data.aadhar_card_no || data.aadhaar_number || "",
+          receiveEmails: Boolean(data.email_consent),
+          roundsChanting:
+            data.no_of_chanting_rounds === null || data.no_of_chanting_rounds === undefined
+              ? ""
+              : String(data.no_of_chanting_rounds),
+          harinamInitiated:
+            data.is_initiated === null || data.is_initiated === undefined
+              ? ""
+              : data.is_initiated ? "Yes" : "No",
+          initiatedName: data.initiated_name || "",
+          spiritualMaster: data.spiritual_master || "",
+          initiationDate: data.initiation_date ? String(data.initiation_date).slice(0, 10) : "",
+          initiationPlace: data.initiation_place || "",
+        }));
+        setExistingPhotoUrl(existingPhoto);
+        setVerificationStatus(data.profile_verification_status || "");
+        const complete = Boolean(
+          data.first_name &&
+          data.last_name &&
+          data.dob &&
+          data.gender &&
+          data.mobile &&
+          data.marital_status &&
+          data.center &&
+          data.aadhar_card_no &&
+          data.is_initiated !== null &&
+          data.is_initiated !== undefined &&
+          data.no_of_chanting_rounds !== null &&
+          data.no_of_chanting_rounds !== undefined &&
+          (data.profile_picture_url || data.profile_picture || data.profile_image)
+        );
+        setIsProfileComplete(complete);
+        setEditingProfile(!complete);
+      } catch (err) {
+        // A missing profile is expected for a brand-new user.
+        console.debug("No existing profile to prefill", err);
+      } finally {
+        if (!cancelled) setProfileResolved(true);
+      }
+    };
+
+    loadExistingProfile();
+    return () => { cancelled = true; };
+  }, [baces]);
 
   // -----------------------------------------------------------------
   // Photo preview
   useEffect(() => {
-    if (!details.photo) return setPhotoPreview(null);
+    if (!details.photo) return setPhotoPreview(existingPhotoUrl || null);
     const url = URL.createObjectURL(details.photo);
     setPhotoPreview(url);
     return () => URL.revokeObjectURL(url);
-  }, [details.photo]);
+  }, [details.photo, existingPhotoUrl]);
 
   // -----------------------------------------------------------------
   const onChange = (key, value) => {
@@ -123,8 +254,8 @@ export default function BasicProfile() {
     }
 
     // Photo
-    if (!details.photo) newErrors.photo = "Photo is required (max 1 MB)";
-    else if (details.photo.size > MAX_PHOTO_SIZE)
+    if (!details.photo && !existingPhotoUrl) newErrors.photo = "Photo is required (max 1 MB)";
+    else if (details.photo && details.photo.size > MAX_PHOTO_SIZE)
       newErrors.photo = "Photo exceeds 1 MB size limit";
 
     // Email consent
@@ -162,6 +293,11 @@ export default function BasicProfile() {
       });
       return;
     }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to submit your profile? You will not be able to change your profile once it is submitted."
+    );
+    if (!confirmed) return;
 
     setSubmitting(true);
     const token = localStorage.getItem("userToken");
@@ -215,9 +351,12 @@ export default function BasicProfile() {
       }
 
       // ---------- SUCCESS ----------
+      await fetchProfile();
       setStatus({ type: "success", msg: "Profile saved successfully!" });
-      const stage = await fetchProfile();
-      // setTimeout(() => navigate("/"), 1500);
+      alert("Profile saved successfully!");
+      setIsProfileComplete(true);
+      setEditingProfile(false);
+      onComplete?.();
     } catch (err) {
       let errorMsg = "An error occurred while saving the profile.";
 
@@ -227,7 +366,7 @@ export default function BasicProfile() {
         // 1️⃣ Field-level DRF errors (most common)
         if (typeof data === "object" && !Array.isArray(data)) {
           errorMsg = Object.entries(data)
-            .map(([field, messages]) =>
+            .map(([, messages]) =>
               messages
                 .map((msg) => msg.charAt(0).toUpperCase() + msg.slice(1))
                 .join(" ")
@@ -272,7 +411,61 @@ export default function BasicProfile() {
     });
     setErrors({});
     setStatus(null);
+    setIsProfileComplete(false);
+    setEditingProfile(true);
   };
+
+  const ownMember = {
+    ...profile,
+    is_self: true,
+    full_name: `${details.firstName} ${details.lastName}`.trim(),
+    first_name: details.firstName,
+    last_name: details.lastName,
+    profile_picture: photoPreview || profile?.profile_picture_url || existingPhotoUrl,
+    user_type: profile?.user_type || "guest",
+    dob: details.dob,
+    gender: details.gender,
+    marital_status: details.maritalStatus,
+    mobile: details.mobile,
+    center: details.center,
+    bace: details.center,
+    is_initiated: details.harinamInitiated === "Yes",
+    initiated_name: details.initiatedName,
+  };
+
+  const profileSummary = (
+    <div className={isReviewer ? "profile-summary-card" : "cp-card profile-summary-card"}>
+      {!isReviewer && (
+        <p className="step-purpose-notice">Profile needs to be verified before Approval for Yatra can be checked.</p>
+      )}
+      <h2 className="cp-title">Your Profile</h2>
+      {verificationStatus === "rejected" && (
+        <div className="status-box error" style={{ marginBottom: "1rem" }}>
+          Your profile was rejected. Please check and submit your profile again.
+        </div>
+      )}
+      <div className="members-list">
+        <MemberCard m={ownMember} />
+      </div>
+      {isProfileEditable && (
+        <div className="form-actions">
+          <button
+            type="button"
+            className="cp-btn-primary"
+            onClick={() => {
+              if (!isProfileEditable) {
+                alert("Your profile cannot be edited while it is pending approval.");
+                return;
+              }
+              setEditingProfile(true);
+            }}
+          >
+            Edit Profile
+          </button>
+        </div>
+      )}
+    </div>
+  );
 
   // -----------------------------------------------------------------
   const Label = ({ htmlFor, children }) => (
@@ -282,21 +475,77 @@ export default function BasicProfile() {
   );
 
   // -----------------------------------------------------------------
-  if (profileStage === "guest") {
-    return <ProfileApprovalForm user={user} />;
-  }
   return (
+    !profileResolved ? <FullPageLoader /> :
     <>
       {submitting && <FullPageLoader />}
       <div className="cp-page">
-        <form className="cp-card" onSubmit={handleSubmit} noValidate>
-          <h2 className="cp-title">Complete Your Profile To Continue</h2>
-          <p
-            style={{ textAlign: "center", color: "#555", marginBottom: "1rem" }}
-          >
-            Please fill in your details.
-          </p>
+        {isReviewer && (
+          <section className="cp-card profile-requests-section has-fixed-bulk-actions" style={{ marginBottom: "1rem" }}>
+            <p className="step-purpose-notice">Profile needs to be verified before Approval for Yatra can be checked.</p>
+            <div className="profile-requests-heading">
+              <h3 style={{ margin: 0 }}>New Profile Requests</h3>
+            </div>
+            <p className="cp-subtitle" style={{ marginBottom: "1rem" }}>
+              Review new profiles assigned to your Bace.
+            </p>
+            {reviewRequests.length === 0 ? (
+              <p className="empty-msg">No new profile requests.</p>
+            ) : (
+              <div className="members-list">
+                {reviewRequests.map((request) => (
+                  <MemberCard
+                    key={request.id}
+                    selectable
+                    hideActions
+                    selected={selectedReviewRequests.includes(request.id)}
+                    onSelect={() => toggleReviewSelection(request.id)}
+                    m={{
+                      ...request.from_user,
+                      is_pending: true,
+                      request_id: request.id,
+                      request_created_at: request.created_at,
+                      bace: request.bace,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            <MentorRequestBulkBar
+              selectedCount={selectedReviewRequests.length}
+              allSelected={allReviewRequestsSelected}
+              loading={bulkReviewLoading}
+              onToggleAll={toggleAllReviewRequests}
+              onCancel={clearReviewSelection}
+              onAction={handleBulkReview}
+            />
+            {isProfileComplete && !editingProfile && profileSummary}
+          </section>
+        )}
 
+        {(!isProfileComplete || editingProfile) ? (
+        <form className="cp-card profile-form-card" onSubmit={handleSubmit} noValidate>
+          <div className="profile-form-scroll">
+          <h2 className="cp-title">Complete Your Profile To Continue</h2>
+          {status && status.type === "error" && (
+            <div
+              ref={statusRef}
+              className="status-box error"
+              style={{ whiteSpace: "pre-line", marginBottom: "1rem" }}
+            >
+              {status.msg}
+            </div>
+          )}
+          {verificationStatus === "rejected" && (
+            <div className="status-box error" style={{ marginBottom: "1rem" }}>
+              Your profile was rejected. Please check and submit your profile again.
+            </div>
+          )}
+          {verificationStatus === "pending" && (
+            <div className="status-box info" style={{ marginBottom: "1rem" }}>
+              Your profile is pending verification by your selected Bace.
+            </div>
+          )}
           <div className="cp-grid">
             {/* ---------- Core fields (unchanged) ---------- */}
             {[
@@ -357,7 +606,7 @@ export default function BasicProfile() {
 
             {/* ---------- Center / Base ---------- */}
             <div className="cp-field">
-              <Label htmlFor="center">Center / Base</Label>
+              <Label htmlFor="center">Bace</Label>
 
               <select
                 id="center"
@@ -367,7 +616,7 @@ export default function BasicProfile() {
                 className={errors.center ? "error-border" : ""}
               >
                 <option value="">Select</option>
-                {CENTER_OPTIONS.map((c) => (
+                {[...new Set([...baces.map((bace) => bace.name), ...CENTER_OPTIONS])].map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>
@@ -377,6 +626,7 @@ export default function BasicProfile() {
               {errors.center && (
                 <div className="error-text">{errors.center}</div>
               )}
+
             </div>
 
             {/* ---------- Custom Center (only if Others) ---------- */}
@@ -513,17 +763,21 @@ export default function BasicProfile() {
 
             {/* ---------- Photo Upload (unchanged) ---------- */}
             <div className="cp-field" style={{ alignSelf: "start" }}>
-              <Label htmlFor="photo">Upload Profile Photo</Label>
-              <span style={{ fontSize: "0.7rem", color: "#888" }}>
-                Max size: <b>1 MB</b>.
-              </span>
               <div
+                className="photo-upload-layout"
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  gap: "0.0rem",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "1rem",
                 }}
               >
+                <div className="photo-upload-controls">
+                  <Label htmlFor="photo">Upload Profile Photo</Label>
+                  <span style={{ fontSize: "0.7rem", color: "#888" }}>
+                    Max size: <b>1 MB</b>.
+                  </span>
                 <div
                   style={{ display: "flex", alignItems: "center", gap: "1rem" }}
                 >
@@ -584,8 +838,9 @@ export default function BasicProfile() {
                     </>
                   )}
                 </div>
+                </div>
 
-                {details.photo && (
+                {photoPreview && (
                   <div
                     style={{
                       display: "flex",
@@ -607,6 +862,9 @@ export default function BasicProfile() {
                       <img
                         src={photoPreview}
                         alt="Profile"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
                         style={{
                           width: "100%",
                           height: "100%",
@@ -665,20 +923,34 @@ export default function BasicProfile() {
           )}
 
           {/* ---------- Status ---------- */}
-          {status && (
+          {status && status.type !== "error" && (
             <div
-              className={`status-box ${
-                status.type === "success" ? "success" : "error"
-              }`}
+              className="status-box success"
               style={{ whiteSpace: "pre-line" }}
             >
               {status.msg}
             </div>
           )}
+          </div>
 
           {/* ---------- Actions ---------- */}
-          <div className="form-actions">
-            <button
+          <div className="form-actions profile-form-actions">
+           
+            {isProfileComplete && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingProfile(false);
+                  setErrors({});
+                  setStatus(null);
+                }}
+                className="cp-btn-ghost"
+                disabled={submitting}
+              >
+                Cancel
+              </button>
+            )}
+             <button
               type="button"
               onClick={handleReset}
               className="cp-btn-ghost"
@@ -691,10 +963,12 @@ export default function BasicProfile() {
               className="cp-btn-primary"
               disabled={submitting}
             >
-              {submitting ? "Saving..." : "Save & Continue"}
+              {submitting ? "Submitting..." : "Submit"}
             </button>
           </div>
         </form>
+        ) : (!isReviewer ? profileSummary : null)}
+
       </div>
     </>
   );

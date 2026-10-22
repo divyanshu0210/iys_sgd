@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { useYatraRegistration } from "./context/YatraRegistrationContext";
-import "../../css/members.css";
+import "../../css/registration.css";
 
 import Sidebar from "./components/Sidebar";
 import AlertModal from "./components/AlertModal";
@@ -11,10 +11,14 @@ import RegisteredTab from "./tabs/RegisteredTab";
 import { useAuth } from "../../context/AuthContext";
 import ProfileSearchBar from "./components/ProfileSearchBar";
 import YatraRegistrationStatusFilter from "./components/YatraRegistrationStatusFilter";
+import BasicProfile from "../Profile/BasicProfile";
+import API from "../../services/api";
 
 // ── Step status helpers ──────────────────────────────────────────
-function useStepStatus() {
+function useStepStatus(profileStepActive, profilePendingCount, ownProfileNeedsCompletion) {
   const { eligibilityData, registerData } = useYatraRegistration();
+  const { profileStage } = useAuth();
+  const isReviewer = profileStage === "mentor" || profileStage === "counsellor";
   const eligible   = eligibilityData.profiles || [];
   const registered = registerData.profiles    || [];
 
@@ -33,21 +37,30 @@ function useStepStatus() {
   const step3 = registeredCount > 0 ? "active" : "pending";
 
   const allSteps = [
-    { id: "approve",    label: "Approve",  sublabel: "Review members",    status: step1, badge: pendingApproval  },
-    { id: "newReg",     label: "Register", sublabel: "Register approved", status: step2, badge: approvedNotReg  },
-    { id: "registered", label: "Status",   sublabel: "Monitor payments",  status: step3, badge: registeredCount },
+    {
+      id: "profile",
+      label: "Profile",
+      sublabel: "Complete profile",
+      status: profileStepActive ? "active" : "completed",
+      badge: profilePendingCount,
+    },
+    { id: "approve",    label: "Approve",  sublabel: "Review members",    status: step1, badge: isReviewer && !ownProfileNeedsCompletion ? pendingApproval : 0  },
+    { id: "newReg",     label: "Register", sublabel: "Register approved", status: step2, badge: isReviewer ? approvedNotReg : 0  },
+    { id: "registered", label: "Status",   sublabel: "Monitor payments",  status: step3, badge: isReviewer ? registeredCount : 0 },
   ];
 
   return {
     requiresApproval,
-    steps: requiresApproval ? allSteps : allSteps.filter(s => s.id !== "approve"),
+    steps: requiresApproval || profileStage === "mentor" || profileStage === "counsellor"
+      ? allSteps
+      : allSteps.filter(s => s.id !== "approve"),
   };
 }
 
 // ── Stepper component ────────────────────────────────────────────
-function RegistrationStepper() {
+function RegistrationStepper({ profileStepActive, profilePendingCount, ownProfileNeedsCompletion, lockOtherSteps }) {
   const { activeTab, setActiveTab } = useYatraRegistration();
-  const { steps } = useStepStatus();
+  const { steps } = useStepStatus(profileStepActive, profilePendingCount, ownProfileNeedsCompletion);
 
   const circleStyle = (step) => ({
     width: 34, height: 34, borderRadius: "50%",
@@ -79,9 +92,14 @@ function RegistrationStepper() {
         <div key={step.id} style={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? "1 1 0" : "none" }}>
           {/* Step node */}
           <div
-            onClick={() => setActiveTab(step.id)}
-            style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer",
-              opacity: step.status === "pending" ? 0.5 : 1 }}
+            onClick={() => {
+              if (step.id !== "profile" && step.status === "pending") return;
+              if (step.id !== "profile" && lockOtherSteps) return;
+              setActiveTab(step.id);
+            }}
+            aria-disabled={step.id !== "profile" && lockOtherSteps}
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: step.status === "pending" || (step.id !== "profile" && lockOtherSteps) ? "default" : "pointer",
+              opacity: step.status === "pending" || (step.id !== "profile" && lockOtherSteps) ? 0.5 : 1 }}
           >
             <div style={circleStyle(step)}>
               {step.status === "completed" ? <Check size={15} strokeWidth={2.5} /> : i + 1}
@@ -89,7 +107,7 @@ function RegistrationStepper() {
             <span style={{
               fontSize: "0.72rem", marginTop: 4, whiteSpace: "nowrap",
               fontWeight: activeTab === step.id ? 700 : 500,
-              color: activeTab === step.id ? "#0ea5e9" : "#475569",
+              color: activeTab === step.id ? "#0ea5e9" : (step.id !== "profile" && lockOtherSteps ? "#94a3b8" : "#475569"),
             }}>
               {step.label}
             </span>
@@ -115,9 +133,35 @@ export default function YatraRegister() {
     registerData, eligibilityData, setActiveTab,
   } = useYatraRegistration();
 
-  const { profile } = useAuth();
+  const { profile, profileStage } = useAuth();
   const defaultSet = useRef(false);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  const [pendingReviewCount, setPendingReviewCount] = useState(0);
+
+  useEffect(() => {
+    const isReviewer = profile?.user_type === "mentor" || profile?.user_type === "counsellor";
+    if (!isReviewer) {
+      setPendingReviewCount(0);
+      return undefined;
+    }
+
+    let cancelled = false;
+    API.get("/api/mentor/requests/")
+      .then((res) => {
+        if (!cancelled) setPendingReviewCount(res.data?.pending_requests?.length || 0);
+      })
+      .catch(() => {
+        if (!cancelled) setPendingReviewCount(0);
+      });
+    return () => { cancelled = true; };
+  }, [profile?.user_type]);
+
+  const ownProfileNeedsCompletion =
+    profileStage === "not-exists" ||
+    profile?.profile_verification_status !== "verified";
+  const profileStepActive = ownProfileNeedsCompletion || pendingReviewCount > 0;
+  const isReviewer = profileStage === "mentor" || profileStage === "counsellor";
+  const lockOtherSteps = ownProfileNeedsCompletion;
 
   useEffect(() => {
     if (profile == null) return;
@@ -140,6 +184,11 @@ export default function YatraRegister() {
 
   // Smart default — runs once after initial data load
   useEffect(() => {
+    if (profileStepActive) {
+      defaultSet.current = true;
+      setActiveTab("profile");
+      return;
+    }
     if (defaultSet.current) return;
     if (!initialDataLoaded) return;
 
@@ -158,28 +207,41 @@ export default function YatraRegister() {
     else if (pendingApproval > 0 && requiresApproval) setActiveTab("approve");
     else if (registeredCount > 0)                  setActiveTab("registered");
     else                                           setActiveTab(requiresApproval ? "approve" : "newReg");
-  }, [initialDataLoaded, eligibilityData, registerData, setActiveTab]);
+  }, [initialDataLoaded, eligibilityData, registerData, profileStage, profileStepActive, setActiveTab]);
 
   const requiresApproval = eligibilityData.yatra?.requires_approval ?? true;
 
   const renderActiveTab = () => {
     switch (activeTab) {
+      case "profile":
+        return (
+          <BasicProfile
+            onComplete={() => setActiveTab(requiresApproval ? "approve" : "newReg")}
+          />
+        );
       case "registered": return <RegisteredTab />;
-      case "approve":    return requiresApproval ? <ApproveTab /> : <NewRegistrationTab />;
+      case "approve":    return requiresApproval || isReviewer ? <ApproveTab /> : <NewRegistrationTab />;
       case "newReg":     return <NewRegistrationTab />;
       default:           return requiresApproval ? <ApproveTab /> : <NewRegistrationTab />;
     }
   };
 
   return (
-    <div className="profile-page">
+    <div className="registration-page">
       <Sidebar />
-      <div className="profile-content">
-        <RegistrationStepper />
-        <div className="search-and-filter">
-          <ProfileSearchBar />
-          <YatraRegistrationStatusFilter activeTab={activeTab} />
-        </div>
+      <div className="registration-content">
+        <RegistrationStepper
+          profileStepActive={profileStepActive}
+          profilePendingCount={pendingReviewCount}
+          ownProfileNeedsCompletion={ownProfileNeedsCompletion}
+          lockOtherSteps={lockOtherSteps}
+        />
+        {isReviewer && (
+          <div className="search-and-filter">
+            <ProfileSearchBar />
+            <YatraRegistrationStatusFilter activeTab={activeTab} />
+          </div>
+        )}
         {renderActiveTab()}
       </div>
 
