@@ -118,8 +118,7 @@ function Row({ label, value, field, type = "text", options, editable = true }) {
 // ── Main component ───────────────────────────────────────────────
 export default function Profile() {
   const { fetchProfile: refreshAuthProfile } = useAuth();
-  const { baceNames } = useBaces();
-  const centerOptions = baceNames.map((name) => ({ value: name, label: name }));
+  const { baces } = useBaces();
   const [profile, setProfile] = useState(null);
   const [activeTab, setActiveTab] = useState("basic");
   const [isEditing, setIsEditing] = useState(false);
@@ -129,6 +128,7 @@ export default function Profile() {
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const photoInputRef = useRef(null);
+  const centerOptions = (baces || []).map(({ name }) => ({ value: name, label: name }));
 
   useEffect(() => {
     API.get("/api/profile/").then((res) => setProfile(res.data));
@@ -144,6 +144,8 @@ export default function Profile() {
   const set = (key, value) => setEditData((p) => ({ ...p, [key]: value }));
 
   const startEditing = () => {
+    const savedCenter = profile.center || "";
+    const isPrimaryBace = (baces || []).some((bace) => bace.name === savedCenter);
     setEditData({
       first_name: profile.first_name || "",
       last_name: profile.last_name || "",
@@ -151,7 +153,8 @@ export default function Profile() {
       gender: profile.gender || "",
       marital_status: profile.marital_status || "",
       mobile: profile.mobile || "",
-      center: profile.center || "",
+      center: isPrimaryBace ? savedCenter : savedCenter ? "Others" : "",
+      other_center: !isPrimaryBace && savedCenter && savedCenter !== "Others" ? savedCenter : "",
       aadhar_card_no: profile.aadhar_card_no || "",
       is_initiated: profile.is_initiated ?? false,
       initiated_name: profile.initiated_name || "",
@@ -200,8 +203,11 @@ export default function Profile() {
     // Build a partial payload — only include fields that actually changed
     const changes = {};
     for (const key of Object.keys(editData)) {
+      if (key === "other_center") continue;
       const original = profile[key] ?? "";
-      const current = editData[key];
+      const current = key === "center" && editData.center === "Others"
+        ? editData.other_center
+        : editData[key];
       // Normalise booleans and numbers for comparison
       if (String(current) !== String(original)) {
         // Skip empty date strings — backend rejects them
@@ -324,6 +330,9 @@ export default function Profile() {
                 <Row label="Marital Status"  field="marital_status"   value={profile.marital_status} options={MARITAL_OPTIONS} />
                 <Row label="Mobile"          field="mobile"           value={profile.mobile} type="tel" />
                 <Row label="Center"          field="center"           value={profile.center} options={centerOptions} />
+                {isEditing && editData.center === "Others" && (
+                  <Row label="Other Center" field="other_center" value={editData.other_center} />
+                )}
                 <Row label="Aadhaar No"      field="aadhar_card_no"   value={profile.aadhar_card_no} />
                 <Row label="Rounds Chanting" field="no_of_chanting_rounds"
                   value={String(profile.no_of_chanting_rounds ?? profile.daily_chanting_rounds ?? 0)} type="number" />
