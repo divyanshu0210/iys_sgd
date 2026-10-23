@@ -293,11 +293,18 @@ function RegistrationFormModal({ profile, onClose }) {
           ) : (
             <p className="info-banner">Form can only be filled once.</p>
           ))}
-        {registrationPhase?.name && (
-          <div className="info-banner phase-banner">
-            Registration phase: <strong>{registrationPhase.name}</strong>
-          </div>
-        )}
+          
+            {registrationPhase?.end_date && !phaseEnded && (
+              <div className="info-banner phase-banner">
+                Registration closes on{" "}
+                <strong>
+                  {new Date(`${registrationPhase.end_date}T00:00:00`).toLocaleDateString(
+                    "en-IN",
+                    { day: "2-digit", month: "short", year: "numeric" }
+                  )}
+                </strong>
+              </div>
+            )}
         <form className="form-body" onSubmit={handleSubmit}>
           {/* --- Dynamic Fields --- */}
           {(yatra.form_fields || []).length > 0 && (

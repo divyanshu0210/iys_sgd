@@ -1,5 +1,6 @@
 import "../css/memberCards.css";
 import MemberActions from "./MemberActions";
+import { useAuth } from "../context/AuthContext";
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
   const date = new Date(dateStr);
@@ -11,6 +12,8 @@ const formatDate = (dateStr) => {
 };
 
 export default function MemberDetailsCard({ m, hideActions = false }) {
+  const { profile: currentProfile } = useAuth();
+  const canShowSelfBadge = ["mentor", "counsellor"].includes(currentProfile?.user_type);
   const isPending = m.is_pending;
   const verificationStatus = m.profile_verification_status || (isPending ? "pending" : "");
   const statusMeta = {
@@ -44,7 +47,7 @@ export default function MemberDetailsCard({ m, hideActions = false }) {
       <div className="member-mobile-name-row">
         <div className="member-mobile-name">
           <p className="member-line name-line">{displayName}</p>
-          {m.is_self && <span className="member-self-badge">You</span>}
+          {m.is_self && canShowSelfBadge && <span className="member-self-badge">You</span>}
           {statusPill}
         </div>
         {isPending && !hideActions && <MemberActions m={m} />}
@@ -63,7 +66,7 @@ export default function MemberDetailsCard({ m, hideActions = false }) {
 
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <p className="member-line name-line">{displayName}</p>
-            {m.is_self && <span className="member-self-badge">You</span>}
+            {m.is_self && canShowSelfBadge && <span className="member-self-badge">You</span>}
             {statusPill}
           </div>
           </div>

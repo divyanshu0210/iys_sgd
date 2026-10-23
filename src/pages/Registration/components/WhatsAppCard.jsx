@@ -26,6 +26,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
     setRegistrations,
   } = useYatraRegistration();
   const { profile: authProfile } = useAuth();
+  const canShowSelfBadge = ["mentor", "counsellor"].includes(authProfile?.user_type);
   const navigate = useNavigate();
   const [openInfoModal, setOpenInfoModal] = useState(false);
   const [localShowForm, setLocalShowForm] = useState(false);
@@ -259,7 +260,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
                       : profile.full_name}
                   </strong>
                 </div>
-                {profile.is_self && <span className="badge-self">You</span>}
+                {profile.is_self && canShowSelfBadge && <span className="badge-self">You</span>}
               </div>
               <div className="whatsapp-memberid">
                 ID: {profile.member_id || "N/A"}
@@ -538,14 +539,6 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
                     className="action-btn pending self-request-button"
                   >
                     {isSelfRequesting ? "Sending..." : "Request Pending"}
-                  </button>
-                )}
-                {profile.is_approved && (
-                  <button
-                    onClick={() => window.confirm("Can't unapprove yourself. Contact your counsellor to unapprove.")}
-                    className="action-btn unapprove self-request-button"
-                  >
-                    Unapprove
                   </button>
                 )}
               </>
