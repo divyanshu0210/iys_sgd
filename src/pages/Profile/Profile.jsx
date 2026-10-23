@@ -129,6 +129,10 @@ export default function Profile() {
   const [photoPreview, setPhotoPreview] = useState(null);
   const photoInputRef = useRef(null);
   const centerOptions = (baces || []).map(({ name }) => ({ value: name, label: name }));
+  const canEditCenter = !["pending", "verified"].includes(profile?.profile_verification_status);
+  const isOtherCenter = Boolean(
+    profile?.center && !(baces || []).some((bace) => bace.name === profile.center)
+  );
 
   useEffect(() => {
     API.get("/api/profile/").then((res) => setProfile(res.data));
@@ -329,7 +333,15 @@ export default function Profile() {
                 <Row label="Gender"          field="gender"           value={profile.gender} options={GENDER_OPTIONS} />
                 <Row label="Marital Status"  field="marital_status"   value={profile.marital_status} options={MARITAL_OPTIONS} />
                 <Row label="Mobile"          field="mobile"           value={profile.mobile} type="tel" />
-                <Row label="Center"          field="center"           value={profile.center} options={centerOptions} />
+                <Row label="Center"          field="center"           value={isOtherCenter ? "Others" : profile.center} options={centerOptions} editable={canEditCenter} />
+                {(isOtherCenter || (isEditing && editData.center === "Others")) && (
+                  <Row
+                    label="Other Center"
+                    field={isEditing ? "other_center" : undefined}
+                    value={isEditing ? editData.other_center : profile.center}
+                    editable={isEditing && canEditCenter}
+                  />
+                )}
                 {isEditing && editData.center === "Others" && (
                   <Row label="Other Center" field="other_center" value={editData.other_center} />
                 )}

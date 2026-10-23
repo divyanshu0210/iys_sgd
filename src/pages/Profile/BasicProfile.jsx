@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import "../../css/profile.css";
 import "../../css/bulkActions.css";
@@ -20,7 +20,7 @@ const resolveProfileImageUrl = (value) => {
 };
 
 // ---------------------------------------------------------------
-export default function BasicProfile({ onComplete }) {
+export default function BasicProfile({ onComplete, requestCenterFilter = "all" }) {
   const { user, profile, fetchProfile } = useAuth();
   const photoInputRef = useRef(null);
   const statusRef = useRef(null);
@@ -62,6 +62,16 @@ export default function BasicProfile({ onComplete }) {
   const isReviewer = profile?.user_type === "mentor" || profile?.user_type === "counsellor";
   const isProfileEditable =
     !isProfileComplete || ["rejected", "incomplete"].includes(verificationStatus);
+  const filteredReviewRequests = useMemo(() => {
+    if (requestCenterFilter === "all") return reviewRequests;
+
+    return reviewRequests.filter((request) => {
+      const center = String(
+        request.from_user?.center || request.bace || "Unknown Center"
+      ).trim();
+      return center === requestCenterFilter;
+    });
+  }, [requestCenterFilter, reviewRequests]);
   const {
     selectedIds: selectedReviewRequests,
     allSelected: allReviewRequestsSelected,
@@ -70,7 +80,7 @@ export default function BasicProfile({ onComplete }) {
     toggleAll: toggleAllReviewRequests,
     clearSelection: clearReviewSelection,
     handleAction: handleBulkReview,
-  } = useMentorRequestBulkActions(reviewRequests);
+  } = useMentorRequestBulkActions(filteredReviewRequests);
 
   useEffect(() => {
     if (status?.type === "error") {
@@ -492,9 +502,11 @@ export default function BasicProfile({ onComplete }) {
             </p>
             {reviewRequests.length === 0 ? (
               <p className="empty-msg">No new profile requests.</p>
+            ) : filteredReviewRequests.length === 0 ? (
+              <p className="empty-msg">No profile requests for this center.</p>
             ) : (
               <div className="members-list">
-                {reviewRequests.map((request) => (
+                {filteredReviewRequests.map((request) => (
                   <MemberCard
                     key={request.id}
                     selectable

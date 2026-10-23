@@ -6,11 +6,19 @@ const APPROVAL_STATUS_MAP = {
   not_approved: { text: "Not Approved", icon: "○" },
 };
 
-const YatraRegistrationStatusFilter = ({ activeTab }) => {
+const YatraRegistrationStatusFilter = ({ activeTab, profileRequests = [] }) => {
   const { statusFilter, setStatusFilter, getStatusCounts } =
     useYatraRegistration();
   const counts = getStatusCounts(activeTab);
   const isApproveTab = activeTab === "approve";
+  const isProfileTab = activeTab === "profile";
+  const getRequestCenter = (request) =>
+    String(request.from_user?.center || request.bace || "Unknown Center").trim();
+  const centerCounts = profileRequests.reduce((result, request) => {
+    const center = getRequestCenter(request);
+    result[center] = (result[center] || 0) + 1;
+    return result;
+  }, {});
 
   useEffect(() => {
     setStatusFilter("all");
@@ -23,9 +31,21 @@ const YatraRegistrationStatusFilter = ({ activeTab }) => {
         onChange={(e) => setStatusFilter(e.target.value)}
         style={{ width: "100%" , padding:"10px 2px"}}
       >
-        <option value="all">All ({counts.all || 0})</option>
+        <option value="all">
+          {isProfileTab ? "All Centers" : "All"} (
+            {isProfileTab ? profileRequests.length : counts.all || 0}
+          )
+        </option>
 
-        {isApproveTab
+        {isProfileTab
+          ? Object.keys(centerCounts)
+              .sort((a, b) => a.localeCompare(b))
+              .map((center) => (
+                <option key={center} value={center}>
+                  {center} ({centerCounts[center]})
+                </option>
+              ))
+          : isApproveTab
           ? Object.entries(APPROVAL_STATUS_MAP).map(([key, v]) => (
               <option key={key} value={key} disabled={!counts[key]}>
                 {v.icon} {v.text} ({counts[key] || 0})

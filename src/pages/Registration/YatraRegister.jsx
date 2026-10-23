@@ -131,12 +131,14 @@ export default function YatraRegister() {
     yatra_id, activeTab, showModal, modalMessage, setShowModal,
     fetchRegistrationData, fetchEligibilityData, setInitialLoading,
     registerData, eligibilityData, setActiveTab,
+    statusFilter,
   } = useYatraRegistration();
 
   const { profile, profileStage } = useAuth();
   const defaultSet = useRef(false);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [pendingReviewCount, setPendingReviewCount] = useState(0);
+  const [profileRequests, setProfileRequests] = useState([]);
 
   useEffect(() => {
     const isReviewer = profile?.user_type === "mentor" || profile?.user_type === "counsellor";
@@ -148,10 +150,17 @@ export default function YatraRegister() {
     let cancelled = false;
     API.get("/api/mentor/requests/")
       .then((res) => {
-        if (!cancelled) setPendingReviewCount(res.data?.pending_requests?.length || 0);
+        if (!cancelled) {
+          const requests = res.data?.pending_requests || [];
+          setProfileRequests(requests);
+          setPendingReviewCount(requests.length);
+        }
       })
       .catch(() => {
-        if (!cancelled) setPendingReviewCount(0);
+        if (!cancelled) {
+          setProfileRequests([]);
+          setPendingReviewCount(0);
+        }
       });
     return () => { cancelled = true; };
   }, [profile?.user_type]);
@@ -217,6 +226,7 @@ export default function YatraRegister() {
         return (
           <BasicProfile
             onComplete={() => setActiveTab(requiresApproval ? "approve" : "newReg")}
+            requestCenterFilter={statusFilter}
           />
         );
       case "registered": return <RegisteredTab />;
@@ -239,7 +249,10 @@ export default function YatraRegister() {
         {isReviewer && (
           <div className="search-and-filter">
             <ProfileSearchBar />
-            <YatraRegistrationStatusFilter activeTab={activeTab} />
+            <YatraRegistrationStatusFilter
+              activeTab={activeTab}
+              profileRequests={profileRequests}
+            />
           </div>
         )}
         {renderActiveTab()}
