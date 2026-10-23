@@ -1,5 +1,4 @@
 import "../css/memberCards.css";
-import MemberActions from "./MemberActions";
 import { useAuth } from "../context/AuthContext";
 import { PROFILE_STATUS } from "./profileStatus";
 const formatDate = (dateStr) => {
@@ -12,7 +11,7 @@ const formatDate = (dateStr) => {
   });
 };
 
-export default function MemberDetailsCard({ m, hideActions = false }) {
+export default function MemberDetailsCard({ m }) {
   const { profile: currentProfile } = useAuth();
   const canShowSelfBadge = ["mentor", "counsellor"].includes(currentProfile?.user_type);
   const isPending = m.is_pending;
@@ -46,7 +45,6 @@ export default function MemberDetailsCard({ m, hideActions = false }) {
           {m.is_self && canShowSelfBadge && <span className="member-self-badge">You</span>}
           {statusPill}
         </div>
-        {isPending && !hideActions && <MemberActions m={m} />}
       </div>
     <div className="member-content">
       <div className="member-photo">
@@ -56,7 +54,7 @@ export default function MemberDetailsCard({ m, hideActions = false }) {
         />
       </div>
 
-      <div className={`member-info ${isPending && !hideActions ? "has-actions" : ""}`}>
+      <div className="member-info">
         <div className="member-name-row">
           <div className="member-name-details">
 
@@ -66,11 +64,6 @@ export default function MemberDetailsCard({ m, hideActions = false }) {
             {statusPill}
           </div>
           </div>
-          {isPending && !hideActions && (
-            <div className="member-card-actions">
-              <MemberActions m={m} />
-            </div>
-          )}
         </div>
      
         <p className="member-line">

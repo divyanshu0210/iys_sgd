@@ -498,7 +498,6 @@ export default function BasicProfile({ onComplete }) {
                   <MemberCard
                     key={request.id}
                     selectable
-                    hideActions
                     selected={selectedReviewRequests.includes(request.id)}
                     onSelect={() => toggleReviewSelection(request.id)}
                     m={{

@@ -35,8 +35,6 @@ export default function Members() {
     switch (activeTab) {
       case "all":
         return [
-          data.mentor_profile,
-          ...data.approved_mentees,
           ...data.pending_requests.map((r) => ({
             ...r.from_user,
             is_pending: true,
@@ -44,6 +42,8 @@ export default function Members() {
             request_created_at: r.created_at,
             bace: r.bace,
           })),
+          data.mentor_profile,
+          ...data.approved_mentees,
         ];
       case "devotee":
         return [data.mentor_profile, ...data.approved_mentees];
@@ -61,7 +61,7 @@ export default function Members() {
   };
 
   const members = getMembersForTab();
-  const isRequestTab = activeTab === "guest";
+  const canBulkManageRequests = activeTab === "all" || activeTab === "guest";
   const {
     selectedIds: selectedRequestIds,
     allSelected: allRequestsSelected,
@@ -102,14 +102,14 @@ export default function Members() {
           </nav>
         </div>
 
-        <div className={`profile-content ${selectedRequestIds.length ? "has-fixed-bulk-actions" : ""}`}>
+        <div className="profile-content">
           <h3 style={{ marginBottom: 10 }}>
             {activeTab === "all" && "All Members"}
             {activeTab === "devotee" && "Devotees List"}
             {activeTab === "guest" && "Pending Requests"}
           </h3>
 
-          <div className="members-list" style={{ position: "relative" }}>
+          <div className="members-list has-fixed-bulk-actions" style={{ position: "relative" }}>
             {loading && <FullPageLoader small />}
 
             {!loading && members.length === 0 && <p>No members found.</p>}
@@ -119,10 +119,9 @@ export default function Members() {
               members.map((m) => (
                 <MemberCard
                   key={m.id || m.member_id}
-                  selectable={isRequestTab && m.is_pending}
+                  selectable={canBulkManageRequests && m.is_pending}
                   selected={selectedRequestIds.includes(m.request_id)}
                   onSelect={() => toggleRequestSelection(m.request_id)}
-                  hideActions={isRequestTab && m.is_pending}
                   m={{
                     ...m,
                     is_self:
@@ -135,7 +134,7 @@ export default function Members() {
               ))}
           </div>
 
-          {isRequestTab && (
+          {canBulkManageRequests && (
             <MentorRequestBulkBar
               selectedCount={selectedRequestIds.length}
               allSelected={allRequestsSelected}

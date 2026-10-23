@@ -1,8 +1,7 @@
 import MemberDetailsCard from "./MemberDetailsCard";
-import MemberActions from "./MemberActions";
 import "../css/memberCards.css";
 
-export default function MemberCard({ m, selectable = false, selected = false, onSelect, hideActions = false }) {
+export default function MemberCard({ m, selectable = false, selected = false, onSelect }) {
   return (
     <div className={`member-card ${selectable ? "has-selection" : ""}`}>
       {selectable && (
@@ -15,7 +14,7 @@ export default function MemberCard({ m, selectable = false, selected = false, on
           aria-label={`Select ${m.full_name || "profile"}`}
         />
       )}
-      <MemberDetailsCard m={m} hideActions={hideActions} />
+      <MemberDetailsCard m={m} />
     </div>
   );
 }

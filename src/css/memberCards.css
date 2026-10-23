@@ -61,7 +61,6 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.member-info.has-actions { padding-right: 132px; }
 .member-info p { margin: 2px 12px 2px 0; }
 .member-info > .member-line { display: inline-block; vertical-align: top; }
 
@@ -96,61 +95,6 @@
   flex-wrap: nowrap;
 }
 
-.member-name-row .member-actions { align-self: center; margin-left: auto; }
-
-.member-card-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.pending-label { color: #f39c12; font-size: 0.85rem; }
-
-.member-actions {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.action-menu-btn {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #555;
-  padding: 6px 20px;
-}
-
-.action-dropdown {
-  position: absolute;
-  right: 0;
-  top: 24px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  min-width: 180px;
-  z-index: 10;
-}
-
-.action-item {
-  padding: 8px 12px;
-  text-align: left;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 0.95rem;
-  color: black;
-}
-
-.action-item:hover { background-color: #f5f5f5; }
-.action-item.reject { color: #e74c3c; }
-
 @media (max-width: 768px) {
   .member-card { padding: 6px 8px; }
   .member-content { flex-direction: row; align-items: center; gap: 8px; width: 100%; }
@@ -167,14 +111,11 @@
   .member-card.has-selection .member-content { padding-left: 0; }
   .member-mobile-name { display: flex; align-items: center; gap: 6px; min-width: 0; }
   .member-mobile-name .name-line { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .member-mobile-name-row > .member-actions { flex-shrink: 0; }
   .member-photo img { width: 60px; height: 60px; display: block; }
   .member-photo { flex: 0 0 60px; display: block; }
   .member-line { font-size: 10px; }
   .name-line { font-size: 12px; }
   .member-name-row { display: none; }
   .member-name-details { flex: 1; min-width: 0; }
-  .member-card-actions { display: none; }
   .member-info { margin: 0; padding: 4px 6px; background-color: #fff; }
-  .member-info.has-actions { padding-right: 6px; }
 }
