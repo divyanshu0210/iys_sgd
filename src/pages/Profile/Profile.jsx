@@ -9,6 +9,8 @@ import { Check, X, Pencil, Camera } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import useBaces from "../../hooks/useBaces";
 import ProfileStatusBanner from "../../components/ProfileStatusBanner";
+import useProfileForm, { MAX_PROFILE_PHOTO_SIZE } from "./useProfileForm";
+import BasicProfile from "./BasicProfile";
 
 // Normalise any date value to YYYY-MM-DD for <input type="date">
 const toDateInput = (val) => {
@@ -117,33 +119,68 @@ function Row({ label, value, field, type = "text", options, editable = true }) {
 
 // ── Main component ───────────────────────────────────────────────
 export default function Profile() {
+  const [initialProfile, setInitialProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    API.get("/api/profile/")
+      .then((res) => {
+        if (!cancelled) setInitialProfile(res.data);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) return <FullPageLoader />;
+  if (
+    !initialProfile ||
+    !["pending", "verified", "rejected"].includes(
+      initialProfile.profile_verification_status
+    )
+  ) {
+    return (
+      <BasicProfile
+        showYatraNotice={false}
+        onComplete={async () => {
+          const response = await API.get("/api/profile/");
+          setInitialProfile(response.data);
+        }}
+      />
+    );
+  }
+
+  return <ProfileDisplay initialProfile={initialProfile} />;
+}
+
+function ProfileDisplay({ initialProfile }) {
   const { fetchProfile: refreshAuthProfile } = useAuth();
   const { baces } = useBaces();
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(initialProfile);
   const [activeTab, setActiveTab] = useState("basic");
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({});
-  const [saving, setSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState(null);
-  const [photoFile, setPhotoFile] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null);
   const photoInputRef = useRef(null);
+  const {
+    photoFile,
+    photoPreview,
+    status: saveStatus,
+    setStatus: setSaveStatus,
+    saving,
+    setSaving,
+    handlePhotoChange,
+    resetFormState,
+  } = useProfileForm({ existingPhotoUrl: profile?.profile_picture_url });
   const centerOptions = (baces || []).map(({ name }) => ({ value: name, label: name }));
   const canEditCenter = !["pending", "verified"].includes(profile?.profile_verification_status);
   const isOtherCenter = Boolean(
     profile?.center && !(baces || []).some((bace) => bace.name === profile.center)
   );
-
-  useEffect(() => {
-    API.get("/api/profile/").then((res) => setProfile(res.data));
-  }, []);
-
-  useEffect(() => {
-    if (!photoFile) return setPhotoPreview(null);
-    const url = URL.createObjectURL(photoFile);
-    setPhotoPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [photoFile]);
 
   const set = (key, value) => setEditData((p) => ({ ...p, [key]: value }));
 
@@ -181,8 +218,7 @@ export default function Profile() {
   const cancelEditing = () => {
     setIsEditing(false);
     setEditData({});
-    setPhotoFile(null);
-    setSaveStatus(null);
+    resetFormState(photoInputRef);
   };
 
   const DATE_FIELDS = ["dob", "initiation_date", "iskcon_introduction_date"];
@@ -190,6 +226,25 @@ export default function Profile() {
   const handleSave = async () => {
     setSaving(true);
     setSaveStatus(null);
+
+    if (
+      profile.profile_verification_status !== "verified" &&
+      !profile.profile_picture_url &&
+      !photoFile
+    ) {
+      setSaveStatus({
+        type: "error",
+        msg: "A profile photo is required before submitting your profile.",
+      });
+      setSaving(false);
+      return;
+    }
+
+    if (photoFile && photoFile.size > MAX_PROFILE_PHOTO_SIZE) {
+      setSaveStatus({ type: "error", msg: "Photo must be 1 MB or smaller." });
+      setSaving(false);
+      return;
+    }
 
     // If marking as initiated, the 4 devotional fields are required
     const initiated = editData.is_initiated ?? profile.is_initiated;
@@ -221,14 +276,16 @@ export default function Profile() {
     }
 
     try {
-      if (Object.keys(changes).length > 0) {
-        await API.post("/api/profile/", changes);
-      }
       if (photoFile) {
-        const fd = new FormData();
-        fd.append("profile_picture", photoFile);
-        await API.post("/api/profile/upload-picture/", fd);
-        setPhotoFile(null);
+        const formData = new FormData();
+        Object.entries(changes).forEach(([key, value]) => {
+          formData.append(key, String(value));
+        });
+        formData.append("profile_picture", photoFile);
+        await API.post("/api/profile/", formData);
+        resetFormState(photoInputRef);
+      } else if (Object.keys(changes).length > 0) {
+        await API.post("/api/profile/", changes);
       }
       const res = await API.get("/api/profile/");
       setProfile(res.data);
@@ -288,7 +345,7 @@ export default function Profile() {
                     }}><Camera size={14} /></button>
                   <input ref={photoInputRef} type="file" accept="image/*"
                     style={{ display: "none" }}
-                    onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} />
+                    onChange={handlePhotoChange} />
                 </>
               )}
             </div>

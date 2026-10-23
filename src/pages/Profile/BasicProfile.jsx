@@ -4,13 +4,12 @@ import "../../css/profile.css";
 import "../../css/bulkActions.css";
 import API from "../../services/api";
 import { SPIRITUAL_MASTERS, GENDER_OPTIONS, MARITAL_OPTIONS, validateInitiationFields } from "./data";
+import useProfileForm, { MAX_PROFILE_PHOTO_SIZE } from "./useProfileForm";
 import useBaces from "../../hooks/useBaces";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
 import MemberCard from "../../components/MemberCard";
 import MentorRequestBulkBar from "../../components/MentorRequestBulkBar";
 import useMentorRequestBulkActions from "../../hooks/useMentorRequestBulkActions";
-
-const MAX_PHOTO_SIZE = 1 * 1024 * 1024; // 1MB
 
 const resolveProfileImageUrl = (value) => {
   if (!value || typeof value !== "string") return "";
@@ -20,7 +19,11 @@ const resolveProfileImageUrl = (value) => {
 };
 
 // ---------------------------------------------------------------
-export default function BasicProfile({ onComplete, requestCenterFilter = "all" }) {
+export default function BasicProfile({
+  onComplete,
+  requestCenterFilter = "all",
+  showYatraNotice = true,
+}) {
   const { user, profile, fetchProfile } = useAuth();
   const photoInputRef = useRef(null);
   const statusRef = useRef(null);
@@ -35,7 +38,6 @@ export default function BasicProfile({ onComplete, requestCenterFilter = "all" }
     center: "",
     customCenter: "", // ✅ NEW
     aadhaarNumber: "",
-    photo: null,
     receiveEmails: false,
     roundsChanting: "", // ✅ NEW
 
@@ -48,11 +50,19 @@ export default function BasicProfile({ onComplete, requestCenterFilter = "all" }
   });
 
 
-  const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-  const [status, setStatus] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null);
   const [existingPhotoUrl, setExistingPhotoUrl] = useState("");
+  const {
+    photoFile,
+    photoPreview,
+    errors,
+    setErrors,
+    status,
+    setStatus,
+    saving: submitting,
+    setSaving: setSubmitting,
+    handlePhotoChange,
+    removePhoto,
+  } = useProfileForm({ existingPhotoUrl });
   const { baces, baceNames } = useBaces();
   const [verificationStatus, setVerificationStatus] = useState("");
   const [reviewRequests, setReviewRequests] = useState([]);
@@ -152,7 +162,7 @@ export default function BasicProfile({ onComplete, requestCenterFilter = "all" }
         }));
         setExistingPhotoUrl(existingPhoto);
         setVerificationStatus(data.profile_verification_status || "");
-        const complete = Boolean(
+        const complete = data.profile_verification_status !== "incomplete" && Boolean(
           data.first_name &&
           data.last_name &&
           data.dob &&
@@ -182,37 +192,12 @@ export default function BasicProfile({ onComplete, requestCenterFilter = "all" }
   }, [baceNames, baces]);
 
   // -----------------------------------------------------------------
-  // Photo preview
-  useEffect(() => {
-    if (!details.photo) return setPhotoPreview(existingPhotoUrl || null);
-    const url = URL.createObjectURL(details.photo);
-    setPhotoPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [details.photo, existingPhotoUrl]);
-
-  // -----------------------------------------------------------------
   const onChange = (key, value) => {
     setDetails((s) => ({ ...s, [key]: value }));
     setErrors((e) => ({ ...e, [key]: "" }));
   };
 
   // -----------------------------------------------------------------
-  const handlePhotoChange = (e) => {
-    const file = e.target.files?.[0] ?? null;
-    if (file && file.size > MAX_PHOTO_SIZE) {
-      setErrors((e) => ({ ...e, photo: "File size must be less than 1 MB" }));
-      onChange("photo", null);
-      if (photoInputRef.current) photoInputRef.current.value = "";
-      return;
-    }
-    onChange("photo", file);
-  };
-
-  const removePhoto = () => {
-    onChange("photo", null);
-    if (photoInputRef.current) photoInputRef.current.value = "";
-  };
-
   // -----------------------------------------------------------------
   const validate = () => {
     const newErrors = {};
@@ -261,8 +246,8 @@ export default function BasicProfile({ onComplete, requestCenterFilter = "all" }
     }
 
     // Photo
-    if (!details.photo && !existingPhotoUrl) newErrors.photo = "Photo is required (max 1 MB)";
-    else if (details.photo && details.photo.size > MAX_PHOTO_SIZE)
+    if (!photoFile && !existingPhotoUrl) newErrors.photo = "Photo is required (max 1 MB)";
+    else if (photoFile && photoFile.size > MAX_PROFILE_PHOTO_SIZE)
       newErrors.photo = "Photo exceeds 1 MB size limit";
 
     // Email consent
@@ -311,51 +296,40 @@ export default function BasicProfile({ onComplete, requestCenterFilter = "all" }
 
     try {
       // ---------- 1. Textual profile ----------
-      const profileData = {
-        username: user?.username || "",
-        first_name: details.firstName,
-        last_name: details.lastName,
-        dob: details.dob,
-        gender: details.gender?.toLowerCase() || "",
-        marital_status: details.maritalStatus,
-        mobile: details.mobile,
-        aadhar_card_no: details.aadhaarNumber,
-        center:
-          details.center === "Others"
-            ? details.customCenter.trim()
-            : details.center,
-        email_consent: details.receiveEmails,
-        is_initiated: details.harinamInitiated === "Yes",
-        no_of_chanting_rounds: Number(details.roundsChanting),
-      };
+      const profileData = new FormData();
+      profileData.append("username", user?.username || "");
+      profileData.append("first_name", details.firstName);
+      profileData.append("last_name", details.lastName);
+      profileData.append("dob", details.dob);
+      profileData.append("gender", details.gender?.toLowerCase() || "");
+      profileData.append("marital_status", details.maritalStatus);
+      profileData.append("mobile", details.mobile);
+      profileData.append("aadhar_card_no", details.aadhaarNumber);
+      profileData.append(
+        "center",
+        details.center === "Others" ? details.customCenter.trim() : details.center
+      );
+      profileData.append("email_consent", String(details.receiveEmails));
+      profileData.append("is_initiated", String(details.harinamInitiated === "Yes"));
+      profileData.append("no_of_chanting_rounds", String(Number(details.roundsChanting)));
 
       // ✅ Include devotional fields only if harinamInitiated is "Yes"
       if (details.harinamInitiated === "Yes") {
-        profileData.initiated_name = details.initiatedName;
-        profileData.spiritual_master = details.spiritualMaster;
-        profileData.initiation_date = details.initiationDate;
-        profileData.initiation_place = details.initiationPlace;
+        profileData.append("initiated_name", details.initiatedName);
+        profileData.append("spiritual_master", details.spiritualMaster);
+        profileData.append("initiation_date", details.initiationDate);
+        profileData.append("initiation_place", details.initiationPlace);
+      }
+
+      if (photoFile) {
+        profileData.append("profile_picture", photoFile);
       }
 
       await API.post("/api/profile/", profileData, {
         headers: {
-          "Content-Type": "application/json",
           ...(token && { Authorization: `Token ${token}` }),
         },
       });
-
-      // ---------- 2. Photo (unchanged) ----------
-      if (details.photo) {
-        const formData = new FormData();
-        formData.append("profile_picture", details.photo);
-
-        await API.post("/api/profile/upload-picture/", formData, {
-          headers: {
-            ...(token && { Authorization: `Token ${token}` }),
-            "Content-Type": "multipart/form-data",
-          },
-        });
-      }
 
       // ---------- SUCCESS ----------
       await fetchProfile();
@@ -411,7 +385,6 @@ export default function BasicProfile({ onComplete, requestCenterFilter = "all" }
       center: "",
       customCenter: "",
       aadhaarNumber: "",
-      photo: null,
       receiveEmails: false,
       harinamInitiated: "",
       initiatedName: "",
@@ -446,14 +419,14 @@ export default function BasicProfile({ onComplete, requestCenterFilter = "all" }
 
   const profileSummary = (
     <div className={isReviewer ? "profile-summary-card" : "cp-card profile-summary-card"}>
-      {!isReviewer && (
+      {!isReviewer && showYatraNotice && (
         <p className="step-purpose-notice">Profile needs to be verified before Approval for Yatra can be checked.</p>
       )}
-          {verificationStatus === "rejected" && (
-            <div className="status-box error" style={{ marginBottom: "1rem" }}>
-              Your profile was rejected. Please check and submit your profile again.
-            </div>
-          )}
+      {verificationStatus === "rejected" && (
+        <div className="status-box error" style={{ marginBottom: "1rem" }}>
+          Your profile was rejected. Please check and submit your profile again.
+        </div>
+      )}
       <h2 className="cp-title">Your Profile</h2>
       <div className="members-list">
         <MemberCard m={ownMember} />
@@ -493,7 +466,9 @@ export default function BasicProfile({ onComplete, requestCenterFilter = "all" }
       <div className="cp-page">
         {isReviewer && (
           <section className="cp-card profile-requests-section has-fixed-bulk-actions" style={{ marginBottom: "1rem" }}>
-            <p className="step-purpose-notice">Profile needs to be verified before Approval for Yatra can be checked.</p>
+            {showYatraNotice && (
+              <p className="step-purpose-notice">Profile needs to be verified before Approval for Yatra can be checked.</p>
+            )}
             <div className="profile-requests-heading">
               <h3 style={{ margin: 0 }}>New Profile Requests</h3>
             </div>
@@ -538,7 +513,9 @@ export default function BasicProfile({ onComplete, requestCenterFilter = "all" }
         {(!isProfileComplete || editingProfile) ? (
         <>
         <form className="cp-card profile-form-card" onSubmit={handleSubmit} noValidate>
-        {!isReviewer && <p className="step-purpose-notice">Profile needs to be verified before Approval for Yatra can be checked.</p>}
+        {!isReviewer && showYatraNotice && (
+          <p className="step-purpose-notice">Profile needs to be verified before Approval for Yatra can be checked.</p>
+        )}
           <div className="profile-form-scroll">
           <h2 className="cp-title">Complete Your Profile To Continue</h2>
           {status && status.type === "error" && (
@@ -809,7 +786,7 @@ export default function BasicProfile({ onComplete, requestCenterFilter = "all" }
                     Choose File
                   </label>
 
-                  {details.photo && (
+                  {photoFile && (
                     <>
                       <span
                         style={{
@@ -821,11 +798,11 @@ export default function BasicProfile({ onComplete, requestCenterFilter = "all" }
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {details.photo.name}
+                        {photoFile.name}
                       </span>
                       <button
                         type="button"
-                        onClick={removePhoto}
+                        onClick={() => removePhoto(photoInputRef)}
                         disabled={submitting}
                         style={{
                           background: "none",
