@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import API from "../services/api";
-import Modal from "../components/Modal";
-import ProfileApprovalForm from "./Profile/ProfileVerificationStatus";
 import Footer from "../components/Footer";
 import EventsSection from "../components/EventsSection";
 import YatraCard from "../components/YatraCard";

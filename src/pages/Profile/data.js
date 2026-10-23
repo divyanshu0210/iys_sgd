@@ -27,22 +27,6 @@ export function validateInitiationFields(values) {
     .map(([, label]) => label);
 }
 
-// Spiritual Master & Initiation Place options (paste exactly)
-export const CENTER_OPTIONS = [
-  "Vrindavan Bace",
-  "Mayapur Bace",
-  "Giri Govardhan Bace",
-  "Shrivas Aangan Bace",
-  "Kalewadi Center",
-  "Dehu Center",
-  "Talegaon Center",
-  "CYF",
-  "Temple VTA",
-  "Temple Brahmachari",
-  "Others",
-];
-
-
 export const SPIRITUAL_MASTERS = [
   "H.H. Bhakti Tirtha Swāmi",
   "H.G. Bhurijana Prabhu",

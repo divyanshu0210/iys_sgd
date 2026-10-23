@@ -4,11 +4,11 @@ import "../../css/profiledisplay.css";
 import "../../css/profileTabs.css";
 import "../../css/registration.css";
 import FullPageLoader from "../../components/FullPageLoader";
-import { SPIRITUAL_MASTERS, CENTER_OPTIONS, GENDER_OPTIONS, MARITAL_OPTIONS, validateInitiationFields } from "./data";
+import { SPIRITUAL_MASTERS, GENDER_OPTIONS, MARITAL_OPTIONS, validateInitiationFields } from "./data";
 import { Check, X, Pencil, Camera } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-
-const CENTER_OPTS = CENTER_OPTIONS.map((c) => ({ value: c, label: c }));
+import useBaces from "../../hooks/useBaces";
+import ProfileStatusBanner from "../../components/ProfileStatusBanner";
 
 // Normalise any date value to YYYY-MM-DD for <input type="date">
 const toDateInput = (val) => {
@@ -118,6 +118,8 @@ function Row({ label, value, field, type = "text", options, editable = true }) {
 // ── Main component ───────────────────────────────────────────────
 export default function Profile() {
   const { fetchProfile: refreshAuthProfile } = useAuth();
+  const { baceNames } = useBaces();
+  const centerOptions = baceNames.map((name) => ({ value: name, label: name }));
   const [profile, setProfile] = useState(null);
   const [activeTab, setActiveTab] = useState("basic");
   const [isEditing, setIsEditing] = useState(false);
@@ -310,6 +312,7 @@ export default function Profile() {
 
         {/* ── Content ── */}
         <div className="profile-content">
+          <ProfileStatusBanner status={profile.profile_verification_status} />
           {activeTab === "basic" && (
             <div className="tab-content">
               <TabHeader title="Basic Information" />
@@ -320,7 +323,7 @@ export default function Profile() {
                 <Row label="Gender"          field="gender"           value={profile.gender} options={GENDER_OPTIONS} />
                 <Row label="Marital Status"  field="marital_status"   value={profile.marital_status} options={MARITAL_OPTIONS} />
                 <Row label="Mobile"          field="mobile"           value={profile.mobile} type="tel" />
-                <Row label="Center"          field="center"           value={profile.center} options={CENTER_OPTS} />
+                <Row label="Center"          field="center"           value={profile.center} options={centerOptions} />
                 <Row label="Aadhaar No"      field="aadhar_card_no"   value={profile.aadhar_card_no} />
                 <Row label="Rounds Chanting" field="no_of_chanting_rounds"
                   value={String(profile.no_of_chanting_rounds ?? profile.daily_chanting_rounds ?? 0)} type="number" />

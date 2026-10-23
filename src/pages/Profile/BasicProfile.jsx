@@ -3,7 +3,8 @@ import { useAuth } from "../../context/AuthContext";
 import "../../css/profile.css";
 import "../../css/bulkActions.css";
 import API from "../../services/api";
-import { CENTER_OPTIONS, SPIRITUAL_MASTERS, GENDER_OPTIONS, MARITAL_OPTIONS, validateInitiationFields } from "./data";
+import { SPIRITUAL_MASTERS, GENDER_OPTIONS, MARITAL_OPTIONS, validateInitiationFields } from "./data";
+import useBaces from "../../hooks/useBaces";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
 import MemberCard from "../../components/MemberCard";
 import MentorRequestBulkBar from "../../components/MentorRequestBulkBar";
@@ -52,7 +53,7 @@ export default function BasicProfile({ onComplete }) {
   const [status, setStatus] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [existingPhotoUrl, setExistingPhotoUrl] = useState("");
-  const [baces, setBaces] = useState([]);
+  const { baces, baceNames } = useBaces();
   const [verificationStatus, setVerificationStatus] = useState("");
   const [reviewRequests, setReviewRequests] = useState([]);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
@@ -80,12 +81,6 @@ export default function BasicProfile({ onComplete }) {
   }, [status]);
 
   useEffect(() => {
-    API.get("/api/baces/")
-      .then((res) => setBaces(Array.isArray(res.data) ? res.data : []))
-      .catch(() => setBaces([]));
-  }, []);
-
-  useEffect(() => {
     if (!isReviewer) return undefined;
     let cancelled = false;
     API.get("/api/mentor/requests/")
@@ -110,8 +105,7 @@ export default function BasicProfile({ onComplete }) {
 
         const data = res.data;
         const savedCenter = data.center || "";
-        const baceNames = baces.map((bace) => bace.name);
-        const isKnownCenter = baceNames.includes(savedCenter);
+        const isPrimaryBace = baces.some((bace) => bace.name === savedCenter);
         const existingPhoto = resolveProfileImageUrl(
           data.profile_picture_url || data.profile_picture || data.profile_image
         );
@@ -126,8 +120,11 @@ export default function BasicProfile({ onComplete }) {
             : "",
           mobile: data.mobile || "",
           maritalStatus: data.marital_status || "",
-          center: isKnownCenter ? savedCenter : savedCenter ? "Others" : "",
-          customCenter: "",
+          // The backend stores a custom “Others” center in `center`. Restore
+          // it as the Others selection and put the original text back in the
+          // custom field so it is visible and can be submitted unchanged.
+          center: isPrimaryBace ? savedCenter : savedCenter ? "Others" : "",
+          customCenter: !isPrimaryBace && savedCenter && savedCenter !== "Others" ? savedCenter : "",
           aadhaarNumber: data.aadhar_card_no || data.aadhaar_number || "",
           receiveEmails: Boolean(data.email_consent),
           roundsChanting:
@@ -172,7 +169,7 @@ export default function BasicProfile({ onComplete }) {
 
     loadExistingProfile();
     return () => { cancelled = true; };
-  }, [baces]);
+  }, [baceNames, baces]);
 
   // -----------------------------------------------------------------
   // Photo preview
@@ -353,7 +350,6 @@ export default function BasicProfile({ onComplete }) {
       // ---------- SUCCESS ----------
       await fetchProfile();
       setStatus({ type: "success", msg: "Profile saved successfully!" });
-      alert("Profile saved successfully!");
       setIsProfileComplete(true);
       setEditingProfile(false);
       onComplete?.();
@@ -366,11 +362,16 @@ export default function BasicProfile({ onComplete }) {
         // 1️⃣ Field-level DRF errors (most common)
         if (typeof data === "object" && !Array.isArray(data)) {
           errorMsg = Object.entries(data)
-            .map(([, messages]) =>
-              messages
-                .map((msg) => msg.charAt(0).toUpperCase() + msg.slice(1))
-                .join(" ")
-            )
+            .map(([field, messages]) => {
+              const values = Array.isArray(messages) ? messages : [messages];
+              const text = values
+                .map((msg) => {
+                  const message = typeof msg === "string" ? msg : JSON.stringify(msg);
+                  return message.charAt(0).toUpperCase() + message.slice(1);
+                })
+                .join(" ");
+              return field === "detail" ? text : `${field}: ${text}`;
+            })
             .join("\n");
         }
 
@@ -438,12 +439,12 @@ export default function BasicProfile({ onComplete }) {
       {!isReviewer && (
         <p className="step-purpose-notice">Profile needs to be verified before Approval for Yatra can be checked.</p>
       )}
+          {verificationStatus === "rejected" && (
+            <div className="status-box error" style={{ marginBottom: "1rem" }}>
+              Your profile was rejected. Please check and submit your profile again.
+            </div>
+          )}
       <h2 className="cp-title">Your Profile</h2>
-      {verificationStatus === "rejected" && (
-        <div className="status-box error" style={{ marginBottom: "1rem" }}>
-          Your profile was rejected. Please check and submit your profile again.
-        </div>
-      )}
       <div className="members-list">
         <MemberCard m={ownMember} />
       </div>
@@ -524,7 +525,9 @@ export default function BasicProfile({ onComplete }) {
         )}
 
         {(!isProfileComplete || editingProfile) ? (
+        <>
         <form className="cp-card profile-form-card" onSubmit={handleSubmit} noValidate>
+        {!isReviewer && <p className="step-purpose-notice">Profile needs to be verified before Approval for Yatra can be checked.</p>}
           <div className="profile-form-scroll">
           <h2 className="cp-title">Complete Your Profile To Continue</h2>
           {status && status.type === "error" && (
@@ -534,16 +537,6 @@ export default function BasicProfile({ onComplete }) {
               style={{ whiteSpace: "pre-line", marginBottom: "1rem" }}
             >
               {status.msg}
-            </div>
-          )}
-          {verificationStatus === "rejected" && (
-            <div className="status-box error" style={{ marginBottom: "1rem" }}>
-              Your profile was rejected. Please check and submit your profile again.
-            </div>
-          )}
-          {verificationStatus === "pending" && (
-            <div className="status-box info" style={{ marginBottom: "1rem" }}>
-              Your profile is pending verification by your selected Bace.
             </div>
           )}
           <div className="cp-grid">
@@ -616,7 +609,7 @@ export default function BasicProfile({ onComplete }) {
                 className={errors.center ? "error-border" : ""}
               >
                 <option value="">Select</option>
-                {[...new Set([...baces.map((bace) => bace.name), ...CENTER_OPTIONS])].map((c) => (
+                {baceNames.map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>
@@ -967,6 +960,7 @@ export default function BasicProfile({ onComplete }) {
             </button>
           </div>
         </form>
+        </>
         ) : (!isReviewer ? profileSummary : null)}
 
       </div>

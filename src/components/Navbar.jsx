@@ -10,7 +10,6 @@ export default function Navbar() {
     logout,
     isNavigationLocked,
     useFullWidth,
-    setOpenApprovalModal,
   } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -240,7 +239,8 @@ export default function Navbar() {
     </div>
   );
 
-  const hasNotif = user && (profileStage === "guest" || profileStage === "approval");
+  // Keep the notification affordance available for future notifications.
+  const hasNotif = Boolean(user);
 
   return (
     <nav
@@ -349,16 +349,6 @@ export default function Navbar() {
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                         <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                       </svg>
-                      <span style={{
-                        position: "absolute",
-                        top: 6,
-                        right: 6,
-                        width: 7,
-                        height: 7,
-                        background: "#ef4444",
-                        borderRadius: "50%",
-                        border: "1.5px solid #2c3e50",
-                      }} />
                     </button>
                     {notifOpen && (
                       <div style={{
@@ -374,24 +364,7 @@ export default function Navbar() {
                         padding: "14px 16px",
                       }}>
                         <div style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.5px" }}>Notifications</div>
-                        {profileStage === "guest" && (
-                          <div style={{ borderLeft: "3px solid #f97316", paddingLeft: 10 }}>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Profile Approval</div>
-                            <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5, marginBottom: 10 }}>Complete your Bace profile verification to unlock full access.</div>
-                            <button
-                              onClick={() => { setNotifOpen(false); setOpenApprovalModal(true); }}
-                              style={{ background: "#f97316", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontWeight: 600, fontSize: 12 }}
-                            >
-                              Profile Verification
-                            </button>
-                          </div>
-                        )}
-                        {profileStage === "approval" && (
-                          <div style={{ borderLeft: "3px solid #f59e0b", paddingLeft: 10 }}>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Pending Review</div>
-                            <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5 }}>Your profile is awaiting confirmation from your counsellor.</div>
-                          </div>
-                        )}
+                        <div style={{ fontSize: 12, color: "#6b7280" }}>No new notifications.</div>
                       </div>
                     )}
                   </div>
@@ -402,7 +375,7 @@ export default function Navbar() {
               <>
                 <NavLink to="/yatras">Yatras</NavLink>
                 <NavLink to="/resources">Resources</NavLink>
-                <NavLink to="/complete-profile">Complete Profile</NavLink>
+                        <NavLink to="/profile">Complete Profile</NavLink>
                 <ProfileAvatar />
               </>
             )
@@ -454,16 +427,6 @@ export default function Navbar() {
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                   </svg>
-                  <span style={{
-                    position: "absolute",
-                    top: 6,
-                    right: 6,
-                    width: 7,
-                    height: 7,
-                    background: "#ef4444",
-                    borderRadius: "50%",
-                    border: "1.5px solid #2c3e50",
-                  }} />
                 </button>
                 {notifOpen && (
                   <div style={{
@@ -480,24 +443,7 @@ export default function Navbar() {
                     padding: "14px 16px",
                   }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.5px" }}>Notifications</div>
-                    {profileStage === "guest" && (
-                      <div style={{ borderLeft: "3px solid #f97316", paddingLeft: 10 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Profile Approval</div>
-                        <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5, marginBottom: 10 }}>Get approved by your counsellor to unlock full access.</div>
-                        <button
-                          onClick={() => { setNotifOpen(false); setOpenApprovalModal(true); }}
-                          style={{ background: "#f97316", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontWeight: 600, fontSize: 12 }}
-                        >
-                          Profile Verification
-                        </button>
-                      </div>
-                    )}
-                    {profileStage === "approval" && (
-                      <div style={{ borderLeft: "3px solid #f59e0b", paddingLeft: 10 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 4 }}>Pending Review</div>
-                        <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.5 }}>Your profile is awaiting confirmation from your counsellor.</div>
-                      </div>
-                    )}
+                    <div style={{ fontSize: 12, color: "#6b7280" }}>No new notifications.</div>
                   </div>
                 )}
               </div>
@@ -571,7 +517,7 @@ export default function Navbar() {
               <>
                 <NavLink to="/yatras">Yatras</NavLink>
                 <NavLink to="/resources">Resources</NavLink>
-                <NavLink to="/complete-profile">Complete Profile</NavLink>
+                <NavLink to="/profile">Complete Profile</NavLink>
               </>
             )}
             <button onClick={handleLogout} className="logout-btn">

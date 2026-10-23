@@ -1,6 +1,7 @@
 import "../css/memberCards.css";
 import MemberActions from "./MemberActions";
 import { useAuth } from "../context/AuthContext";
+import { PROFILE_STATUS } from "./profileStatus";
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
   const date = new Date(dateStr);
@@ -16,12 +17,7 @@ export default function MemberDetailsCard({ m, hideActions = false }) {
   const canShowSelfBadge = ["mentor", "counsellor"].includes(currentProfile?.user_type);
   const isPending = m.is_pending;
   const verificationStatus = m.profile_verification_status || (isPending ? "pending" : "");
-  const statusMeta = {
-    verified: { label: "Verified", background: "#dcfce7", color: "#166534" },
-    pending: { label: "Pending", background: "#fef3c7", color: "#92400e" },
-    rejected: { label: "Rejected", background: "#fee2e2", color: "#991b1b" },
-    incomplete: { label: "Incomplete", background: "#e5e7eb", color: "#374151" },
-  }[verificationStatus];
+  const statusMeta = PROFILE_STATUS[verificationStatus];
   const displayName = m.is_initiated ? m.initiated_name : m.full_name || "Unnamed";
 
   const statusPill = statusMeta && (

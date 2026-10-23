@@ -11,7 +11,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [useFullWidth, setUseFullWidth] = useState(false);
   const [isNavigationLocked, setIsNavigationLocked] = useState(false);
-  const [openApprovalModal, setOpenApprovalModal] = useState(false);
 
   const determineProfileStage = (data) => {
     if (data.user_type === "mentor") return "mentor";
@@ -130,8 +129,6 @@ export function AuthProvider({ children }) {
         setIsNavigationLocked,
         useFullWidth,
         setUseFullWidth,
-        openApprovalModal,
-        setOpenApprovalModal,
       }}
     >
       {children}

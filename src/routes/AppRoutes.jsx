@@ -5,7 +5,6 @@ import PublicOnlyRoute from "./PublicOnlyRoute";
 import SignIn from "../pages/Auth/SignIn";
 import SignUp from "../pages/Auth/SignUp";
 import ProtectedRoute from "./ProtectedRoute";
-import BasicProfile from "../pages/Profile/BasicProfile";
 import YatraList from "../pages/YatraList";
 import YatraRegistrationLayout from "../pages/Registration/context/YatraRegistrationLayout";
 import YatraRegister from "../pages/Registration/YatraRegister";
@@ -53,8 +52,6 @@ export default function AppRoutes() {
       {/* Protected */}
       <Route element={<ProtectedRoute />}>
         <Route element={<PendingPaymentGuard />}>
-          <Route path="/complete-profile" element={<BasicProfile />} />
-
           <Route element={<YatraRegistrationLayout />}>
             <Route
               path="/yatra/:yatra_id/register"
