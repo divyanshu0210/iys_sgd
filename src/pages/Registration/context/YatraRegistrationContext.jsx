@@ -100,29 +100,61 @@ export const YatraRegistrationProvider = ({ children }) => {
     return reg && reg.installments_paid?.length > 0;
   };
 
-  const handleEligibility = async (profileId, action) => {
+  const handleEligibility = async (
+    profileId,
+    action,
+    { suppressAlert = false } = {}
+  ) => {
     const profileIds = Array.isArray(profileId) ? profileId : [profileId];
     const key = `${profileIds.join(",")}-${action}`;
     setLoading((prev) => ({ ...prev, [key]: true }));
-    try {
-      if (action === "unapprove" && profileIds.some((id) => registrations[id])) {
-        alert(
-          "Cannot unapprove — this profile has already started registration or registered."
-        );
-        return;
-      }
-      await API.post(`/yatras/${yatra_id}/eligibility/`, {
-        profile_ids: profileIds,
-        action,
-      });
-      const [res1, res2] = await Promise.all([
+
+    const refreshEligibilityData = async () => {
+      const [eligibilityResponse, registrationResponse] = await Promise.all([
         API.get(`/yatras/${yatra_id}/eligibility/`),
         API.get(`/yatras/${yatra_id}/register/`),
       ]);
-      setEligibilityData(res1.data);
-      setRegisterData(res2.data);
+      setEligibilityData(eligibilityResponse.data);
+      setRegisterData(registrationResponse.data);
+    };
+
+    const getErrors = (error) =>
+      error?.response?.data?.errors || [error?.message || `Failed to ${action}`];
+    try {
+      if (action === "unapprove" && profileIds.some((id) => registrations[id])) {
+        if (!suppressAlert) alert(
+          "Cannot unapprove — this profile has already started registration or registered."
+        );
+        return {
+          updated: [],
+          errors: ["Registration has already started for this devotee."],
+        };
+      }
+      const response = await API.post(`/yatras/${yatra_id}/eligibility/`, {
+        profile_ids: profileIds,
+        action,
+      });
+      await refreshEligibilityData();
+      const result = response.data || { updated: [], errors: [] };
+      if (!suppressAlert && result.errors?.length) {
+        alert(result.errors.join("\n"));
+      }
+      return result;
     } catch (err) {
-      alert(err.response?.data?.errors?.[0] || `Failed to ${action}`);
+      const result = {
+        ...(err.response?.data || {}),
+        updated: err.response?.data?.updated || [],
+        errors: getErrors(err),
+      };
+
+      try {
+        await refreshEligibilityData();
+      } catch (refreshError) {
+        console.error("Failed to refresh eligibility data", refreshError);
+      }
+
+      if (!suppressAlert) alert(result.errors.join("\n"));
+      return result;
     } finally {
       setLoading((prev) => ({ ...prev, [key]: false }));
     }

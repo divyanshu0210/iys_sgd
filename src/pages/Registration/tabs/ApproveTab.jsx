@@ -6,7 +6,7 @@ import FullPageLoader from "../../../components/FullPageLoader";
 import "../../../css/bulkActions.css";
 import "../../../css/profile.css";
 
-const ApproveTab = () => {
+const ApproveTab = ({ onActionResult }) => {
   const { eligibilityData, loading, initialLoading, applyFilters, handleEligibility } = useYatraRegistration();
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkLoading, setBulkLoading] = useState(false);
@@ -20,19 +20,40 @@ const ApproveTab = () => {
     window.requestAnimationFrame(() => window.scrollTo(0, scrollY));
   };
   const handleBulk = async (action) => {
-    const eligibleIds = approveList
-      .filter((profile) => selectedIds.includes(profile.id || profile.profile_id))
-      .filter((profile) => action === "approve" ? !profile.is_approved : profile.is_approved)
-      .map((profile) => profile.id || profile.profile_id);
+    const selectedProfiles = approveList.filter((profile) =>
+      selectedIds.includes(profile.id || profile.profile_id)
+    );
+    const actionableProfiles = selectedProfiles.filter((profile) =>
+      action === "approve" ? !profile.is_approved : profile.is_approved
+    );
+    const skippedProfiles = selectedProfiles.filter(
+      (profile) => !actionableProfiles.includes(profile)
+    );
+    const eligibleIds = actionableProfiles.map(
+      (profile) => profile.id || profile.profile_id
+    );
 
     if (!eligibleIds.length) {
+      onActionResult({
+        action,
+        updated: [],
+        errors: [],
+        skippedCount: skippedProfiles.length,
+      });
       setSelectedIds([]);
       return;
     }
 
     setBulkLoading(true);
     try {
-      await handleEligibility(eligibleIds, action);
+      const result = await handleEligibility(eligibleIds, action, {
+        suppressAlert: true,
+      });
+      onActionResult({
+        action,
+        ...result,
+        skippedCount: skippedProfiles.length,
+      });
       setSelectedIds([]);
     } finally {
       setBulkLoading(false);
@@ -89,6 +110,7 @@ const ApproveTab = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

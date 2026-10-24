@@ -15,6 +15,28 @@ import BasicProfile from "../Profile/BasicProfile";
 import API from "../../services/api";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
 
+function getBulkActionSummary(actionResult) {
+  const uniqueUpdated = new Set(
+    (actionResult.updated || []).map((item) => item.profile_id)
+  );
+  const registrationFailures = (actionResult.errors || []).filter((error) =>
+    /already registered|registration has (already )?started/i.test(error)
+  ).length;
+  const otherFailures = (actionResult.errors || []).length - registrationFailures;
+  const updatedLabel = actionResult.action === "approve" ? "approved" : "unapproved";
+  const skippedLabel =
+    actionResult.action === "approve" ? "already approved" : "already unapproved";
+
+  return [
+    uniqueUpdated.size && `${uniqueUpdated.size} ${updatedLabel}`,
+    actionResult.skippedCount && `${actionResult.skippedCount} ${skippedLabel}`,
+    registrationFailures && `${registrationFailures} failed (registration started)`,
+    otherFailures && `${otherFailures} failed`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 // ── Step status helpers ──────────────────────────────────────────
 function useStepStatus(profileStepActive, profilePendingCount, ownProfileNeedsCompletion) {
   const { eligibilityData, registerData } = useYatraRegistration();
@@ -134,6 +156,7 @@ export default function YatraRegister() {
     fetchRegistrationData, fetchEligibilityData, setInitialLoading,
     registerData, eligibilityData, setActiveTab,
     statusFilter,
+    loading: actionLoading,
   } = useYatraRegistration();
 
   const { profile, profileStage, loading: authLoading } = useAuth();
@@ -143,6 +166,7 @@ export default function YatraRegister() {
   const [initialTabResolved, setInitialTabResolved] = useState(false);
   const [pendingReviewCount, setPendingReviewCount] = useState(0);
   const [profileRequests, setProfileRequests] = useState([]);
+  const [actionResult, setActionResult] = useState(null);
 
   useEffect(() => {
     const isReviewer = profile?.user_type === "mentor" || profile?.user_type === "counsellor";
@@ -242,6 +266,9 @@ export default function YatraRegister() {
 
   const requiresApproval = eligibilityData.yatra?.requires_approval ?? true;
   const initialising = !initialTabResolved;
+  const activeActionKey = Object.keys(actionLoading).find(
+    (key) => actionLoading[key]
+  );
 
   const renderActiveTab = () => {
     switch (activeTab) {
@@ -254,9 +281,9 @@ export default function YatraRegister() {
           />
         );
       case "registered": return <RegisteredTab />;
-      case "approve":    return requiresApproval || isReviewer ? <ApproveTab /> : <NewRegistrationTab />;
+      case "approve":    return requiresApproval || isReviewer ? <ApproveTab onActionResult={setActionResult} /> : <NewRegistrationTab />;
       case "newReg":     return <NewRegistrationTab />;
-      default:           return requiresApproval ? <ApproveTab /> : <NewRegistrationTab />;
+      default:           return requiresApproval ? <ApproveTab onActionResult={setActionResult} /> : <NewRegistrationTab />;
     }
   };
 
@@ -285,6 +312,17 @@ export default function YatraRegister() {
       </div>
 
       <AlertModal show={showModal} message={modalMessage} onClose={() => setShowModal(false)} />
+      <AlertModal
+        show={Boolean(actionResult)}
+        message={actionResult ? getBulkActionSummary(actionResult) : ""}
+        title={
+          actionResult?.action === "approve"
+            ? "Bulk Approval Summary"
+            : "Bulk Unapproval Summary"
+        }
+        onClose={() => setActionResult(null)}
+      />
+      {activeActionKey && <FullPageLoader />}
     </div>
   );
 }

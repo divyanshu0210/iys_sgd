@@ -1,5 +1,3 @@
-import { useAuth } from "../context/AuthContext";
-
 // src/components/FullPageLoader.jsx
 export default function FullPageLoader() {
 
@@ -23,7 +21,8 @@ const styles = {
   justifyContent: "center",
   alignItems: "center",
   zIndex: 9999,
-  pointerEvents: "none",               // ⬅️ Allows click-through if you want
+  pointerEvents: "auto",
+  cursor: "wait",
 },
 
   dotsWrapper: {
