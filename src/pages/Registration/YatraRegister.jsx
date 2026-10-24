@@ -14,7 +14,6 @@ import YatraRegistrationStatusFilter from "./components/YatraRegistrationStatusF
 import BasicProfile from "../Profile/BasicProfile";
 import API from "../../services/api";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
-import { getRegistrationPolicyStatus } from "./registrationPolicy";
 
 function getBulkActionSummary(actionResult) {
   const uniqueUpdated = new Set(
@@ -202,20 +201,9 @@ export default function YatraRegister() {
   const ownProfileNeedsCompletion =
     profileStage === "not-exists" ||
     profile?.profile_verification_status !== "verified";
+  const profileStepActive = ownProfileNeedsCompletion || pendingReviewCount > 0;
   const isReviewer = profileStage === "mentor" || profileStage === "counsellor";
-  const registrationPolicy = registerData.yatra?.registration_policy || {};
-  const profilePolicyStatus = getRegistrationPolicyStatus(
-    registrationPolicy,
-    profile
-  );
-  const profileNeedsChantingRounds = Boolean(
-    !isReviewer && profile && profilePolicyStatus.blocked
-  );
-  const profileStepActive =
-    ownProfileNeedsCompletion ||
-    profileNeedsChantingRounds ||
-    pendingReviewCount > 0;
-  const lockOtherSteps = ownProfileNeedsCompletion || profileNeedsChantingRounds;
+  const lockOtherSteps = ownProfileNeedsCompletion;
 
   useEffect(() => {
     if (!yatra_id) return;
@@ -288,14 +276,9 @@ export default function YatraRegister() {
       case "profile":
         return (
           <BasicProfile
-            onComplete={() => {
-              if (profileNeedsChantingRounds) return;
-              setActiveTab(requiresApproval ? "approve" : "newReg");
-            }}
+            onComplete={() => setActiveTab(requiresApproval ? "approve" : "newReg")}
             requestCenterFilter={statusFilter}
             initialReviewRequests={profileRequests}
-            registrationPolicy={registrationPolicy}
-            yatraPolicyBlocked={profileNeedsChantingRounds}
           />
         );
       case "registered": return <RegisteredTab />;

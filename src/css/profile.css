@@ -150,16 +150,6 @@ textarea:focus {
   line-height: 1.35;
 }
 
-.yatra-policy-notice {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #b91c1c;
-}
-
-.yatra-policy-notice strong {
-  color: #991b1b;
-}
-
 .profile-form-actions {
   display: flex;
   align-items: center;

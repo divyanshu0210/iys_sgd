@@ -10,7 +10,6 @@ import FullPageLoader from "../../components/FullPageLoader.jsx";
 import MemberCard from "../../components/MemberCard";
 import MentorRequestBulkBar from "../../components/MentorRequestBulkBar";
 import useMentorRequestBulkActions from "../../hooks/useMentorRequestBulkActions";
-import { getRegistrationPolicyStatus } from "../Registration/registrationPolicy";
 
 const resolveProfileImageUrl = (value) => {
   if (!value || typeof value !== "string") return "";
@@ -25,8 +24,6 @@ export default function BasicProfile({
   requestCenterFilter = "all",
   showYatraNotice = true,
   initialReviewRequests,
-  registrationPolicy = {},
-  yatraPolicyBlocked = false,
 }) {
   const { user, profile, fetchProfile } = useAuth();
   const photoInputRef = useRef(null);
@@ -77,17 +74,8 @@ export default function BasicProfile({
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileResolved, setProfileResolved] = useState(false);
   const isReviewer = profile?.user_type === "mentor" || profile?.user_type === "counsellor";
-  const profilePolicyStatus = getRegistrationPolicyStatus(
-    registrationPolicy,
-    details
-  );
-  const policyRequiresEdit =
-    !isReviewer &&
-    (yatraPolicyBlocked || profilePolicyStatus.blocked);
   const isProfileEditable =
-    !isProfileComplete ||
-    ["rejected", "incomplete"].includes(verificationStatus) ||
-    policyRequiresEdit;
+    !isProfileComplete || ["rejected", "incomplete"].includes(verificationStatus);
   const filteredReviewRequests = useMemo(() => {
     if (requestCenterFilter === "all") return reviewRequests;
 
@@ -217,7 +205,7 @@ export default function BasicProfile({
 
     loadExistingProfile();
     return () => { cancelled = true; };
-  }, [baceNames, baces, profile, yatraPolicyBlocked]);
+  }, [baceNames, baces, profile]);
 
   // -----------------------------------------------------------------
   const onChange = (key, value) => {
@@ -363,14 +351,8 @@ export default function BasicProfile({
       await fetchProfile();
       setStatus({ type: "success", msg: "Profile saved successfully!" });
       setIsProfileComplete(true);
-      const stillBelowYatraMinimum =
-        !isReviewer &&
-        getRegistrationPolicyStatus(
-          registrationPolicy,
-          details
-        ).blocked;
       setEditingProfile(false);
-      if (!stillBelowYatraMinimum) onComplete?.();
+      onComplete?.();
     } catch (err) {
       let errorMsg = "An error occurred while saving the profile.";
 
@@ -451,27 +433,11 @@ export default function BasicProfile({
     initiated_name: details.initiatedName,
   };
 
-  const profileNotices = !isReviewer ? (
-    <>
-      {showYatraNotice && (
-        <p className="step-purpose-notice">
-          Profile needs to be verified before Approval for Yatra can be checked.
-        </p>
-      )}
-      {showYatraNotice && policyRequiresEdit && (
-        <p className="step-purpose-notice yatra-policy-notice">
-          This Yatra requires at least{" "}
-          <strong>{profilePolicyStatus.primaryRequirement?.requiredValue}</strong>{" "}
-          {profilePolicyStatus.primaryRequirement?.label}. You currently have{" "}
-          <strong>{profilePolicyStatus.primaryRequirement?.currentValue}</strong>. Update your profile and save to continue.
-        </p>
-      )}
-    </>
-  ) : null;
-
   const profileSummary = (
     <div className={isReviewer ? "profile-summary-card" : "cp-card profile-summary-card"}>
-      {profileNotices}
+      {!isReviewer && showYatraNotice && (
+        <p className="step-purpose-notice">Profile needs to be verified before Approval for Yatra can be checked.</p>
+      )}
       {verificationStatus === "rejected" && (
         <div className="status-box error" style={{ marginBottom: "1rem" }}>
           Your profile was rejected. Please check and submit your profile again.
@@ -563,7 +529,9 @@ export default function BasicProfile({
         {(!isProfileComplete || editingProfile) ? (
         <>
         <form className="cp-card profile-form-card" onSubmit={handleSubmit} noValidate>
-        {profileNotices}
+        {!isReviewer && showYatraNotice && (
+          <p className="step-purpose-notice">Profile needs to be verified before Approval for Yatra can be checked.</p>
+        )}
           <div className="profile-form-scroll">
           <h2 className="cp-title">Complete Your Profile To Continue</h2>
           {status && status.type === "error" && (
