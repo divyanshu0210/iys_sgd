@@ -128,6 +128,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
         amount: i.amount,
         order: i.order,
         start_date: i.start_date,
+        tag: i.tag,
         is_paid: i.is_paid,
         proof: i.payment?.proof || null,
         status: i.payment?.status || false,

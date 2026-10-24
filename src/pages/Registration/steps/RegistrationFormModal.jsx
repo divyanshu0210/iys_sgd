@@ -453,12 +453,24 @@ function RegistrationFormModal({ profile, onClose }) {
                     <label className="installment-label">
                       <input
                         type="checkbox"
+                        className={
+                          isMandatory ? "mandatory-installment-checkbox" : ""
+                        }
                         checked={isSelected || isPaid}
-                        onChange={() => handleInstallmentToggle(label)}
+                        onChange={(event) => {
+                          if (isMandatory) {
+                            event.preventDefault();
+                            return;
+                          }
+                          handleInstallmentToggle(label);
+                        }}
+                        onClick={(event) => {
+                          if (isMandatory) event.preventDefault();
+                        }}
+                        aria-disabled={isMandatory}
                         disabled={
                           isPaid ||
                           (hasProof && !isRejected) ||
-                          isMandatory ||
                           orderBlocked
                         }
                         title={

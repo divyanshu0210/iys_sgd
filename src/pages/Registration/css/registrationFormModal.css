@@ -178,6 +178,12 @@
   gap: 4px;
 }
 
+.mandatory-installment-checkbox {
+  opacity: 1;
+  accent-color: #2563eb;
+  cursor: not-allowed;
+}
+
 .installment-status {
   font-size: 0.8rem;
   margin-left: 8px;

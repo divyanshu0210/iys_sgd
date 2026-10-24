@@ -448,8 +448,9 @@ export default function Navbar() {
                 )}
               </div>
             )}
-            <div
-              className="mobile-only"
+            <button
+              type="button"
+              className="mobile-only mobile-nav-profile-control"
               onClick={(e) => {
                 if (isNavigationLocked) {
                   e.preventDefault();
@@ -460,12 +461,17 @@ export default function Navbar() {
                   setIsMenuOpen(true);
                 }
               }}
-              style={{ cursor: "pointer", padding: "0 6px" }}
+              aria-label="Open navigation and profile menu"
             >
-              <div className="bar"></div>
-              <div className="bar"></div>
-              <div className="bar"></div>
-            </div>
+              <span className="mobile-nav-icon" aria-hidden="true">
+                <span className="bar"></span>
+                <span className="bar"></span>
+                <span className="bar"></span>
+              </span>
+              <span className="mobile-nav-avatar">
+                <AvatarCircle size={30} fontSize={13} />
+              </span>
+            </button>
           </div>
         )}
       </div>
@@ -556,6 +562,39 @@ export default function Navbar() {
       margin: 4px 0;
     }
 
+    .mobile-nav-profile-control {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 3px 3px 3px 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 22px;
+      background: rgba(255,255,255,0.08);
+      cursor: pointer;
+      color: #fff;
+    }
+
+    .mobile-nav-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mobile-nav-icon .bar {
+      width: 18px;
+      height: 2px;
+      margin: 2px 0;
+    }
+
+    .mobile-nav-avatar {
+      display: block;
+      margin-left: -2px;
+      position: relative;
+      z-index: 1;
+    }
+
     .overlay {
       position: fixed;
       top: 0;
@@ -630,6 +669,10 @@ export default function Navbar() {
 
       .mobile-only {
         display: block;
+      }
+
+      .mobile-nav-profile-control {
+        display: flex;
       }
     }
 
