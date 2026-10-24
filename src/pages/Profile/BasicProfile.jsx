@@ -23,6 +23,7 @@ export default function BasicProfile({
   onComplete,
   requestCenterFilter = "all",
   showYatraNotice = true,
+  initialReviewRequests,
 }) {
   const { user, profile, fetchProfile } = useAuth();
   const photoInputRef = useRef(null);
@@ -65,7 +66,10 @@ export default function BasicProfile({
   } = useProfileForm({ existingPhotoUrl });
   const { baces, baceNames } = useBaces();
   const [verificationStatus, setVerificationStatus] = useState("");
-  const [reviewRequests, setReviewRequests] = useState([]);
+  const [reviewRequests, setReviewRequests] = useState(initialReviewRequests || []);
+  const [reviewRequestsResolved, setReviewRequestsResolved] = useState(
+    Array.isArray(initialReviewRequests)
+  );
   const [isProfileComplete, setIsProfileComplete] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileResolved, setProfileResolved] = useState(false);
@@ -101,17 +105,31 @@ export default function BasicProfile({
   }, [status]);
 
   useEffect(() => {
-    if (!isReviewer) return undefined;
+    if (Array.isArray(initialReviewRequests)) {
+      setReviewRequests(initialReviewRequests);
+      setReviewRequestsResolved(true);
+      return undefined;
+    }
+
+    if (!isReviewer) {
+      setReviewRequestsResolved(true);
+      return undefined;
+    }
+
     let cancelled = false;
+    setReviewRequestsResolved(false);
     API.get("/api/mentor/requests/")
       .then((res) => {
         if (!cancelled) setReviewRequests(res.data?.pending_requests || []);
       })
       .catch(() => {
         if (!cancelled) setReviewRequests([]);
+      })
+      .finally(() => {
+        if (!cancelled) setReviewRequestsResolved(true);
       });
     return () => { cancelled = true; };
-  }, [isReviewer]);
+  }, [initialReviewRequests, isReviewer]);
 
   // Load any profile data already saved for this account so completion can
   // be resumed without re-entering everything.
@@ -120,10 +138,8 @@ export default function BasicProfile({
 
     const loadExistingProfile = async () => {
       try {
-        const res = await API.get("/api/profile/");
-        if (cancelled || !res.data) return;
-
-        const data = res.data;
+        const data = profile || (await API.get("/api/profile/")).data;
+        if (cancelled || !data) return;
         const savedCenter = data.center || "";
         const isPrimaryBace = baces.some((bace) => bace.name === savedCenter);
         const existingPhoto = resolveProfileImageUrl(
@@ -189,7 +205,7 @@ export default function BasicProfile({
 
     loadExistingProfile();
     return () => { cancelled = true; };
-  }, [baceNames, baces]);
+  }, [baceNames, baces, profile]);
 
   // -----------------------------------------------------------------
   const onChange = (key, value) => {
@@ -460,7 +476,7 @@ export default function BasicProfile({
 
   // -----------------------------------------------------------------
   return (
-    !profileResolved ? <FullPageLoader /> :
+    !profileResolved || (isReviewer && !reviewRequestsResolved) ? <FullPageLoader /> :
     <>
       {submitting && <FullPageLoader />}
       <div className="cp-page">

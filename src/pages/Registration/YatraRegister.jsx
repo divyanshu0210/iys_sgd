@@ -13,6 +13,7 @@ import ProfileSearchBar from "./components/ProfileSearchBar";
 import YatraRegistrationStatusFilter from "./components/YatraRegistrationStatusFilter";
 import BasicProfile from "../Profile/BasicProfile";
 import API from "../../services/api";
+import FullPageLoader from "../../components/FullPageLoader.jsx";
 
 // ── Step status helpers ──────────────────────────────────────────
 function useStepStatus(profileStepActive, profilePendingCount, ownProfileNeedsCompletion) {
@@ -58,7 +59,7 @@ function useStepStatus(profileStepActive, profilePendingCount, ownProfileNeedsCo
 }
 
 // ── Stepper component ────────────────────────────────────────────
-function RegistrationStepper({ profileStepActive, profilePendingCount, ownProfileNeedsCompletion, lockOtherSteps }) {
+function RegistrationStepper({ profileStepActive, profilePendingCount, ownProfileNeedsCompletion, lockOtherSteps, initializing }) {
   const { activeTab, setActiveTab } = useYatraRegistration();
   const { steps } = useStepStatus(profileStepActive, profilePendingCount, ownProfileNeedsCompletion);
 
@@ -66,18 +67,18 @@ function RegistrationStepper({ profileStepActive, profilePendingCount, ownProfil
     width: 34, height: 34, borderRadius: "50%",
     display: "flex", alignItems: "center", justifyContent: "center",
     fontWeight: 700, fontSize: 14, flexShrink: 0,
-    background: activeTab === step.id ? "#0ea5e9"
+    background: initializing ? "#e2e8f0" : activeTab === step.id ? "#0ea5e9"
               : step.status === "completed" ? "#10b981"
               : "#e2e8f0",
-    color: activeTab === step.id || step.status === "completed" ? "#fff" : "#94a3b8",
-    boxShadow: activeTab === step.id ? "0 0 0 3px rgba(14,165,233,0.2)" : "none",
+    color: !initializing && (activeTab === step.id || step.status === "completed") ? "#fff" : "#94a3b8",
+    boxShadow: !initializing && activeTab === step.id ? "0 0 0 3px rgba(14,165,233,0.2)" : "none",
     transition: "all 0.2s",
   });
 
   const connectorStyle = (step) => ({
     flex: 1, height: 2, margin: "0 6px",
     marginBottom: 20,
-    background: step.status === "completed" ? "#10b981" : "#e2e8f0",
+    background: !initializing && step.status === "completed" ? "#10b981" : "#e2e8f0",
     transition: "background 0.3s",
   });
 
@@ -93,6 +94,7 @@ function RegistrationStepper({ profileStepActive, profilePendingCount, ownProfil
           {/* Step node */}
           <div
             onClick={() => {
+              if (initializing) return;
               if (step.id !== "profile" && step.status === "pending") return;
               if (step.id !== "profile" && lockOtherSteps) return;
               setActiveTab(step.id);
@@ -102,16 +104,16 @@ function RegistrationStepper({ profileStepActive, profilePendingCount, ownProfil
               opacity: step.status === "pending" || (step.id !== "profile" && lockOtherSteps) ? 0.5 : 1 }}
           >
             <div style={circleStyle(step)}>
-              {step.status === "completed" ? <Check size={15} strokeWidth={2.5} /> : i + 1}
+              {!initializing && step.status === "completed" ? <Check size={15} strokeWidth={2.5} /> : i + 1}
             </div>
             <span style={{
               fontSize: "0.72rem", marginTop: 4, whiteSpace: "nowrap",
-              fontWeight: activeTab === step.id ? 700 : 500,
-              color: activeTab === step.id ? "#0ea5e9" : (step.id !== "profile" && lockOtherSteps ? "#94a3b8" : "#475569"),
+              fontWeight: !initializing && activeTab === step.id ? 700 : 500,
+              color: initializing ? "#94a3b8" : activeTab === step.id ? "#0ea5e9" : (step.id !== "profile" && lockOtherSteps ? "#94a3b8" : "#475569"),
             }}>
               {step.label}
             </span>
-            {step.badge > 0 && (
+            {!initializing && step.badge > 0 && (
               <span style={{ fontSize: "0.62rem", color: "#94a3b8", marginTop: 1 }}>
                 {step.badge} {step.status === "completed" ? "done" : "pending"}
               </span>
@@ -134,9 +136,11 @@ export default function YatraRegister() {
     statusFilter,
   } = useYatraRegistration();
 
-  const { profile, profileStage } = useAuth();
+  const { profile, profileStage, loading: authLoading } = useAuth();
   const defaultSet = useRef(false);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  const [profileRequestsLoaded, setProfileRequestsLoaded] = useState(false);
+  const [initialTabResolved, setInitialTabResolved] = useState(false);
   const [pendingReviewCount, setPendingReviewCount] = useState(0);
   const [profileRequests, setProfileRequests] = useState([]);
 
@@ -144,10 +148,12 @@ export default function YatraRegister() {
     const isReviewer = profile?.user_type === "mentor" || profile?.user_type === "counsellor";
     if (!isReviewer) {
       setPendingReviewCount(0);
+      setProfileRequestsLoaded(true);
       return undefined;
     }
 
     let cancelled = false;
+    setProfileRequestsLoaded(false);
     API.get("/api/mentor/requests/")
       .then((res) => {
         if (!cancelled) {
@@ -161,6 +167,9 @@ export default function YatraRegister() {
           setProfileRequests([]);
           setPendingReviewCount(0);
         }
+      })
+      .finally(() => {
+        if (!cancelled) setProfileRequestsLoaded(true);
       });
     return () => { cancelled = true; };
   }, [profile?.user_type]);
@@ -173,9 +182,10 @@ export default function YatraRegister() {
   const lockOtherSteps = ownProfileNeedsCompletion;
 
   useEffect(() => {
-    if (profile == null) return;
+    if (!yatra_id) return;
     defaultSet.current = false;
     setInitialDataLoaded(false);
+    setInitialTabResolved(false);
 
     const loadAll = async () => {
       setInitialLoading(true);
@@ -189,18 +199,20 @@ export default function YatraRegister() {
       }
     };
     loadAll();
-  }, [yatra_id, profile]);
+  }, [yatra_id]);
 
   // Smart default — runs once after initial data load
   useEffect(() => {
+    if (authLoading || !profileRequestsLoaded) return;
+
     if (profileStepActive) {
       defaultSet.current = true;
       setActiveTab("profile");
+      setInitialTabResolved(true);
       return;
     }
     if (defaultSet.current) return;
     if (!initialDataLoaded) return;
-
     const eligible    = eligibilityData.profiles || [];
     const registered  = registerData.profiles    || [];
     const requiresApproval = eligibilityData.yatra?.requires_approval ?? true;
@@ -212,13 +224,24 @@ export default function YatraRegister() {
     const registeredCount = registered.filter(p => p.is_registered).length;
 
     // Action-oriented: land where work is needed most
-    if (approvedNotReg > 0)                        setActiveTab("newReg");
+    if (approvedNotReg > 0) setActiveTab("newReg");
     else if (pendingApproval > 0 && requiresApproval) setActiveTab("approve");
-    else if (registeredCount > 0)                  setActiveTab("registered");
-    else                                           setActiveTab(requiresApproval ? "approve" : "newReg");
-  }, [initialDataLoaded, eligibilityData, registerData, profileStage, profileStepActive, setActiveTab]);
+    else if (registeredCount > 0) setActiveTab("registered");
+    else setActiveTab(requiresApproval ? "approve" : "newReg");
+    setInitialTabResolved(true);
+  }, [
+    initialDataLoaded,
+    profileRequestsLoaded,
+    authLoading,
+    eligibilityData,
+    registerData,
+    profileStage,
+    profileStepActive,
+    setActiveTab,
+  ]);
 
   const requiresApproval = eligibilityData.yatra?.requires_approval ?? true;
+  const initialising = !initialTabResolved;
 
   const renderActiveTab = () => {
     switch (activeTab) {
@@ -227,6 +250,7 @@ export default function YatraRegister() {
           <BasicProfile
             onComplete={() => setActiveTab(requiresApproval ? "approve" : "newReg")}
             requestCenterFilter={statusFilter}
+            initialReviewRequests={profileRequests}
           />
         );
       case "registered": return <RegisteredTab />;
@@ -238,6 +262,7 @@ export default function YatraRegister() {
 
   return (
     <div className="registration-page">
+      {initialising && <FullPageLoader />}
       <Sidebar />
       <div className="registration-content">
         <RegistrationStepper
@@ -245,8 +270,9 @@ export default function YatraRegister() {
           profilePendingCount={pendingReviewCount}
           ownProfileNeedsCompletion={ownProfileNeedsCompletion}
           lockOtherSteps={lockOtherSteps}
+          initializing={initialising}
         />
-        {isReviewer && (
+        {!initialising && isReviewer && (
           <div className="search-and-filter">
             <ProfileSearchBar />
             <YatraRegistrationStatusFilter
@@ -255,7 +281,7 @@ export default function YatraRegister() {
             />
           </div>
         )}
-        {renderActiveTab()}
+        {!initialising && renderActiveTab()}
       </div>
 
       <AlertModal show={showModal} message={modalMessage} onClose={() => setShowModal(false)} />
