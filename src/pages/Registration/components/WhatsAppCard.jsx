@@ -28,6 +28,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
   } = useYatraRegistration();
   const { profile: authProfile } = useAuth();
   const canShowSelfBadge = ["mentor", "counsellor"].includes(authProfile?.user_type);
+  const canShowResources = !canShowSelfBadge;
   const navigate = useNavigate();
   const [openInfoModal, setOpenInfoModal] = useState(false);
   const [localShowForm, setLocalShowForm] = useState(false);
@@ -474,17 +475,19 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
                 )}
               </>
             )}
-                       <button
-              className="action-btn"
-              style={{
-                maxWidth: "fit-content",
-                color: "black",
-                backgroundColor: "white",
-              }}
-              onClick={openResources}
-            >
-              View Resources
-            </button>
+            {canShowResources && (
+              <button
+                className="action-btn"
+                style={{
+                  maxWidth: "fit-content",
+                  color: "black",
+                  backgroundColor: "white",
+                }}
+                onClick={openResources}
+              >
+                View Resources
+              </button>
+            )}
             {["paid", "partial"].includes(registrationStatus) && (
               <>
                 {(yatra.is_substitution_open || yatra.is_cancellation_open) && (
