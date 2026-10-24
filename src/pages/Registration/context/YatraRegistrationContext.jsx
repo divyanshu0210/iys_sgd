@@ -44,13 +44,28 @@ export const YatraRegistrationProvider = ({ children }) => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [yatraData, setYatraData] = useState(location.state?.yatra || {});
 
   // Prefer the Yatra returned by the registration endpoint. Navigation state
   // is only an initial snapshot and disappears on refresh or may be stale
   // after an admin updates phases/installments.
   const yatra = registerData.yatra?.id
     ? registerData.yatra
-    : location.state?.yatra || registerData.yatra;
+    : yatraData;
+
+  // Load the lightweight Yatra details independently so the sidebar can be
+  // populated while the heavier registration/profile request is still running.
+  const fetchYatraData = async () => {
+    try {
+      const response = await API.get("/yatra/list/");
+      const currentYatra = response.data.find(
+        (item) => String(item.id) === String(yatra_id)
+      );
+      if (currentYatra) setYatraData(currentYatra);
+    } catch (err) {
+      console.error("Failed to load yatra details", err);
+    }
+  };
 
   // Fetch registration data
   const fetchRegistrationData = async (loading = false) => {
@@ -276,6 +291,7 @@ export const YatraRegistrationProvider = ({ children }) => {
     yatra,
     registerData,
     eligibilityData,
+    fetchYatraData,
     selected,
     registrations,
     activeTab,

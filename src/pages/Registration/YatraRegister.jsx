@@ -153,7 +153,7 @@ function RegistrationStepper({ profileStepActive, profilePendingCount, ownProfil
 export default function YatraRegister() {
   const {
     yatra_id, activeTab, showModal, modalMessage, setShowModal,
-    fetchRegistrationData, fetchEligibilityData, setInitialLoading,
+    fetchYatraData, fetchRegistrationData, fetchEligibilityData, setInitialLoading,
     registerData, eligibilityData, setActiveTab,
     statusFilter,
     loading: actionLoading,
@@ -213,6 +213,7 @@ export default function YatraRegister() {
 
     const loadAll = async () => {
       setInitialLoading(true);
+      fetchYatraData();
       try {
         await Promise.all([fetchRegistrationData(), fetchEligibilityData()]);
       } catch (e) {

@@ -13,6 +13,7 @@ import CancellationModal from "../Substitution/CancellationModal";
 import { STATUS_MAP } from "./YatraRegistrationStatusFilter";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { MapPin } from "lucide-react";
 
 const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable = false, selected: isCardSelected = false, onSelect, hideEligibilityActions = false }) => {
   const {
@@ -264,7 +265,11 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
                 {profile.is_self && canShowSelfBadge && <span className="badge-self">You</span>}
               </div>
               <div className="whatsapp-memberid">
-                ID: {profile.member_id || "N/A"}
+                <span>ID: {profile.member_id || "N/A"}</span>
+                <span className="whatsapp-center">
+                  <MapPin size={12} strokeWidth={2.5} aria-hidden="true" />
+                  {profile.center || "N/A"}
+                </span>
               </div>
             </div>
           </div>
