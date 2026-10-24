@@ -1,6 +1,9 @@
 // src/components/RegistrationFormModal.jsx
 import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useYatraRegistration } from "../context/YatraRegistrationContext";
+import { useAuth } from "../../../context/AuthContext";
+import { getRegistrationPolicyStatus } from "../registrationPolicy";
 import "../css/registrationFormModal.css";
 
 function RegistrationFormModal({ profile, onClose }) {
@@ -12,6 +15,8 @@ function RegistrationFormModal({ profile, onClose }) {
     registerData,
     yatra,
   } = useYatraRegistration();
+  const { profile: authProfile } = useAuth();
+  const isReviewer = ["mentor", "counsellor"].includes(authProfile?.user_type);
   const today = useMemo(() => new Date(), []);
 
   const profileId = profile.id || profile.profile_id;
@@ -28,6 +33,16 @@ function RegistrationFormModal({ profile, onClose }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isReadOnly = existing?.hasProof || false; // Only disable for proof, not paid installments
+  const policyStatus = getRegistrationPolicyStatus(
+    yatra?.registration_policy,
+    profile
+  );
+  const primaryRequirement = policyStatus.primaryRequirement;
+  const registrationAlreadyStarted = Boolean(
+    profile?.is_registered || existing?.registration_id
+  );
+  const registrationPolicyBlocked =
+    !registrationAlreadyStarted && policyStatus.blocked;
   const existingHasPhaseInstallment = Boolean(
     existing?.installments_info?.length
   );
@@ -219,6 +234,8 @@ function RegistrationFormModal({ profile, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
+
+    if (registrationPolicyBlocked) return;
 
     const missing = (yatra.form_fields || []).filter(
       (f) => f.is_required && !formFields[f.name]
@@ -527,12 +544,27 @@ function RegistrationFormModal({ profile, onClose }) {
 
           {/* --- Actions --- */}
           <div className="form-actions-modern">
+            {registrationPolicyBlocked && (
+              <p className="registration-policy-notice" role="alert">
+                Minimum {primaryRequirement?.requiredValue} {primaryRequirement?.label} required to register.
+                {!isReviewer && (
+                  <>
+                    {" "}Update your{" "}
+                    <Link to="/profile" onClick={onClose}>
+                      Profile
+                    </Link>{" "}
+                    and retry.
+                  </>
+                )}
+              </p>
+            )}
             {/* Save button enabled only if unpaid installments are selected */}
             <button
               type="submit"
               className="btn-primary"
               disabled={
                 isSubmitting ||
+                registrationPolicyBlocked ||
                 registrationClosedForPending ||
                 unpaidInstallmentsSelected.length === 0
               }
