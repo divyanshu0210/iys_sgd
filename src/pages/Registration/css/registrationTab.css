@@ -761,6 +761,58 @@
 }
 
 @media (max-width: 768px) {
+  .whatsapp-card {
+    box-sizing: border-box;
+  }
+
+  /* Registration cards: keep identity/status together and move
+     installment badges to a full-width second row. */
+  .whatsapp-card-with-register-btn:not(.eligibility-card-header) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 10px;
+  }
+
+  .whatsapp-card-with-register-btn:not(.eligibility-card-header) .whatsapp-name-line {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    padding-right: 0;
+  }
+
+  .whatsapp-card-with-register-btn:not(.eligibility-card-header) .whatsapp-person-info {
+    flex: 1 1 auto;
+    width: 0;
+    min-width: 0;
+  }
+
+  .whatsapp-card-with-register-btn:not(.eligibility-card-header) > .badge-registered {
+    grid-column: 2;
+    grid-row: 1;
+    margin-left: 0 !important;
+  }
+
+  .whatsapp-card-with-register-btn:not(.eligibility-card-header) .installmet-edit {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    min-width: 0;
+    flex: none;
+  }
+
+  .whatsapp-card-with-register-btn:not(.eligibility-card-header) .installment-badge-collection {
+    display: flex;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
   /* ---- 1. Checkout container ------------------------------------------------ */
   .checkout-full {
     padding: 0.75rem;
