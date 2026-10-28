@@ -43,21 +43,28 @@ function RegistrationFormModal({ profile, onClose }) {
     [yatra?.registration_phases, registrationPhase?.id]
   );
   const installments = useMemo(
-    () =>
-      existing?.installments_info?.length > 0
-        ? existing.installments_info
-        : profile?.installments_info?.length > 0
+    () => {
+      const phaseInstallments = profile?.installments_info?.length > 0
         ? profile.installments_info
-        : !existing?.registration_id && configuredPhaseInstallments.length > 0
-        ? configuredPhaseInstallments
-        : registrationPhase
-        ? []
-        : (yatra?.installments || []).filter(
-            (installment) => !installment.phase_id && !installment.phase
-          ),
+        : configuredPhaseInstallments.length > 0
+          ? configuredPhaseInstallments
+          : registrationPhase
+            ? []
+            : (yatra?.installments || []).filter(
+                (installment) => !installment.phase_id && !installment.phase
+              );
+      const savedInstallments = existing?.installments_info || [];
+      const source = phaseInstallments.length > 0 ? phaseInstallments : savedInstallments;
+      return source.map((installment) => {
+        const saved = savedInstallments.find((item) => item.label === installment.label);
+        const merged = { tag: "due", ...installment, ...saved };
+        // A payment without an uploaded proof can be submitted again.
+        if (saved && !saved.is_paid && !saved.proof) merged.tag = "due";
+        return merged;
+      });
+    },
     [
       existing?.installments_info,
-      existing?.registration_id,
       profile?.installments_info,
       configuredPhaseInstallments,
       registrationPhase,
@@ -200,6 +207,8 @@ function RegistrationFormModal({ profile, onClose }) {
           form_fields,
           installments_selected,
           installments_paid: installments_paid || [],
+          installments_info: installments,
+          installments_details: installments,
           amount,
           registration_id: profileObj.registration_id,
           phase: prev[profileId]?.phase || registrationPhase,
@@ -238,7 +247,7 @@ function RegistrationFormModal({ profile, onClose }) {
     const amount = installmentsSelected
       .filter((label) => {
         const inst = installments.find((i) => i.label === label);
-        return inst && ["due", "rejected"].includes(inst.tag.toLowerCase());
+        return inst && ["due", "rejected"].includes((inst.tag || "due").toLowerCase());
       })
       .reduce((sum, label) => sum + getInstallmentAmount(label, installments), 0);
 
@@ -258,19 +267,18 @@ function RegistrationFormModal({ profile, onClose }) {
     }
   };
 
-  const totalSelectedAmount = installmentsSelected.reduce(
+  // Check if any unpaid installment is selected
+  const unpaidInstallmentsSelected = installmentsSelected.filter((label) => {
+    const match = installments.find(
+      (i) => i.label === label
+    );
+    return match && !(match.is_paid || (match.proof && match.status !== "rejected"));
+    // return !(match?.is_paid || match?.proof);
+  });
+  const totalSelectedAmount = unpaidInstallmentsSelected.reduce(
     (sum, label) => sum + getInstallmentAmount(label, installments),
     0
   );
-
-  // Check if any unpaid installment is selected
-  const unpaidInstallmentsSelected = installmentsSelected.filter((label) => {
-    const match = existing?.installments_details?.find(
-      (i) => i.label === label
-    );
-    return !(match?.is_paid || (match?.proof && match?.status !== "rejected"));
-    // return !(match?.is_paid || match?.proof);
-  });
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -382,12 +390,10 @@ function RegistrationFormModal({ profile, onClose }) {
           <div className="form-section">
             {installments.length > 0 && (
               <h3 className="section-title">
-                {isReadOnly
-                  ? "Payment"
-                  : "Choose Installments (multiple allowed)"}
+                Choose Installments (multiple allowed)
               </h3>
             )}
-            {!isReadOnly && totalSelectedAmount > 0 && (
+            {totalSelectedAmount > 0 && (
               <div className="amount-banner">
                 Total Selected: ₹{totalSelectedAmount}
               </div>
@@ -416,7 +422,7 @@ function RegistrationFormModal({ profile, onClose }) {
 
             {registrationClosedForPending && (
               <div className="info-banner phase-banner">
-                Registration has closed.This yatra is no more accepting payments.
+                Registration has closed. This yatra is no longer accepting payments.
               </div>
             )}
 
@@ -436,7 +442,7 @@ function RegistrationFormModal({ profile, onClose }) {
                 const isMandatory = isInstallmentMandatory(inst);
                 const missingPrerequisite = getMissingPrerequisite(index);
                 const orderBlocked = Boolean(
-                  !isPaid && !isReadOnly && missingPrerequisite
+                  !isPaid && missingPrerequisite
                 );
 
                 return (
@@ -471,6 +477,7 @@ function RegistrationFormModal({ profile, onClose }) {
                         disabled={
                           isPaid ||
                           (hasProof && !isRejected) ||
+                          registrationClosedForPending ||
                           orderBlocked
                         }
                         title={
@@ -485,12 +492,12 @@ function RegistrationFormModal({ profile, onClose }) {
                       <span>
                         <strong>{label}</strong>
                         {/* {!isPaid && <span>- ₹{amount}</span>} */}
-                        {!hasProof && <span>- ₹{amount}</span>}
+                        <span>- ₹{amount}</span>
                       </span>
                       {isPaid && (
                         <span className="installment-status paid">Paid</span>
                       )}
-                      {hasProof && (
+                      {hasProof && !isPaid && (
                         <>
                           {inst.status === "rejected" && <br />}
                           <span
@@ -503,8 +510,8 @@ function RegistrationFormModal({ profile, onClose }) {
                             }`}
                           >
                             {inst.status === "rejected"
-                              ? "(Rejected - Please re-upload)"
-                              : `(${inst.status})`}
+                              ? "Rejected — please submit payment proof again"
+                              : "Under review"}
                           </span>
                         </>
                       )}

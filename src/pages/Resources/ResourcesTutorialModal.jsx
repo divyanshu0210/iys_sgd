@@ -49,7 +49,7 @@ export default function ResourcesTutorialModal({ onClose }) {
             navigate("/resources");
           }}
         >
-          View Resources
+          Yatra Resources
         </button>
         <button
           className="skip-btn"

@@ -510,7 +510,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
                 }}
                 onClick={openResources}
               >
-                View Resources
+                Yatra Resources 
               </button>
             )}
             {["paid", "partial"].includes(registrationStatus) && (
