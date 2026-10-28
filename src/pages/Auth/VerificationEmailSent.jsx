@@ -1,8 +1,9 @@
 // src/pages/EmailSent.jsx
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "../../css/signIn.css"; 
 
 export default function VerificationEmailSent() {
+  const location = useLocation();
   return (
     <div className="reg-page">
       <div className="reg-card" style={{ textAlign: "center" }}>
@@ -14,7 +15,7 @@ export default function VerificationEmailSent() {
 
         <p style={{ marginTop: "1.5rem" }}>
           Didn’t receive the email?  
-          <Link to="/signup" className="btn-link">Try again</Link>
+          <Link to="/signup" state={location.state} className="btn-link">Try again</Link>
         </p>
 
         {/* <Link

@@ -1,16 +1,16 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function useYatraClickHandler() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleYatraClick = (e) => {
     if (!user) {
       e.preventDefault();
+      const destination = new URL(e.currentTarget.href, window.location.origin);
       navigate("/signin", {
-        state: { from: `${location.pathname}${location.search}${location.hash}` },
+        state: { from: `${destination.pathname}${destination.search}${destination.hash}` },
       });
       return;
     }

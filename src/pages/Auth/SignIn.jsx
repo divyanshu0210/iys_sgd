@@ -4,19 +4,16 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import "../../css/signIn.css"; 
 import GoogleBtn from "../../components/GoogleBtn";
 import { useAuth } from "../../context/AuthContext";
+import { clearAuthReturnTo, getAuthReturnTo } from "../../utils/authReturnTo";
 
 
 export default function SignIn() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const { login, profile, fetchProfile ,loading, setLoading} = useAuth();
+  const { login, fetchProfile ,loading, setLoading} = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [status, setStatus] = useState(null); // { type, msg }
-  const storedReturnTo = sessionStorage.getItem("authReturnTo");
-  const storedReturnToAt = Number(sessionStorage.getItem("authReturnToAt"));
-  const hasFreshStoredReturnTo = storedReturnTo && storedReturnToAt &&
-    Date.now() - storedReturnToAt < 10 * 60 * 1000;
-  const returnTo = location.state?.from || (hasFreshStoredReturnTo ? storedReturnTo : "/");
+  const returnTo = getAuthReturnTo(location.state?.from);
 
   // Email/Password Login
   const handleSubmit = async (e) => {
@@ -32,8 +29,7 @@ export default function SignIn() {
       await fetchProfile(); // refresh latest profile
 
       setTimeout(() => {
-        sessionStorage.removeItem("authReturnTo");
-        sessionStorage.removeItem("authReturnToAt");
+        clearAuthReturnTo();
         navigate(returnTo, { replace: true }); // return to the originally requested page
       }, 1000);
     } catch (err) {

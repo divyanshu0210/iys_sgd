@@ -4,6 +4,7 @@ import "../../css/signIn.css";
 import GoogleBtn from "../../components/GoogleBtn";
 import API from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import { clearAuthReturnTo, getAuthReturnTo } from "../../utils/authReturnTo";
 
 const isEmailVerificationMandatoryForSignUp =
   import.meta.env.VITE_ACCOUNT_EMAIL_VERIFICATION === "mandatory";
@@ -12,7 +13,7 @@ export default function SignUp() {
   const [form, setForm] = useState({ email: "", password: "" });
   const navigate = useNavigate();
   const location = useLocation();
-  const returnTo = location.state?.from || sessionStorage.getItem("authReturnTo") || "/";
+  const returnTo = getAuthReturnTo(location.state?.from);
   const [status, setStatus] = useState(null); // { type, msg }
   const { loading, setLoading, login, fetchProfile } = useAuth();
 
@@ -44,8 +45,7 @@ export default function SignUp() {
       } else {
         await login(form.email, form.password);
         await fetchProfile();
-        sessionStorage.removeItem("authReturnTo");
-        sessionStorage.removeItem("authReturnToAt");
+        clearAuthReturnTo();
         navigate(returnTo, { replace: true });
       }
     } catch (err) {

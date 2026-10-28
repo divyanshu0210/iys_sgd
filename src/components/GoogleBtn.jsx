@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import FullPageLoader from "./FullPageLoader";
+import { clearAuthReturnTo } from "../utils/authReturnTo";
 
 const GoogleBtn = ({ setStatus, returnTo = "/" }) => {
   const navigate = useNavigate();
@@ -29,8 +30,7 @@ const GoogleBtn = ({ setStatus, returnTo = "/" }) => {
         await fetchProfile();
 
         setTimeout(() => {
-          sessionStorage.removeItem("authReturnTo");
-          sessionStorage.removeItem("authReturnToAt");
+          clearAuthReturnTo();
           navigate(returnTo, { replace: true });
         }, 800);
       } catch (err) {
