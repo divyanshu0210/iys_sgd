@@ -204,7 +204,6 @@ export default function YatraRegister() {
   const profileStepActive = ownProfileNeedsCompletion || pendingReviewCount > 0;
   const isReviewer = profileStage === "mentor" || profileStage === "counsellor";
   const lockOtherSteps = ownProfileNeedsCompletion;
-
   useEffect(() => {
     if (!yatra_id) return;
     defaultSet.current = false;
@@ -276,7 +275,10 @@ export default function YatraRegister() {
       case "profile":
         return (
           <BasicProfile
-            onComplete={() => setActiveTab(requiresApproval ? "approve" : "newReg")}
+            onComplete={() => {
+              if (!isReviewer && ownProfileNeedsCompletion) return;
+              setActiveTab(requiresApproval ? "approve" : "newReg");
+            }}
             requestCenterFilter={statusFilter}
             initialReviewRequests={profileRequests}
           />

@@ -1,6 +1,6 @@
 // src/context/YatraRegistrationContext.jsx
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import API from "../../../services/api";
 import { useAuth } from "../../../context/AuthContext";
@@ -31,6 +31,19 @@ export const YatraRegistrationProvider = ({ children }) => {
   const [activeTab, setActiveTab] = useState(
     profileStage === "not-exists" ? "profile" : "approve"
   );
+
+  // Keep the tab state itself aligned with the user's profile status. This
+  // avoids relying on a display-only override in the page component while
+  // the authenticated profile is still being resolved.
+  const profileNeedsVerification =
+    profileStage === "not-exists" ||
+    profile?.profile_verification_status !== "verified";
+
+  useEffect(() => {
+    if (profileNeedsVerification) {
+      setActiveTab("profile");
+    }
+  }, [profileNeedsVerification]);
   const [currentStep, setCurrentStep] = useState(1);
 
   const [selected, setSelected] = useState([]);
@@ -76,7 +89,7 @@ export const YatraRegistrationProvider = ({ children }) => {
       setRegisterData(regRes.data);
     } catch (err) {
       console.error("Failed to load registration data", err);
-      alert("Failed to load resister data");
+      // alert("Failed to load resister data");
     } finally {
       loading && setInitialLoading(false);
     }
@@ -136,15 +149,6 @@ export const YatraRegistrationProvider = ({ children }) => {
     const getErrors = (error) =>
       error?.response?.data?.errors || [error?.message || `Failed to ${action}`];
     try {
-      if (action === "unapprove" && profileIds.some((id) => registrations[id])) {
-        if (!suppressAlert) alert(
-          "Cannot unapprove — this profile has already started registration or registered."
-        );
-        return {
-          updated: [],
-          errors: ["Registration has already started for this devotee."],
-        };
-      }
       const response = await API.post(`/yatras/${yatra_id}/eligibility/`, {
         profile_ids: profileIds,
         action,
@@ -179,12 +183,6 @@ export const YatraRegistrationProvider = ({ children }) => {
   const requestApproval = async () => {
     setLoading((prev) => ({ ...prev, selfRequest: true }));
     try {
-      if (registrations[profile.id]) {
-        alert(
-          "Cannot unapprove — this profile has already started registration or registered."
-        );
-        return;
-      }
       await API.post(`/yatras/${yatra_id}/eligibility/`, {
         profile_ids: [profile.id],
         action: "request_approval",

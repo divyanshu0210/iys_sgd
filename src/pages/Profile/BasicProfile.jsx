@@ -209,7 +209,11 @@ export default function BasicProfile({
 
   // -----------------------------------------------------------------
   const onChange = (key, value) => {
-    setDetails((s) => ({ ...s, [key]: value }));
+    setDetails((s) => ({
+      ...s,
+      [key]: value,
+      ...(key === "center" && value !== "Others" ? { customCenter: "" } : {}),
+    }));
     setErrors((e) => ({ ...e, [key]: "" }));
   };
 
@@ -479,6 +483,7 @@ export default function BasicProfile({
     !profileResolved || (isReviewer && !reviewRequestsResolved) ? <FullPageLoader /> :
     <>
       {submitting && <FullPageLoader />}
+      {bulkReviewLoading && <FullPageLoader />}
       <div className="cp-page">
         {isReviewer && (
           <section className="cp-card profile-requests-section has-fixed-bulk-actions" style={{ marginBottom: "1rem" }}>

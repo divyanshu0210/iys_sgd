@@ -160,7 +160,7 @@ export default function Profile() {
 
 function ProfileDisplay({ initialProfile }) {
   const { fetchProfile: refreshAuthProfile } = useAuth();
-  const { baces } = useBaces();
+  const { baces, baceNames } = useBaces();
   const [profile, setProfile] = useState(initialProfile);
   const [activeTab, setActiveTab] = useState("basic");
   const [isEditing, setIsEditing] = useState(false);
@@ -176,17 +176,21 @@ function ProfileDisplay({ initialProfile }) {
     handlePhotoChange,
     resetFormState,
   } = useProfileForm({ existingPhotoUrl: profile?.profile_picture_url });
-  const centerOptions = (baces || []).map(({ name }) => ({ value: name, label: name }));
+  const centerOptions = (baceNames || []).map((name) => ({ value: name, label: name }));
   const canEditCenter = !["pending", "verified"].includes(profile?.profile_verification_status);
   const isOtherCenter = Boolean(
     profile?.center && !(baces || []).some((bace) => bace.name === profile.center)
   );
 
-  const set = (key, value) => setEditData((p) => ({ ...p, [key]: value }));
+  const set = (key, value) => setEditData((p) => ({
+    ...p,
+    [key]: value,
+    ...(key === "center" && value !== "Others" ? { other_center: "" } : {}),
+  }));
 
   const startEditing = () => {
     const savedCenter = profile.center || "";
-    const isPrimaryBace = (baces || []).some((bace) => bace.name === savedCenter);
+    const isConfiguredCenter = (baceNames || []).includes(savedCenter);
     setEditData({
       first_name: profile.first_name || "",
       last_name: profile.last_name || "",
@@ -194,8 +198,8 @@ function ProfileDisplay({ initialProfile }) {
       gender: profile.gender || "",
       marital_status: profile.marital_status || "",
       mobile: profile.mobile || "",
-      center: isPrimaryBace ? savedCenter : savedCenter ? "Others" : "",
-      other_center: !isPrimaryBace && savedCenter && savedCenter !== "Others" ? savedCenter : "",
+      center: isConfiguredCenter ? savedCenter : savedCenter ? "Others" : "",
+      other_center: !isConfiguredCenter && savedCenter && savedCenter !== "Others" ? savedCenter : "",
       aadhar_card_no: profile.aadhar_card_no || "",
       is_initiated: profile.is_initiated ?? false,
       initiated_name: profile.initiated_name || "",
@@ -226,6 +230,7 @@ function ProfileDisplay({ initialProfile }) {
   const handleSave = async () => {
     setSaving(true);
     setSaveStatus(null);
+    const wasRejected = profile.profile_verification_status === "rejected";
 
     if (
       profile.profile_verification_status !== "verified" &&
@@ -284,13 +289,16 @@ function ProfileDisplay({ initialProfile }) {
         formData.append("profile_picture", photoFile);
         await API.post("/api/profile/", formData);
         resetFormState(photoInputRef);
-      } else if (Object.keys(changes).length > 0) {
-        await API.post("/api/profile/", changes);
+      } else if (Object.keys(changes).length > 0 || wasRejected) {
+        await API.post("/api/profile/", wasRejected ? { center: profile.center, ...changes } : changes);
       }
       const res = await API.get("/api/profile/");
       setProfile(res.data);
       setIsEditing(false);
-      setSaveStatus({ type: "success", msg: "Profile updated!" });
+      setSaveStatus({
+        type: "success",
+        msg: wasRejected ? "Profile resubmitted for verification." : "Profile updated!",
+      });
       refreshAuthProfile();
       setTimeout(() => setSaveStatus(null), 3000);
     } catch (err) {
@@ -391,16 +399,13 @@ function ProfileDisplay({ initialProfile }) {
                 <Row label="Marital Status"  field="marital_status"   value={profile.marital_status} options={MARITAL_OPTIONS} />
                 <Row label="Mobile"          field="mobile"           value={profile.mobile} type="tel" />
                 <Row label="Center"          field="center"           value={isOtherCenter ? "Others" : profile.center} options={centerOptions} editable={canEditCenter} />
-                {(isOtherCenter || (isEditing && editData.center === "Others")) && (
+                {((isOtherCenter && !isEditing) || (isEditing && editData.center === "Others")) && (
                   <Row
                     label="Other Center"
                     field={isEditing ? "other_center" : undefined}
                     value={isEditing ? editData.other_center : profile.center}
                     editable={isEditing && canEditCenter}
                   />
-                )}
-                {isEditing && editData.center === "Others" && (
-                  <Row label="Other Center" field="other_center" value={editData.other_center} />
                 )}
                 <Row label="Aadhaar No"      field="aadhar_card_no"   value={profile.aadhar_card_no} />
                 <Row label="Rounds Chanting" field="no_of_chanting_rounds"

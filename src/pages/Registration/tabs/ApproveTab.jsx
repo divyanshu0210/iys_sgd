@@ -12,7 +12,20 @@ const ApproveTab = ({ onActionResult }) => {
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // const approveList = eligibilityData.profiles || [];
-  const approveList = applyFilters(eligibilityData.profiles || [], "approve");
+  const approveList = [...applyFilters(eligibilityData.profiles || [], "approve")].sort((a, b) => {
+    const aRequested = !a.is_approved && a.request_created_at;
+    const bRequested = !b.is_approved && b.request_created_at;
+
+    if (Boolean(aRequested) !== Boolean(bRequested)) {
+      return aRequested ? -1 : 1;
+    }
+
+    if (aRequested && bRequested) {
+      return new Date(a.request_created_at) - new Date(b.request_created_at);
+    }
+
+    return 0;
+  });
   const selectableProfiles = approveList.filter((profile) => !profile.is_self);
   const toggleSelection = (id) => {
     const scrollY = window.scrollY;

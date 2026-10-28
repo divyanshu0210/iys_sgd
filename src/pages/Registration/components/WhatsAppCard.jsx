@@ -13,7 +13,7 @@ import CancellationModal from "../Substitution/CancellationModal";
 import { STATUS_MAP } from "./YatraRegistrationStatusFilter";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { MapPin } from "lucide-react";
+import { Clock3, MapPin } from "lucide-react";
 
 const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable = false, selected: isCardSelected = false, onSelect, hideEligibilityActions = false }) => {
   const {
@@ -204,7 +204,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
         }}
       >
         <div
-          className={`whatsapp-card-with-register-btn ${isEligibilityCard ? "eligibility-card-header" : ""}`}
+          className="whatsapp-card-with-register-btn"
           style={{
             backgroundColor: hasSelectableInstallments ? "#f0fdf4" : "white",
             flexDirection: "row",
@@ -276,9 +276,34 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
           </div>
 
           {isEligibilityCard && (!profile.is_self || isApproved) && (
-            <span className={`eligibility-status-pill ${isApproved ? "approved" : "unapproved"}`}>
-              {isApproved ? "Approved" : "Unapproved"}
-            </span>
+            <div className="card-status-meta">
+              <span
+                className="badge-registered"
+                style={{
+                  backgroundColor: isApproved ? "#dcfce7" : "#fef3c7",
+                  color: isApproved ? "#166534" : "#92400e",
+                }}
+              >
+                {isApproved ? "Approved" : "Unapproved"}
+              </span>
+              {!isApproved && profile.request_created_at && (
+                <span className="card-request-time">
+                  <Clock3 size={12} strokeWidth={2} aria-hidden="true" />
+                  <span>
+                    Req. {new Date(profile.request_created_at)
+                      .toLocaleString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      })
+                      .replace(", ", " ")}
+                  </span>
+                </span>
+              )}
+            </div>
           )}
 
           {!hasSelectableInstallments && !isEligibilityCard && (

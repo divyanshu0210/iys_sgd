@@ -12,8 +12,8 @@ const COLORS = {
   lightGray: [245, 245, 245],
   border: [220, 220, 220],
 };
-const fetchBase64Image = async (url) => {
-  const res = await API.get(`api/proxy-image/?url=${encodeURIComponent(url)}`);
+const fetchBase64Image = async (profileId) => {
+  const res = await API.get("api/proxy-image/", { params: { profile_id: profileId } });
   return res.data.base64;
 };
 
@@ -181,7 +181,7 @@ export async function generateRCS(profile,authProfile, yatra) {
   let imgBase64 = null;
   if (profile.profile_picture) {
     try {
-      imgBase64 = await fetchBase64Image(profile.profile_picture);
+      imgBase64 = await fetchBase64Image(profile.id || profile.profile_id);
       doc.addImage(
         `data:image/jpeg;base64,${imgBase64}`,
         "JPEG",

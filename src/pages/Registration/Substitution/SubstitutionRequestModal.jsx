@@ -67,7 +67,7 @@ export default function SubstitutionRequestModal({
             className="sub-desc"
             style={{ fontSize: "13px", marginBottom: "15px" }}
           >
-            Enter the <strong>2-digit verification code</strong> given by the
+            Enter the <strong>verification code</strong> given by the
             initiator.
           </p>
 
@@ -76,7 +76,7 @@ export default function SubstitutionRequestModal({
             placeholder="Enter Code"
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-            maxLength={2}
+            maxLength={6}
             type="text"
             inputMode="numeric"
             style={{ maxWidth: "98%" }}
@@ -209,7 +209,7 @@ export default function SubstitutionRequestModal({
               onClick={onSubmit}
               disabled={
                 isSubmitting ||
-                code.length !== 2 ||
+                ![2, 6].includes(code.length) ||
                 !allChecked ||
                 timeLeft === "Expired"
               }

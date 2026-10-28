@@ -35,13 +35,13 @@ export default function useMentorRequestBulkActions(requests = []) {
 
     setLoading(true);
     try {
-      await Promise.all(
-        selectedIds.map((requestId) =>
-          action === "connect"
-            ? API.post("/api/mentor/requests/", { request_id: requestId })
-            : API.delete(`/api/mentor/requests/${requestId}/`)
-        )
-      );
+      // Let React paint the blocking full-screen loader before a fast
+      // rejection request completes and reloads the page.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await API.post("/api/mentor/requests/", {
+        request_ids: selectedIds,
+        action,
+      });
       window.location.reload();
     } catch {
       alert(`Failed to ${action} selected requests.`);

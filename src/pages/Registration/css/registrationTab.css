@@ -32,10 +32,32 @@
   align-items: center;
   background: white;
   transition: background 0.2s;
+  width: 100%;
 }
 
 .whatsapp-card-with-register-btn:hover {
   background: #f8fafc;
+}
+
+.card-status-meta {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.card-request-time {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  color: #64748b;
+  font-size: 0.68rem;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .whatsapp-avatar img {
@@ -103,79 +125,11 @@
 
 .whatsapp-name-line .reg-checkbox {
   flex: 0 0 auto;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   padding: 0;
 }
 
-
-.eligibility-status-pill {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-  margin-left: auto;
-  border-radius: 999px;
-  padding: 2px 7px;
-  font-size: 0.68rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.eligibility-status-pill.approved {
-  color: #166534;
-  background: #dcfce7;
-}
-
-.eligibility-status-pill.unapproved {
-  color: #92400e;
-  background: #fef3c7;
-}
-
-.eligibility-card-header .whatsapp-person-info > div:first-child {
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  width: 100%;
-  min-width: 0;
-}
-
-.eligibility-card-header .whatsapp-name-line {
-  flex: 1;
-  min-width: 0;
-}
-
-.whatsapp-card-with-register-btn.eligibility-card-header {
-  width: 100%;
-}
-
-.eligibility-card-header > .eligibility-status-pill {
-  margin-left: 10px;
-}
-
-.eligibility-card-header .whatsapp-profileName {
-  flex: 1 1 auto;
-  min-width: 0;
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-  word-break: normal;
-  overflow-wrap: anywhere;
-}
-
-.eligibility-card-header .whatsapp-profileName.is-self-name {
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  white-space: normal !important;
-  overflow-wrap: normal;
-}
-
-.eligibility-card-header .badge-self {
-  display: inline-flex;
-  flex-shrink: 0;
-  margin-left: 4px;
-}
 
 .whatsapp-action {
   margin-left: auto;
@@ -657,22 +611,12 @@
     position: relative;
   }
 
-  .whatsapp-card-with-register-btn:not(.eligibility-card-header) .whatsapp-name-line {
+  .whatsapp-card-with-register-btn .whatsapp-name-line {
     flex: 1 1 0;
     width: auto;
     padding-right: 0;
   }
 
-  .whatsapp-card-with-register-btn.eligibility-card-header {
-    flex-direction: row !important;
-    align-items: center !important;
-    width: 100%;
-  }
-
-  .eligibility-card-header .whatsapp-name-line {
-    width: 100%;
-    min-width: 0;
-  }
   .installmet-edit {
     flex-direction: column;
     width: 100%;
@@ -701,34 +645,8 @@
     word-break: break-word;
   }
 
-  .whatsapp-card-with-register-btn:not(.eligibility-card-header) .whatsapp-profileName {
+  .whatsapp-card-with-register-btn .whatsapp-profileName {
     max-width: 100%;
-  }
-
-  .eligibility-card-header .whatsapp-person-info {
-    flex: 1;
-    width: auto;
-    min-width: 0;
-    overflow: visible;
-  }
-
-  .eligibility-card-header .whatsapp-profileName {
-    flex: 1 1 auto;
-    min-width: 0;
-    max-width: none !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
-    word-break: normal !important;
-    overflow-wrap: anywhere;
-  }
-
-  .eligibility-card-header .whatsapp-person-info > div:first-child {
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    width: 100%;
-    min-width: 0;
   }
 
   .badge-registered {
@@ -739,7 +657,7 @@
     flex: 0 0 auto;
   }
 
-  .whatsapp-card-with-register-btn:not(.eligibility-card-header) .installmet-edit {
+  .whatsapp-card-with-register-btn .installmet-edit {
     flex: 0 0 100%;
   }
 
@@ -763,11 +681,12 @@
 @media (max-width: 768px) {
   .whatsapp-card {
     box-sizing: border-box;
+    padding: 12px 8px;
   }
 
   /* Registration cards: keep identity/status together and move
      installment badges to a full-width second row. */
-  .whatsapp-card-with-register-btn:not(.eligibility-card-header) {
+  .whatsapp-card-with-register-btn {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     width: 100%;
@@ -777,7 +696,7 @@
     row-gap: 10px;
   }
 
-  .whatsapp-card-with-register-btn:not(.eligibility-card-header) .whatsapp-name-line {
+  .whatsapp-card-with-register-btn .whatsapp-name-line {
     grid-column: 1;
     grid-row: 1;
     display: flex;
@@ -787,19 +706,19 @@
     padding-right: 0;
   }
 
-  .whatsapp-card-with-register-btn:not(.eligibility-card-header) .whatsapp-person-info {
+  .whatsapp-card-with-register-btn .whatsapp-person-info {
     flex: 1 1 auto;
     width: 0;
     min-width: 0;
   }
 
-  .whatsapp-card-with-register-btn:not(.eligibility-card-header) > .badge-registered {
+  .whatsapp-card-with-register-btn > .badge-registered {
     grid-column: 2;
     grid-row: 1;
     margin-left: 0 !important;
   }
 
-  .whatsapp-card-with-register-btn:not(.eligibility-card-header) .installmet-edit {
+  .whatsapp-card-with-register-btn .installmet-edit {
     grid-column: 1 / -1;
     grid-row: 2;
     width: 100%;
@@ -807,7 +726,7 @@
     flex: none;
   }
 
-  .whatsapp-card-with-register-btn:not(.eligibility-card-header) .installment-badge-collection {
+  .whatsapp-card-with-register-btn .installment-badge-collection {
     display: flex;
     flex-wrap: wrap;
     min-width: 0;
