@@ -19,10 +19,6 @@ function getBulkActionSummary(actionResult) {
   const uniqueUpdated = new Set(
     (actionResult.updated || []).map((item) => item.profile_id)
   );
-  const registrationFailures = (actionResult.errors || []).filter((error) =>
-    /already registered|registration has (already )?started/i.test(error)
-  ).length;
-  const otherFailures = (actionResult.errors || []).length - registrationFailures;
   const updatedLabel = actionResult.action === "approve" ? "approved" : "unapproved";
   const skippedLabel =
     actionResult.action === "approve" ? "already approved" : "already unapproved";
@@ -30,8 +26,7 @@ function getBulkActionSummary(actionResult) {
   return [
     uniqueUpdated.size && `${uniqueUpdated.size} ${updatedLabel}`,
     actionResult.skippedCount && `${actionResult.skippedCount} ${skippedLabel}`,
-    registrationFailures && `${registrationFailures} failed (registration started)`,
-    otherFailures && `${otherFailures} failed`,
+    ...(actionResult.errors || []),
   ]
     .filter(Boolean)
     .join("\n");
@@ -320,8 +315,8 @@ export default function YatraRegister() {
         message={actionResult ? getBulkActionSummary(actionResult) : ""}
         title={
           actionResult?.action === "approve"
-            ? "Bulk Approval Summary"
-            : "Bulk Unapproval Summary"
+            ? "Approval Summary"
+            : "Unapproval Summary"
         }
         onClose={() => setActionResult(null)}
       />

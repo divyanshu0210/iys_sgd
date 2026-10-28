@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "../css/initiateSubstitutionModal.css";
 import API from "../../../services/api";
+import { getApiErrorMessage } from "../../../utils/apiErrors";
 import { BreakdownSection, BreakdownToggle } from "./BreakdownSection";
 
 export default function CancellationModal({
@@ -61,11 +62,7 @@ export default function CancellationModal({
       // optional alert
       window.alert("Registration cancelled successfully.");
     } catch (err) {
-      setError(
-        err.response?.data?.detail ||
-          err.response?.data?.error ||
-          "Failed to cancel the registration. Please try again."
-      );
+      setError(getApiErrorMessage(err, "Failed to cancel the registration. Please try again."));
     } finally {
       setIsSubmitting(false);
     }

@@ -4,6 +4,7 @@ import {
   useYatraRegistration,
 } from "../context/YatraRegistrationContext";
 import API from "../../../services/api";
+import { getApiErrorMessage } from "../../../utils/apiErrors";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import FullPageLoader from "../../../components/FullPageLoader";
@@ -392,6 +393,7 @@ const CheckoutStep = () => {
     setSteps({ amount: "loading", utr: "idle", payment: "idle" });
     await sleep();
 
+    let createdPaymentId = null;
     try {
       const { tesseractText, getOCRSpaceText } = await extractAllOCRText(
         screenshot
@@ -411,7 +413,7 @@ const CheckoutStep = () => {
           payment: "",
         });
         await sleep();
-        alert(`❌ Payment failed`);
+        alert(`Amount mismatch. Expected ₹${totalAmount}.`);
         return;
       }
 
@@ -438,7 +440,7 @@ const CheckoutStep = () => {
           utr: "Transaction ID not found in screenshot",
         }));
         await sleep();
-        alert(`❌ Payment failed`);
+        alert("Transaction ID not found in the screenshot.");
         return;
       }
 
@@ -450,9 +452,14 @@ const CheckoutStep = () => {
       await sleep();
 
       setLoadingCheckout(true);
-      await API.post(`/yatras/${yatra_id}/register/`, registrations);
-      const paymentId = await submitBatchProof();
-      await uploadScreenshot(paymentId);
+      const registrationResponse = await API.post(`/yatras/${yatra_id}/register/`, registrations);
+      if (registrationResponse.data?.errors?.length) {
+        throw new Error(
+          `Some registrations could not be saved. Other successful registrations were saved; payment was not submitted.\n${registrationResponse.data.errors.join("\n")}`
+        );
+      }
+      createdPaymentId = await submitBatchProof();
+      await uploadScreenshot(createdPaymentId);
       setSteps({ amount: "success", utr: "success", payment: "success" });
       setStepMessages((prev) => ({
         ...prev,
@@ -466,15 +473,18 @@ const CheckoutStep = () => {
       alert("✅ Payment submitted successfully!");
     } catch (err) {
       console.error("Checkout error:", err);
+      const detail = getApiErrorMessage(err, "Payment failed. Please try again.");
+      const errorMessage = createdPaymentId
+        ? `${detail}\nThe payment record was created, but the screenshot was not uploaded. Please contact the Yatra team with your transaction ID before submitting another payment.`
+        : detail;
       setSteps((s) => ({ ...s, payment: "error" }));
       setStepMessages((prev) => ({
         ...prev,
-        payment:
-          err.response?.data?.error || "Payment failed. Please try again.",
+        payment: errorMessage,
       }));
       await sleep();
 
-      alert("Payment failed. Please try again.");
+      alert(errorMessage);
     } finally {
       setLoadingCheckout(false);
       setVerifying(false);
@@ -591,6 +601,7 @@ const CheckoutStep = () => {
                         style={{
                           fontSize: "12px",
                           textAlign: "left",
+                          whiteSpace: "pre-line",
                           color:
                             steps[step.key] === "success"
                               ? "green"

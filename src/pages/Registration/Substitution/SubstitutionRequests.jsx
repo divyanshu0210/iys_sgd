@@ -1,6 +1,7 @@
 // SubstitutionRequests.jsx
 import React, { use, useEffect, useState } from "react";
 import API from "../../../services/api";
+import { getApiErrorMessage } from "../../../utils/apiErrors";
 import SubstitutionBottomSheet from "./SubstitutionBottomSheet";
 import SubstitutionRequestModal from "./SubstitutionRequestModal";
 import Modal from "../../../components/Modal";
@@ -27,19 +28,25 @@ export default function SubstitutionRequests() {
   });
 
   async function loadRequests() {
-    const res = await API.get("/yatra-transfers/substitution_requests/");
-    setRequests(res.data);
+    try {
+      const res = await API.get("/yatra-transfers/substitution_requests/");
+      setRequests(res.data);
+      setError("");
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Could not load substitution requests."));
+    }
   }
 
   const handleCancelRequest = async () => {
-    await API.post(
-      `/yatra-transfers/substitution_requests/${
-        activeReq ? activeReq.id : requests[0].id
-      }/respond/`,
-      { action: "reject" }
-    );
-    setActiveReq(null);
-    await loadRequests();
+    const requestId = activeReq?.id || requests[0]?.id;
+    if (!requestId) return;
+    try {
+      await API.post(`/yatra-transfers/substitution_requests/${requestId}/respond/`, { action: "reject" });
+      setActiveReq(null);
+      await loadRequests();
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Could not reject the substitution request."));
+    }
   };
 
   const handleSubmitCode = async () => {
@@ -57,7 +64,7 @@ export default function SubstitutionRequests() {
       window.location.reload();
       alert("Substitution completed successfully.");
     } catch (err) {
-      setError(err.response?.data?.detail || "Failed to accept");
+      setError(getApiErrorMessage(err, "Failed to accept"));
     } finally {
       setLoading(false);
     }
@@ -65,6 +72,7 @@ export default function SubstitutionRequests() {
 
   return (
     <>
+      {!activeReq && error && <p role="alert" className="sub-error-box">{error}</p>}
       {/* Bottom sheet only if requests exist and no modal open */}
       {requests.length > 0 && !activeReq && (
         <SubstitutionBottomSheet

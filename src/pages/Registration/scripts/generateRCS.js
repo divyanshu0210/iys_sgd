@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import API from "../../../services/api";
+import { getApiErrorMessage } from "../../../utils/apiErrors";
 import QRCode from "qrcode";
 
 const adminBaseURL = import.meta.env.VITE_ADMIN_BACKEND_URL;
@@ -191,7 +192,7 @@ export async function generateRCS(profile,authProfile, yatra) {
         40
       );
     } catch (err) {
-      console.log("Image fetch failed", err);
+      throw new Error(getApiErrorMessage(err, "Could not load the profile photo for RCS."));
     }
   } else {
     // fallback empty box

@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import API from "../../../services/api";
+import { getApiErrorMessages } from "../../../utils/apiErrors";
 import { useAuth } from "../../../context/AuthContext";
 
 const YatraRegistrationContext = createContext();
@@ -146,8 +147,7 @@ export const YatraRegistrationProvider = ({ children }) => {
       setRegisterData(registrationResponse.data);
     };
 
-    const getErrors = (error) =>
-      error?.response?.data?.errors || [error?.message || `Failed to ${action}`];
+    const getErrors = (error) => getApiErrorMessages(error, `Failed to ${action}`);
     try {
       const response = await API.post(`/yatras/${yatra_id}/eligibility/`, {
         profile_ids: profileIds,
@@ -191,7 +191,7 @@ export const YatraRegistrationProvider = ({ children }) => {
       const res = await API.get(`/yatras/${yatra_id}/eligibility/`);
       setEligibilityData(res.data);
     } catch (err) {
-      alert(err.response?.data?.errors?.[0] || "Failed to send request");
+      alert(getApiErrorMessages(err, "Failed to send request").join("\n"));
     } finally {
       setLoading((prev) => ({ ...prev, selfRequest: false }));
     }

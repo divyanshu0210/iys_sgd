@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import API from "../services/api";
+import { getApiErrorMessage } from "../utils/apiErrors";
 
 export default function useMentorRequestBulkActions(requests = []) {
   const [selectedIds, setSelectedIds] = useState([]);
@@ -35,17 +36,15 @@ export default function useMentorRequestBulkActions(requests = []) {
 
     setLoading(true);
     try {
-      // Let React paint the blocking full-screen loader before a fast
-      // rejection request completes and reloads the page.
+      // Let React render the blocking loader before starting the request.
       await new Promise((resolve) => setTimeout(resolve, 0));
       await API.post("/api/mentor/requests/", {
         request_ids: selectedIds,
         action,
       });
       window.location.reload();
-    } catch {
-      alert(`Failed to ${action} selected requests.`);
-    } finally {
+    } catch (err) {
+      alert(getApiErrorMessage(err, `Failed to ${action} selected requests.`));
       setLoading(false);
     }
   };

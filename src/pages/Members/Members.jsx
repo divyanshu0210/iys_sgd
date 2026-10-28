@@ -29,38 +29,23 @@ export default function Members() {
     fetchDashboard();
   }, []);
 
-  const getMembersForTab = () => {
-    if (!data) return [];
-
-    switch (activeTab) {
-      case "all":
-        return [
-          ...data.pending_requests.map((r) => ({
-            ...r.from_user,
-            is_pending: true,
-            request_id: r.id,
-            request_created_at: r.created_at,
-            bace: r.bace,
-          })),
-          data.mentor_profile,
-          ...data.approved_mentees,
-        ];
-      case "devotee":
-        return [data.mentor_profile, ...data.approved_mentees];
-      case "guest":
-        return data.pending_requests.map((r) => ({
-          ...r.from_user,
-          is_pending: true,
-          request_id: r.id,
-          request_created_at: r.created_at,
-          bace: r.bace,
-        }));
-      default:
-        return [];
-    }
-  };
-
-  const members = getMembersForTab();
+  const selfId = data?.mentor_profile?.id;
+  const approvedMentees = data?.approved_mentees || [];
+  const selfProfile = approvedMentees.find((member) => member.id === selfId) || data?.mentor_profile;
+  const otherMentees = approvedMentees.filter((member) => member.id !== selfId);
+  const pendingMembers = (data?.pending_requests || []).map((request) => ({
+    ...request.from_user,
+    is_pending: true,
+    request_id: request.id,
+    request_created_at: request.created_at,
+    bace: request.bace,
+  }));
+  const devoteeMembers = [...(selfProfile ? [selfProfile] : []), ...otherMentees];
+  const members = activeTab === "all"
+    ? [...(selfProfile ? [selfProfile] : []), ...pendingMembers, ...otherMentees]
+    : activeTab === "devotee"
+      ? devoteeMembers
+      : pendingMembers;
   const canBulkManageRequests = activeTab === "all" || activeTab === "guest";
   const {
     selectedIds: selectedRequestIds,
@@ -72,18 +57,17 @@ export default function Members() {
     handleAction: handleBulkRequestAction,
   } = useMentorRequestBulkActions(data?.pending_requests || []);
 
-  const totalMentees = data?.approved_mentees?.length || 0;
-  const pendingCount = data?.pending_requests?.length || 0;
-  const totalAll = totalMentees + pendingCount;
+  const pendingCount = pendingMembers.length;
 
   const tabs = [
-    { id: "all", label: `All (${totalAll + 1})` },
-    { id: "devotee", label: `Devotees (${totalMentees + 1})` },
+    { id: "all", label: `All (${devoteeMembers.length + pendingCount})` },
+    { id: "devotee", label: `Devotees (${devoteeMembers.length})` },
     { id: "guest", label: `Member Requests (${pendingCount})` },
   ];
 
   return (
     <>
+      {bulkActionLoading && <FullPageLoader />}
       <div className="profile-page">
         <div className="registration-sidebar">
           <nav className="vertical-tabs">

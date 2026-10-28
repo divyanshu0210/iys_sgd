@@ -4,6 +4,7 @@ import { useYatraRegistration } from "../context/YatraRegistrationContext";
 import InstallmentBadge from "./InstallmentBadge";
 import RegistrationFormModal from "../steps/RegistrationFormModal";
 import API from "../../../services/api";
+import { getApiErrorMessage } from "../../../utils/apiErrors";
 import Modal from "../../../components/Modal";
 import AccomodationTravelInfo from "./AccomodationTravelInfo";
 import { generateRCS, trackRCSDownload } from "../scripts/generateRCS";
@@ -157,7 +158,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
       setLocalShowForm(true);
     } catch (err) {
       console.error("Error fetching registration details:", err);
-      alert("Could not fetch registration details");
+      alert(getApiErrorMessage(err, "Could not fetch registration details"));
     } finally {
       setIsLoadingRegistration(false);
     }
@@ -177,8 +178,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
       }
     } catch (err) {
       console.error("RCS download failed", err);
-      // Optional: show toast
-      // toast.error("Failed to download RCS. Please try again.");
+      alert(getApiErrorMessage(err, "Failed to download RCS. Please try again."));
     } finally {
       setDownloading(false);
     }

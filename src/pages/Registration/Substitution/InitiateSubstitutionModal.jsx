@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import API from "../../../services/api";
+import { getApiErrorMessage } from "../../../utils/apiErrors";
 import FullPageLoader from "../../../components/FullPageLoader";
 import "../css/initiateSubstitutionModal.css";
 import useCountdown from "./useCountdown";
@@ -157,7 +158,7 @@ export default function InitiateSubstitutionModal({ registrationId, yatra }) {
           setIsExisting(true);
         }
       } catch (err) {
-        console.log("No existing substitution request.");
+        setError(getApiErrorMessage(err, "Could not check existing substitution requests."));
       } finally {
         setLoading(false);
       }
@@ -189,9 +190,7 @@ export default function InitiateSubstitutionModal({ registrationId, yatra }) {
       setResponse(res.data);
       setIsExisting(false);
     } catch (err) {
-      setError(
-        err?.response?.data?.detail || "Failed to initiate substitution"
-      );
+      setError(getApiErrorMessage(err, "Failed to initiate substitution"));
     } finally {
       setLoading(false);
     }
