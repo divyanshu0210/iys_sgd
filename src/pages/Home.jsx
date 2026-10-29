@@ -321,7 +321,7 @@ export default function Home() {
           {yatras.length === 0 ? (
             <p style={{ textAlign: "center", color: C.secondary }}>No upcoming yatras at the moment.</p>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 28, alignItems: "start" }}>
+            <div className="yatra-card-grid">
               {yatras.map(y => (
                 <YatraCard key={y.id} y={y} onRegisterClick={e => handleYatraClick(e, y)} />
               ))}

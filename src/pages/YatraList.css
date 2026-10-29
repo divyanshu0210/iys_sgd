@@ -1,0 +1,10 @@
+.yatra-list-page .yatra-list-heading {
+  margin-bottom: 20px !important;
+}
+
+@media (max-width: 480px) {
+  .yatra-list-page .yatra-list-content {
+    padding: 20px 16px 32px !important;
+  }
+
+}

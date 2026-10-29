@@ -1,0 +1,106 @@
+.yatra-card-poster-background {
+  display: none;
+}
+
+.yatra-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 300px));
+  gap: 24px;
+  align-items: start;
+}
+
+.yatra-card-poster-wrapper {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  cursor: zoom-in;
+}
+
+.yatra-poster-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: auto;
+  padding: 64px 20px 24px;
+  background: rgba(13, 20, 33, 0.92);
+}
+
+.yatra-poster-overlay img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: auto;
+  border-radius: 8px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+}
+
+.yatra-poster-close {
+  position: fixed;
+  z-index: 1;
+  top: 12px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  background: rgba(30, 41, 59, 0.92);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.yatra-poster-close:hover {
+  background: #475569;
+}
+
+.yatra-poster-close:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .yatra-card-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .yatra-card-poster {
+    height: min(38vh, 300px) !important;
+    object-fit: contain;
+    position: relative;
+  }
+
+  .yatra-card-poster-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: #f7ead8;
+  }
+
+  .yatra-card-poster-background {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(18px) brightness(0.8);
+    transform: scale(1.12);
+  }
+
+  .yatra-card-details {
+    padding: 16px !important;
+    gap: 10px !important;
+  }
+
+  .yatra-card-description {
+    line-height: 1.45 !important;
+  }
+}

@@ -37,7 +37,7 @@ export default function MentorRequestBulkBar({
           onClick={() => onAction("connect")}
           disabled={loading}
         >
-          Connect
+          Verify
         </button>
         <button
           className="bulk-reject"
