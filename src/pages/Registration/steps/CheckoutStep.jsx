@@ -10,8 +10,19 @@ import { useNavigate } from "react-router-dom";
 import FullPageLoader from "../../../components/FullPageLoader";
 import Tesseract from "tesseract.js";
 import QRCode from "qrcode";
-import { AccountDetail } from "../../Donate/DonatePage";
+import { AccountDetail, PAYMENT_ACCOUNT_NAME } from "../../Donate/DonatePage";
 import UpiPaymentSection from "../../Payments/UpiPaymentSection";
+
+function containsPaymentAccountName(text) {
+  const normalize = (value) => value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+  const normalizedText = normalize(text || "");
+  const normalizedName = normalize(PAYMENT_ACCOUNT_NAME);
+  return ` ${normalizedText} `.includes(` ${normalizedName} `);
+}
 
 const Spinner = () => (
   <>
@@ -57,12 +68,14 @@ const CheckoutStep = () => {
   const [steps, setSteps] = useState({
     amount: "idle", // idle | loading | success | error
     utr: "idle",
+    recipient: "idle",
     payment: "idle",
   });
 
   const [stepMessages, setStepMessages] = useState({
     amount: "",
     utr: "",
+    recipient: "",
     payment: "",
   });
 
@@ -321,7 +334,7 @@ const CheckoutStep = () => {
     setScreenshot(file);
     setTransactionId("");
     setStepsVisible(false);
-    setSteps({ amount: "idle", utr: "idle", payment: "idle" });
+    setSteps({ amount: "idle", utr: "idle", recipient: "idle", payment: "idle" });
   };
 
   const verifyAmountFromText = async (text) =>
@@ -390,7 +403,7 @@ const CheckoutStep = () => {
     }
     setVerifying(true);
     setStepsVisible(true);
-    setSteps({ amount: "loading", utr: "idle", payment: "idle" });
+    setSteps({ amount: "loading", utr: "idle", recipient: "idle", payment: "idle" });
     await sleep();
 
     let createdPaymentId = null;
@@ -406,10 +419,11 @@ const CheckoutStep = () => {
       }
 
       if (!amountValid) {
-        setSteps({ amount: "error", utr: "idle", payment: "idle" });
+        setSteps({ amount: "error", utr: "idle", recipient: "idle", payment: "idle" });
         setStepMessages({
           amount: `Amount mismatch. Expected ₹${totalAmount}`,
           utr: "",
+          recipient: "",
           payment: "",
         });
         await sleep();
@@ -417,10 +431,11 @@ const CheckoutStep = () => {
         return;
       }
 
-      setSteps({ amount: "success", utr: "loading", payment: "idle" });
+      setSteps({ amount: "success", utr: "loading", recipient: "idle", payment: "idle" });
       setStepMessages({
         amount: `Amount ₹${totalAmount} verified successfully`,
         utr: "",
+        recipient: "",
         payment: "",
       });
       await sleep();
@@ -434,7 +449,7 @@ const CheckoutStep = () => {
       }
 
       if (!utrValid) {
-        setSteps({ amount: "success", utr: "error", payment: "idle" });
+        setSteps({ amount: "success", utr: "error", recipient: "idle", payment: "idle" });
         setStepMessages((prev) => ({
           ...prev,
           utr: "Transaction ID not found in screenshot",
@@ -444,10 +459,32 @@ const CheckoutStep = () => {
         return;
       }
 
-      setSteps({ amount: "success", utr: "success", payment: "loading" });
+      setSteps({ amount: "success", utr: "success", recipient: "loading", payment: "idle" });
       setStepMessages((prev) => ({
         ...prev,
         utr: "Transaction ID verified successfully",
+      }));
+      await sleep();
+
+      let nameFound = containsPaymentAccountName(tesseractText);
+      if (!nameFound) {
+        nameFound = containsPaymentAccountName(await getOCRSpaceText());
+      }
+      if (!nameFound) {
+        setSteps({ amount: "success", utr: "success", recipient: "error", payment: "idle" });
+        setStepMessages((prev) => ({
+          ...prev,
+          recipient: `Account name not found in the screenshot. Please upload a screenshot showing the recipient's account name.`,
+        }));
+        await sleep();
+        alert(`Account name ${PAYMENT_ACCOUNT_NAME} was not found in the screenshot.`);
+        return;
+      }
+
+      setSteps({ amount: "success", utr: "success", recipient: "success", payment: "loading" });
+      setStepMessages((prev) => ({
+        ...prev,
+        recipient: `Account name found in screenshot.`,
       }));
       await sleep();
 
@@ -460,7 +497,7 @@ const CheckoutStep = () => {
       }
       createdPaymentId = await submitBatchProof();
       await uploadScreenshot(createdPaymentId);
-      setSteps({ amount: "success", utr: "success", payment: "success" });
+      setSteps((prev) => ({ ...prev, payment: "success" }));
       setStepMessages((prev) => ({
         ...prev,
         payment: "Payment proof submitted successfully",
@@ -510,12 +547,14 @@ const CheckoutStep = () => {
     setSteps({
       amount: "idle",
       utr: "idle",
+      recipient: "idle",
       payment: "idle",
     });
 
     setStepMessages({
       amount: "",
       utr: "",
+      recipient: "",
       payment: "",
     });
 
@@ -571,6 +610,7 @@ const CheckoutStep = () => {
                 {[
                   { key: "amount", label: "Amount Verification" },
                   { key: "utr", label: "Transaction ID Verification" },
+                  { key: "recipient", label: "Account Name Check" },
                   { key: "payment", label: "Payment Submission" },
                 ].map((step) => (
                   <div key={step.key} style={{ marginBottom: "14px" }}>

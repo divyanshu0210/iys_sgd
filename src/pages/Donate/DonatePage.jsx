@@ -2,6 +2,8 @@ import "../../css/DonatePage.css";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+export const PAYMENT_ACCOUNT_NAME = "Vinod Vitthal Sankapal";
+
 export default function DonatePage() {
   const navigate = useNavigate();
 
@@ -41,7 +43,7 @@ function Detail({ label, value }) {
 export function AccountDetail() {
   return (
     <div className="donation-account-detail-box">
-      <Detail label="Account Name" value="Vinod V Sankapal" />
+      <Detail label="Account Name" value={PAYMENT_ACCOUNT_NAME} />
       <Detail label="Account Number" value="337001000234" />
       <Detail label="IFSC Code" value="ICIC0003370" />
       <Detail label="Bank Name" value="ICICI Bank Nigdi" />
