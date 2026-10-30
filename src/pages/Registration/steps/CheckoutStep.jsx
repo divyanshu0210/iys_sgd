@@ -12,6 +12,7 @@ import Tesseract from "tesseract.js";
 import QRCode from "qrcode";
 import { AccountDetail, PAYMENT_ACCOUNT_NAME } from "../../Donate/DonatePage";
 import UpiPaymentSection from "../../Payments/UpiPaymentSection";
+import "../css/registrationTab.css";
 
 function containsPaymentAccountName(text) {
   const normalize = (value) => value
@@ -23,6 +24,13 @@ function containsPaymentAccountName(text) {
   const normalizedName = normalize(PAYMENT_ACCOUNT_NAME);
   return ` ${normalizedText} `.includes(` ${normalizedName} `);
 }
+
+const PAYMENT_STEPS = [
+  { key: "amount", label: "Amount", loading: "Checking amount…" },
+  { key: "utr", label: "Trans. ID", loading: "Checking transaction ID…" },
+  { key: "recipient", label: "Account", loading: "Checking account name…" },
+  { key: "payment", label: "Pay", loading: "Submitting payment…" },
+];
 
 const Spinner = () => (
   <>
@@ -563,6 +571,13 @@ const CheckoutStep = () => {
     setMessage("");
   };
 
+  const currentStep = PAYMENT_STEPS.find((step) => steps[step.key] === "error") ||
+    PAYMENT_STEPS.find((step) => steps[step.key] === "loading") ||
+    [...PAYMENT_STEPS].reverse().find((step) => stepMessages[step.key]);
+  const currentStepMessage = currentStep && (steps[currentStep.key] === "loading"
+    ? currentStep.loading
+    : stepMessages[currentStep.key]);
+
   return (
     <>
       {loadingCheckout && <FullPageLoader />}
@@ -606,55 +621,25 @@ const CheckoutStep = () => {
               />
             </div>
             {stepsVisible && (
-              <div style={{ marginTop: "24px" }}>
-                {[
-                  { key: "amount", label: "Amount Verification" },
-                  { key: "utr", label: "Transaction ID Verification" },
-                  { key: "recipient", label: "Account Name Check" },
-                  { key: "payment", label: "Payment Submission" },
-                ].map((step) => (
-                  <div key={step.key} style={{ marginBottom: "14px" }}>
-                    {/* Step Row */}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        opacity: steps[step.key] === "idle" ? 0.5 : 1,
-                        fontSize: "14px",
-                      }}
-                    >
+              <div className="payment-progress" aria-live="polite">
+                <div className="payment-progress-steps">
+                  {PAYMENT_STEPS.map((step, index) => (
+                    <div className={`payment-progress-step is-${steps[step.key]} ${index > 0 && steps[PAYMENT_STEPS[index - 1].key] === "success" ? "previous-complete" : ""}`} key={step.key}>
+                      <span className="payment-progress-icon" aria-hidden="true">
+                        {steps[step.key] === "loading" ? <Spinner /> :
+                          steps[step.key] === "success" ? "✓" :
+                          steps[step.key] === "error" ? "×" : index + 1}
+                      </span>
                       <span>{step.label}</span>
-
-                      {steps[step.key] === "loading" && <Spinner />}
-                      {steps[step.key] === "success" && (
-                        <span style={{ color: "green" }}>✔</span>
-                      )}
-                      {steps[step.key] === "error" && (
-                        <span style={{ color: "red" }}>✖</span>
-                      )}
+                      <span className="payment-progress-sr-only">: {steps[step.key]}</span>
                     </div>
-
-                    {/* Step Message */}
-                    {stepMessages[step.key] && (
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          textAlign: "left",
-                          whiteSpace: "pre-line",
-                          color:
-                            steps[step.key] === "success"
-                              ? "green"
-                              : steps[step.key] === "error"
-                              ? "red"
-                              : "#555",
-                        }}
-                      >
-                        {stepMessages[step.key]}
-                      </div>
-                    )}
+                  ))}
+                </div>
+                {currentStepMessage && (
+                  <div className={`payment-progress-message is-${steps[currentStep.key]}`}>
+                    {currentStepMessage}
                   </div>
-                ))}
+                )}
               </div>
             )}
 

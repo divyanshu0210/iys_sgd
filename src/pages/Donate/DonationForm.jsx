@@ -143,7 +143,7 @@ export default function DonationForm() {
       accept: "image/*",
     },
     {
-      label: `PAN Number (for 80G receipt or donations ₹50,000+)`,
+      label: `PAN Number (for donations above ₹50,000)`,
       key: "pan",
       placeholder: "Enter PAN number if applicable",
       required: false,
