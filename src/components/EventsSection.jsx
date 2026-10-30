@@ -66,6 +66,7 @@ export default function EventsSection({ preview = false }) {
     : imageEvents;
 
   const featuredIdx = filtered.findIndex(e => new Date(e.start_datetime) >= now);
+  const showEventColumn = loading || (preview ? filtered.length > 0 : imageEvents.length > 0);
 
   return (
     <div>
@@ -80,9 +81,9 @@ export default function EventsSection({ preview = false }) {
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 32, alignItems: "start" }} className="events-section-layout">
+      <div style={{ display: "grid", gridTemplateColumns: showEventColumn ? "1fr 300px" : "1fr", gap: 32, alignItems: "start" }} className="events-section-layout">
 
-        <div>
+        {showEventColumn && <div>
           {loading ? (
             <div style={{ textAlign: "center", padding: "60px 0", color: C.secondary }}>
               <Clock size={32} style={{ marginBottom: 12, opacity: 0.4 }} />
@@ -113,7 +114,7 @@ export default function EventsSection({ preview = false }) {
               ))}
             </div>
           )}
-        </div>
+        </div>}
 
         <aside style={{ position: "sticky", top: 24 }}>
           <div style={{ borderRadius: 16, border: `1px solid ${C.orange}33`, background: "#fff", overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>

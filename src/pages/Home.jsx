@@ -26,24 +26,24 @@ const HERO_IMG = "/hero.png";
 
 const GALLERY = [
   {
-    src: "https://images.unsplash.com/photo-1606298855672-3efb63017be8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800",
-    label: "Khajuraho Temple Yatra", sub: "March 2025 · 48 Devotees", wide: true,
+    src: "/mayapur.jpg",
+    label: "Mayapur Dham-IYS Yatra 2026", wide: true,
   },
   {
-    src: "https://images.unsplash.com/photo-1667162862361-e2dbce58db05?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-    label: "Vrindavan Dham",
+    src: "/vrindavan.png",
+    label: "Vrindavan Yatra 2025",
   },
   {
-    src: "https://images.unsplash.com/photo-1603228254119-e6a4d095dc59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-    label: "Holi Mahotsav",
+    src: "/boat-festival.jpg",
+    label: "Boat Festival",
   },
   {
-    src: "https://images.unsplash.com/photo-1724433789678-2ac769239bbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-    label: "Ganga Aarti, Haridwar",
+    src: "/ganga-arati.jpg",
+    label: "Ganga Aarti, Mayapur",
   },
   {
-    src: "https://images.unsplash.com/photo-1522075782449-e45a34f1ddfb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-    label: "Meditation Retreat",
+    src: "/drama.jpg",
+    label: "Dramas",
   },
 ];
 
@@ -184,11 +184,11 @@ export default function Home() {
               <span style={{ fontWeight: 600, textTransform: "uppercase", color: C.orange, fontSize: 11, letterSpacing: "3.2px" }}>ISKCON Youth Services · Sri Govind Dham</span>
             </div>
             <h1 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, color: "#FDF6EC", fontSize: "clamp(2.4rem, 6vw, 4.2rem)", lineHeight: 1.12, letterSpacing: "-0.02em", marginBottom: 24 }}>
-              Ignite Your<br />
+              Begin Your<br />
               <span style={{ color: C.orange }}>Spiritual Journey</span>
             </h1>
             <p style={{ color: "rgba(253,246,236,0.75)", fontSize: "clamp(1rem, 2vw, 1.2rem)", lineHeight: 1.7, marginBottom: 40, maxWidth: 480 }}>
-              Connect with a vibrant community of young devotees. Explore sacred pilgrimages, spiritual education, and transformative experiences rooted in Vedic wisdom.
+              Connect with a vibrant community of youths. Explore spiritual retreats, pilgrimages, spiritual education, and transformative experiences rooted in Vedic wisdom.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center" }}>
               <button
@@ -226,7 +226,7 @@ export default function Home() {
         <div style={{ textAlign: "center", marginBottom: "clamp(28px, 5vw, 56px)" }}>
           <SectionLabel text="Events & Announcements" />
           <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)", letterSpacing: "-0.03em", marginBottom: 16 }}>What's Happening</h2>
-          <p style={{ color: C.secondary, fontSize: 16, lineHeight: 1.7, maxWidth: 480, margin: "0 auto" }}>
+          <p style={{ color: C.secondary, fontSize: 16, lineHeight: 1.7, margin: "0 auto" }}>
             Stay updated with our latest events, festivals, and spiritual gatherings.
           </p>
         </div>
@@ -250,7 +250,7 @@ export default function Home() {
           <div style={{ textAlign: "center", marginBottom: "clamp(28px, 5vw, 56px)" }}>
             <SectionLabel text="What We Offer" />
             <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)", color: "#FDF6EC", letterSpacing: "-0.03em", marginBottom: 16 }}>Activities for Youth</h2>
-            <p style={{ color: "rgba(253,246,236,0.6)", fontSize: 16, lineHeight: 1.7, maxWidth: 480, margin: "0 auto" }}>
+            <p style={{ color: "rgba(253,246,236,0.6)", fontSize: 16, lineHeight: 1.7, margin: "0 auto" }}>
               Transformative programs designed to nurture spiritual growth, community bonds, and personal development.
             </p>
           </div>
@@ -278,7 +278,7 @@ export default function Home() {
         <div style={{ textAlign: "center", marginBottom: "clamp(28px, 5vw, 56px)" }}>
           <SectionLabel text="Our Memories" />
           <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)", letterSpacing: "-0.03em", marginBottom: 16 }}>Moments from Our Trips</h2>
-          <p style={{ color: C.secondary, fontSize: 16, lineHeight: 1.7, maxWidth: 480, margin: "0 auto" }}>
+          <p style={{ color: C.secondary, fontSize: 16, lineHeight: 1.7, margin: "0 auto" }}>
             Glimpses of joy, devotion, and togetherness from our sacred journeys.
           </p>
         </div>
@@ -313,7 +313,7 @@ export default function Home() {
           <div style={{ textAlign: "center", marginBottom: "clamp(28px, 5vw, 56px)" }}>
             <SectionLabel text="Sacred Journeys" />
             <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)", letterSpacing: "-0.03em", marginBottom: 16 }}>Upcoming Yatras</h2>
-            <p style={{ color: C.secondary, fontSize: 16, lineHeight: 1.7, maxWidth: 480, margin: "0 auto" }}>
+            <p style={{ color: C.secondary, fontSize: 16, lineHeight: 1.7, margin: "0 auto" }}>
               Embark on transformative pilgrimages to the most sacred places in India with fellow devotees.
             </p>
           </div>
@@ -344,7 +344,7 @@ export default function Home() {
         <div style={{ textAlign: "center", marginBottom: "clamp(28px, 5vw, 56px)" }}>
           <SectionLabel text="Find Us Near You" />
           <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)", letterSpacing: "-0.03em", marginBottom: 16 }}>Our Centres</h2>
-          <p style={{ color: C.secondary, fontSize: 16, lineHeight: 1.7, maxWidth: 480, margin: "0 auto" }}>
+          <p style={{ color: C.secondary, fontSize: 16, lineHeight: 1.7, margin: "0 auto" }}>
             Connect with your local IYS Sri Govind Dham centre and become part of a thriving spiritual community.
           </p>
         </div>
