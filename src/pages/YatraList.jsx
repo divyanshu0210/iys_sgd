@@ -30,6 +30,7 @@ export default function YatraList() {
 
   useEffect(() => {
     setUseFullWidth(true);
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     return () => setUseFullWidth(false);
   }, []);
 
