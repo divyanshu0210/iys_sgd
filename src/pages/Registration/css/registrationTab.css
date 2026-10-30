@@ -521,6 +521,19 @@
 .payment-progress-step.is-error .payment-progress-icon { background: #fee2e2; border-color: #fca5a5; }
 .payment-progress-step.is-loading .payment-progress-icon { background: #eff6ff; border-color: #93c5fd; }
 
+.payment-progress-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ccc;
+  border-top-color: #333;
+  border-radius: 50%;
+  animation: payment-progress-spin 1s linear infinite;
+}
+
+@keyframes payment-progress-spin {
+  to { transform: rotate(360deg); }
+}
+
 .payment-progress-message {
   margin-top: 10px;
   color: #475569;

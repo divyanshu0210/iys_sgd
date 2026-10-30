@@ -8,22 +8,12 @@ import { getApiErrorMessage } from "../../../utils/apiErrors";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import FullPageLoader from "../../../components/FullPageLoader";
-import Tesseract from "tesseract.js";
+import { extractScreenshotText, matchesAccountName, matchesAmount, matchesTransactionId } from "../../../utils/paymentScreenshot";
 import QRCode from "qrcode";
 import { AccountDetail, PAYMENT_ACCOUNT_NAME } from "../../Donate/DonatePage";
 import UpiPaymentSection from "../../Payments/UpiPaymentSection";
 import "../css/registrationTab.css";
 
-function containsPaymentAccountName(text) {
-  const normalize = (value) => value
-    .normalize("NFKC")
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
-    .trim();
-  const normalizedText = normalize(text || "");
-  const normalizedName = normalize(PAYMENT_ACCOUNT_NAME);
-  return ` ${normalizedText} `.includes(` ${normalizedName} `);
-}
 
 const PAYMENT_STEPS = [
   { key: "amount", label: "Amount", loading: "Checking amount…" },
@@ -31,28 +21,6 @@ const PAYMENT_STEPS = [
   { key: "recipient", label: "Account", loading: "Checking account name…" },
   { key: "payment", label: "Pay", loading: "Submitting payment…" },
 ];
-
-const Spinner = () => (
-  <>
-    <div
-      style={{
-        width: 18,
-        height: 18,
-        border: "2px solid #ccc",
-        borderTop: "2px solid #333",
-        borderRadius: "50%",
-        animation: "spin 1s linear infinite",
-      }}
-    />
-    <style>
-      {`@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}`}
-    </style>
-  </>
-);
 
 const CheckoutStep = () => {
   const { setIsNavigationLocked } = useAuth();
@@ -201,141 +169,6 @@ const CheckoutStep = () => {
     return sum + (regData?.amount || 0);
   }, 0);
 
-  // =====================================================
-  // OCR Extraction Helpers
-  // =====================================================
-
-  const extractRawNumbers = (txt) => {
-    const matches = txt.match(/\d[\d,]*/g) || [];
-    return matches.map((m) => m.replace(/,/g, ""));
-  };
-
-  const generateVariants = (numStr) => {
-    const variants = [];
-
-    variants.push(Number(numStr));
-
-    if (numStr.length > 1) {
-      const truncated = numStr.substring(1);
-      if (/^\d+$/.test(truncated)) variants.push(Number(truncated));
-    }
-
-    return variants.filter((v) => v > 0);
-  };
-  const verifyAmount1 = async (text) => {
-    const raw = extractRawNumbers(text);
-    // console.log(raw);
-    let variants = [];
-
-    raw.forEach((n) => {
-      variants.push(...generateVariants(n));
-    });
-
-    variants = [...new Set(variants)];
-
-    console.log("Method 1", variants);
-
-    return variants.includes(totalAmount);
-  };
-  // =====================================================
-  // Tesseract OCR Verification
-  // =====================================================
-
-  const getLines = (txt) =>
-    txt
-      .split("\n")
-      .map((l) => l.trim())
-      .filter(Boolean);
-
-  const extractAmounts = (txt) => {
-    const lines = getLines(txt);
-    const amounts = [];
-
-    for (const line of lines) {
-      // Remove junk but keep digits & spaces
-      const clean = line
-        .replace(/[’'`]/g, "")
-        .replace(/[^\d\s]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-
-      // console.log(clean)
-
-      // Match spaced digits ONLY within this line
-      const match = clean.match(/^(?:\d\s*){3,6}$/);
-
-      if (match) {
-        const num = Number(match[0].replace(/\s+/g, ""));
-        if (num >= 10 && num <= 100000) {
-          amounts.push(num);
-        }
-      }
-    }
-
-    return amounts;
-  };
-
-  const verifyAmount2 = async (text) => {
-    const detected = extractAmounts(text);
-    console.log("Detected amounts Line Method:", detected);
-
-    return detected.includes(Number(totalAmount));
-  };
-
-  const getTextFromOCRSpace = async (imageFile) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", imageFile);
-      formData.append("apikey", "200f6d298a88957"); // move to env later
-      formData.append("language", "eng");
-      formData.append("OCREngine", "2");
-
-      const response = await fetch("https://api.ocr.space/parse/image", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-      return data?.ParsedResults?.[0]?.ParsedText || "";
-    } catch (err) {
-      console.error("OCR.space failed", err);
-      return "";
-    }
-  };
-
-  const extractUTRsByLineMethod = (text) => {
-    const lines = getLines(text);
-    const found = [];
-
-    for (const line of lines) {
-      // Keep digits + spaces only
-      const clean = line
-        .replace(/[^\d\s]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-
-      // Typical UTR length (12–18 digits, may be spaced)
-      const match = clean.match(/^(?:\d\s*){12,18}$/);
-      if (match) {
-        found.push(match[0].replace(/\s+/g, ""));
-      }
-    }
-
-    return found;
-  };
-
-  const verifyUTRFromText = (text) => {
-    const normalizedInput = transactionId.replace(/\s/g, "");
-    const regexMatches = text.match(/\b\d{12,18}\b/g) || [];
-    const lineMatches = extractUTRsByLineMethod(text);
-    const allCandidates = [...regexMatches, ...lineMatches].map((u) =>
-      u.replace(/\s/g, "")
-    );
-
-    console.log("UTR candidates:", allCandidates);
-
-    return allCandidates.includes(normalizedInput);
-  };
   const sleep = (ms = 300) => new Promise((res) => setTimeout(res, ms));
 
   const handleScreenshotChange = (file) => {
@@ -345,37 +178,10 @@ const CheckoutStep = () => {
     setSteps({ amount: "idle", utr: "idle", recipient: "idle", payment: "idle" });
   };
 
-  const verifyAmountFromText = async (text) =>
-    (await verifyAmount1(text)) || (await verifyAmount2(text));
-
-  const extractAllOCRText = async (imageFile) => {
-    let tesseractText = "";
-    let ocrSpaceText = "";
-
-    /* ---------- TESSERACT ---------- */
-    try {
-      const {
-        data: { text },
-      } = await Tesseract.recognize(imageFile, "eng");
-
-      tesseractText = text || "";
-    } catch (err) {
-      console.error("Tesseract failed", err);
-    }
-
-    /* ---------- OCR.SPACE (lazy) ---------- */
-    const runOCRSpace = async () => {
-      if (ocrSpaceText) return ocrSpaceText;
-
-      ocrSpaceText = await getTextFromOCRSpace(imageFile);
-      return ocrSpaceText;
-    };
-
-    return {
-      tesseractText,
-      getOCRSpaceText: runOCRSpace, // function → lazy fallback
-    };
-  };
+  const verifyAmountFromText = (text) => matchesAmount(text, totalAmount);
+  const verifyUTRFromText = (text) => matchesTransactionId(text, transactionId);
+  const containsPaymentAccountName = (text) => matchesAccountName(text, PAYMENT_ACCOUNT_NAME);
+  const extractAllOCRText = extractScreenshotText;
 
   // ==========================
   // SUBMISSION (unchanged)
@@ -626,7 +432,7 @@ const CheckoutStep = () => {
                   {PAYMENT_STEPS.map((step, index) => (
                     <div className={`payment-progress-step is-${steps[step.key]} ${index > 0 && steps[PAYMENT_STEPS[index - 1].key] === "success" ? "previous-complete" : ""}`} key={step.key}>
                       <span className="payment-progress-icon" aria-hidden="true">
-                        {steps[step.key] === "loading" ? <Spinner /> :
+                        {steps[step.key] === "loading" ? <span className="payment-progress-spinner" /> :
                           steps[step.key] === "success" ? "✓" :
                           steps[step.key] === "error" ? "×" : index + 1}
                       </span>

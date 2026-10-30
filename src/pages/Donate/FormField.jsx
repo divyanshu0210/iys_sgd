@@ -12,6 +12,7 @@ export default function FormField({
   placeholder = "",
   imageSrc = null,
   accept = null,
+  children,
 }) {
   const isFile = type === "file";
   return (
@@ -39,6 +40,7 @@ export default function FormField({
         autoComplete="off"
         {...(accept && { accept })}
       />
+      {children}
     </div>
   );
 }

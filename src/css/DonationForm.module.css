@@ -35,6 +35,11 @@
   border-bottom-color: transparent;
 }
 
+.verificationProgress {
+  box-sizing: border-box;
+  width: 100%;
+}
+
 .formInput[type=file] {
   border: none;
   outline: none;
