@@ -1,7 +1,13 @@
 // src/components/RegistrationFormModal.jsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useYatraRegistration } from "../context/YatraRegistrationContext";
+import { firstInstallment } from "../../../hooks/yatraRegistrationStatus";
 import "../css/registrationFormModal.css";
+
+const hasSubmitted = (inst) => inst.is_paid || (inst.proof && inst.status !== "rejected");
+const canRetry = (inst) => inst.proof && inst.status === "rejected";
+const isInstallmentMandatory = (installment) =>
+  Boolean(installment.start_date && new Date(`${installment.start_date}T00:00:00`) <= new Date());
 
 function RegistrationFormModal({ profile, onClose }) {
   const {
@@ -71,27 +77,25 @@ function RegistrationFormModal({ profile, onClose }) {
       yatra?.installments,
     ]
   );
-  const phaseEnded = Boolean(
-    registrationPhase?.end_date &&
-      new Date(`${registrationPhase.end_date}T23:59:59`) < today
-  );
-  const hasPendingInstallments = installments.some((installment) => {
-    const match = existing?.installments_details?.find(
-      (item) => item.label === installment.label
-    );
-    return !(
-      match?.is_paid ||
-      (match?.proof && match?.status !== "rejected")
-    );
-  });
-  const registrationClosedForPending = phaseEnded && hasPendingInstallments;
+  const deadlinePassed = useCallback((inst) => inst.end_date && new Date(`${inst.end_date}T23:59:59.999`) < today, [today]);
+  const blockedReason = useCallback((index) => {
+    const inst = installments[index];
+    if (!inst) return "Installment is unavailable.";
+    for (const previous of installments.slice(0, index)) {
+      if (!hasSubmitted(previous) && canRetry(previous)) return `Resubmit proof for ${previous.label} first.`;
+      if (!hasSubmitted(previous) && deadlinePassed(previous)) return `The deadline for ${previous.label} has passed.`;
+    }
+    if (!hasSubmitted(inst) && !canRetry(inst) && deadlinePassed(inst)) return `The deadline for ${inst.label} has passed.`;
+    return "";
+  }, [deadlinePassed, installments]);
+  const firstEndDate = installments[0]?.end_date;
 
   const nextPhase = useMemo(() => {
     const phases = (yatra?.registration_phases || [])
-      .filter((phase) => phase.start_date)
-      .sort((a, b) => a.start_date.localeCompare(b.start_date));
+      .filter((phase) => firstInstallment(phase)?.start_date)
+      .sort((a, b) => firstInstallment(a).start_date.localeCompare(firstInstallment(b).start_date));
     const upcomingIndex = phases.findIndex(
-      (phase) => new Date(`${phase.start_date}T00:00:00`) > today
+      (phase) => new Date(`${firstInstallment(phase).start_date}T00:00:00`) > today
     );
     return upcomingIndex >= 0
       ? { phase: phases[upcomingIndex], isFirst: upcomingIndex === 0 }
@@ -104,26 +108,24 @@ function RegistrationFormModal({ profile, onClose }) {
     setInstallmentsPaid(existing?.installments_paid || []);
   }, [existing, yatra]);
 
-  const isInstallmentMandatory = (installment) => {
-    if (!installment.start_date) return false;
-    const startDate = new Date(`${installment.start_date}T00:00:00`);
-    return startDate <= new Date();
-  };
-
   useEffect(() => {
     const mandatoryIndexes = installments
-      .map((installment, index) => (isInstallmentMandatory(installment) ? index : -1))
+      .map((installment, index) => (isInstallmentMandatory(installment) && !blockedReason(index) ? index : -1))
       .filter((index) => index >= 0);
     if (!mandatoryIndexes.length) return;
 
     const mandatoryLabels = installments
       .slice(0, Math.max(...mandatoryIndexes) + 1)
+      .filter((installment, index) => !blockedReason(index))
       .map((installment) => installment.label);
 
     setInstallmentsSelected((previous) => [
-      ...new Set([...previous, ...mandatoryLabels]),
+      ...new Set([...previous.filter((label) => {
+        const index = installments.findIndex((item) => item.label === label);
+        return index >= 0 && (hasSubmitted(installments[index]) || !blockedReason(index));
+      }), ...mandatoryLabels]),
     ]);
-  }, [existing, installments]);
+  }, [existing, installments, blockedReason]);
 
   const handleFieldChange = (e) => {
     if (isReadOnly) return;
@@ -302,11 +304,11 @@ function RegistrationFormModal({ profile, onClose }) {
             <p className="info-banner">Form can only be filled once.</p>
           ))}
           
-            {registrationPhase?.end_date && !phaseEnded && (
+            {firstEndDate && !deadlinePassed(installments[0]) && (
               <div className="info-banner phase-banner">
                 Registration closes on{" "}
                 <strong>
-                  {new Date(`${registrationPhase.end_date}T00:00:00`).toLocaleDateString(
+                  {new Date(`${firstEndDate}T00:00:00`).toLocaleDateString(
                     "en-IN",
                     { day: "2-digit", month: "short", year: "numeric" }
                   )}
@@ -403,7 +405,7 @@ function RegistrationFormModal({ profile, onClose }) {
               <div className="info-banner phase-banner">
                 Yatra Registration will {nextPhase.isFirst ? "start" : "resume"} from{" "}
                 <strong>
-                  {new Date(`${nextPhase.phase.start_date}T00:00:00`).toLocaleDateString(
+                  {new Date(`${firstInstallment(nextPhase.phase).start_date}T00:00:00`).toLocaleDateString(
                     "en-IN",
                     { day: "2-digit", month: "short", year: "numeric" }
                   )}
@@ -419,12 +421,6 @@ function RegistrationFormModal({ profile, onClose }) {
                   Registration has been closed to new users.
                 </div>
               )}
-
-            {registrationClosedForPending && (
-              <div className="info-banner phase-banner">
-                Registration has closed. This yatra is no longer accepting payments.
-              </div>
-            )}
 
             <div className="installment-list">
               {installments.map((instBase, index) => {
@@ -444,6 +440,7 @@ function RegistrationFormModal({ profile, onClose }) {
                 const orderBlocked = Boolean(
                   !isPaid && missingPrerequisite
                 );
+                const deadlineReason = blockedReason(index);
 
                 return (
                   <div
@@ -477,15 +474,15 @@ function RegistrationFormModal({ profile, onClose }) {
                         disabled={
                           isPaid ||
                           (hasProof && !isRejected) ||
-                          registrationClosedForPending ||
+                          Boolean(deadlineReason) ||
                           orderBlocked
                         }
                         title={
-                          isMandatory
+                          deadlineReason || (isMandatory
                             ? "Mandatory installment"
                             : orderBlocked
                             ? `Select ${missingPrerequisite.label} first`
-                            : ""
+                            : "")
                         }
                         // disabled={isPaid}
                       />
@@ -493,6 +490,8 @@ function RegistrationFormModal({ profile, onClose }) {
                         <strong>{label}</strong>
                         {/* {!isPaid && <span>- ₹{amount}</span>} */}
                         <span>- ₹{amount}</span>
+                        {inst.end_date && <small> (due {new Date(`${inst.end_date}T00:00:00`).toLocaleDateString("en-IN")})</small>}
+                        {deadlineReason && <small> — {deadlineReason}</small>}
                       </span>
                       {isPaid && (
                         <span className="installment-status paid">Paid</span>
@@ -540,7 +539,7 @@ function RegistrationFormModal({ profile, onClose }) {
               className="btn-primary"
               disabled={
                 isSubmitting ||
-                registrationClosedForPending ||
+                unpaidInstallmentsSelected.some((label) => blockedReason(installments.findIndex((item) => item.label === label))) ||
                 unpaidInstallmentsSelected.length === 0
               }
             >

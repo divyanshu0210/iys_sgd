@@ -34,7 +34,6 @@ const CheckoutStep = () => {
   const ignoreLeaveWarning = useRef(false);
 
   const [verifying, setVerifying] = useState(false);
-  const [message, setMessage] = useState("");
 
   // Checkout & QR state
   const [checkoutData, setCheckoutData] = useState(null);
@@ -87,7 +86,7 @@ const CheckoutStep = () => {
     //  If you have made the payment on account number and cancel without submitting screenshot, your payment wll not be tracked . You wont get chance to resubmit the payment.
 
     // 1. Block browser back/forward navigation
-    const handlePopState = (e) => {
+    const handlePopState = () => {
       console.log("popstate event", ignoreLeaveWarning.current);
       if (ignoreLeaveWarning.current) {
         // clearCheckoutSession();
@@ -138,7 +137,7 @@ const CheckoutStep = () => {
     );
   }
 
-  const { selected, registrations, yatra, registerData, yatra_id } =
+  const { selected, registrations, yatra_id } =
     checkoutData;
 
   // ---- Calculate total
@@ -186,25 +185,15 @@ const CheckoutStep = () => {
   // ==========================
   // SUBMISSION (unchanged)
   // ==========================
-  const submitBatchProof = async () => {
-    const payload = {
-      registration_installments: registrationInstallments,
-      transaction_id: transactionId,
-      total_amount: totalAmount,
-    };
-
-    const res = await API.post(
-      `/payments/${yatra_id}/batch-payment-proof/`,
-      payload
-    );
-    return res.data.payment_id;
-  };
-
-  const uploadScreenshot = async (paymentId) => {
+  const submitCheckout = async () => {
     const formData = new FormData();
     formData.append("screenshot", screenshot);
+    formData.append("registrations", JSON.stringify(registrations));
+    formData.append("registration_installments", JSON.stringify(registrationInstallments));
+    formData.append("transaction_id", transactionId);
+    formData.append("total_amount", String(totalAmount));
 
-    await API.post(`/payments/${paymentId}/upload-screenshot/`, formData, {
+    await API.post(`/payments/${yatra_id}/checkout/`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
   };
@@ -220,7 +209,6 @@ const CheckoutStep = () => {
     setSteps({ amount: "loading", utr: "idle", recipient: "idle", payment: "idle" });
     await sleep();
 
-    let createdPaymentId = null;
     try {
       const { tesseractText, getOCRSpaceText } = await extractAllOCRText(
         screenshot
@@ -303,14 +291,7 @@ const CheckoutStep = () => {
       await sleep();
 
       setLoadingCheckout(true);
-      const registrationResponse = await API.post(`/yatras/${yatra_id}/register/`, registrations);
-      if (registrationResponse.data?.errors?.length) {
-        throw new Error(
-          `Some registrations could not be saved. Other successful registrations were saved; payment was not submitted.\n${registrationResponse.data.errors.join("\n")}`
-        );
-      }
-      createdPaymentId = await submitBatchProof();
-      await uploadScreenshot(createdPaymentId);
+      await submitCheckout();
       setSteps((prev) => ({ ...prev, payment: "success" }));
       setStepMessages((prev) => ({
         ...prev,
@@ -325,9 +306,7 @@ const CheckoutStep = () => {
     } catch (err) {
       console.error("Checkout error:", err);
       const detail = getApiErrorMessage(err, "Payment failed. Please try again.");
-      const errorMessage = createdPaymentId
-        ? `${detail}\nThe payment record was created, but the screenshot was not uploaded. Please contact the Yatra team with your transaction ID before submitting another payment.`
-        : detail;
+      const errorMessage = err.response ? detail : `${detail}\nPlease check your registration status before retrying; the server may have completed your submission.`;
       setSteps((s) => ({ ...s, payment: "error" }));
       setStepMessages((prev) => ({
         ...prev,
@@ -374,7 +353,6 @@ const CheckoutStep = () => {
 
     setVerifying(false);
     setLoadingCheckout(false);
-    setMessage("");
   };
 
   const currentStep = PAYMENT_STEPS.find((step) => steps[step.key] === "error") ||
