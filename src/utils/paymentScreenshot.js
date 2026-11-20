@@ -27,7 +27,14 @@ export function matchesTransactionId(text, transactionId) {
 }
 
 export function matchesAccountName(text, accountName) {
-  const normalize = (value) => value.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  const normalize = (value) => value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .split(/\s+/)
+    .filter((token) => token && token !== "mr")
+    .join(" ")
+    .trim();
   return ` ${normalize(text || "")} `.includes(` ${normalize(accountName)} `);
 }
 
