@@ -18,10 +18,10 @@ export function matchesAmount(text, expected) {
 }
 
 export function matchesTransactionId(text, transactionId) {
-  const direct = text.match(/\b\d{12,18}\b/g) || [];
+  const direct = text.match(/\b\d{9,18}\b/g) || [];
   const spaced = linesOf(text).flatMap((line) => {
     const cleaned = line.replace(/[^\d\s]/g, " ").replace(/\s+/g, " ").trim();
-    return /^(?:\d\s*){12,18}$/.test(cleaned) ? [cleaned.replace(/\s/g, "")] : [];
+    return /^(?:\d\s*){9,18}$/.test(cleaned) ? [cleaned.replace(/\s/g, "")] : [];
   });
   return [...direct, ...spaced].includes(String(transactionId).replace(/\s/g, ""));
 }
