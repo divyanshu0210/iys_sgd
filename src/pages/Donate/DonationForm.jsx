@@ -115,6 +115,7 @@ export default function DonationForm() {
         pan: form.pan, email: form.email, transaction_id: form.transactionId,
       };
       Object.entries(fields).forEach(([key, value]) => payload.append(key, value));
+      payload.append("payment_account_snapshot", JSON.stringify(paymentDetails));
       payload.append("screenshot", paymentScreenshot);
       await API.post("/payments/donations/", payload);
       updateStep("submit", "success", "Donation submitted successfully.");
