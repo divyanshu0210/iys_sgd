@@ -7,7 +7,7 @@ import CustomisedAlert from "../../components/CustomisedAlert.jsx";
 import API from "../../services/api";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import { useAuth } from "../../context/AuthContext";
-import { PAYMENT_ACCOUNT_NAME } from "./DonatePage";
+import { usePaymentAccount } from "../../context/PaymentAccountContext";
 import { extractScreenshotText, matchesAccountName, matchesAmount, matchesTransactionId } from "../../utils/paymentScreenshot";
 import "../Registration/css/registrationTab.css";
 
@@ -21,6 +21,7 @@ const DONATION_STEPS = [
 export default function DonationForm() {
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { paymentAccount } = usePaymentAccount();
   const [loading, setLoading] = useState(false);
   const editedFields = useRef(new Set());
   const [form, setForm] = useState({
@@ -35,6 +36,7 @@ export default function DonationForm() {
   });
   const [paymentScreenshot, setPaymentScreenshot] = useState(null);
   const [verification, setVerification] = useState(null);
+  const paymentDetails = paymentAccount || {};
 
   useEffect(() => {
     if (!profile) return;
@@ -99,7 +101,7 @@ export default function DonationForm() {
       }
       updateStep("transaction", "success", "Transaction ID found in screenshot.");
       updateStep("recipient", "loading", "Checking account name…");
-      if (!await check((text) => matchesAccountName(text, PAYMENT_ACCOUNT_NAME))) {
+      if (!await check((text) => matchesAccountName(text, paymentDetails.payment_account_name))) {
         updateStep("recipient", "error", "Account name not found in the screenshot. Please upload a screenshot showing the recipient's account name.");
         return;
       }
@@ -214,6 +216,7 @@ export default function DonationForm() {
             imageSrc={field.imageSrc}
             required={field.required !== false}
             accept={field.accept}
+            paymentDetails={field.key === "paymentScreenshot" ? paymentDetails : undefined}
           >
             {field.key === "paymentScreenshot" && verification && (
           <div className={`payment-progress ${styles.verificationProgress}`} aria-live="polite">

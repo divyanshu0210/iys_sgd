@@ -11,6 +11,7 @@ import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { PaymentAccountProvider } from "./context/PaymentAccountContext.jsx";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -19,7 +20,9 @@ createRoot(document.getElementById("root")).render(
     <GoogleOAuthProvider clientId={googleClientId}>
       <AuthProvider>
         <BrowserRouter>
-          <App />
+          <PaymentAccountProvider>
+            <App />
+          </PaymentAccountProvider>
         </BrowserRouter>
       </AuthProvider>
     </GoogleOAuthProvider>

@@ -10,7 +10,8 @@ import { useNavigate } from "react-router-dom";
 import FullPageLoader from "../../../components/FullPageLoader";
 import { extractScreenshotText, matchesAccountName, matchesAmount, matchesTransactionId } from "../../../utils/paymentScreenshot";
 import QRCode from "qrcode";
-import { AccountDetail, PAYMENT_ACCOUNT_NAME } from "../../Donate/DonatePage";
+import { AccountDetail } from "../../Donate/DonatePage";
+import { usePaymentAccount } from "../../../context/PaymentAccountContext";
 import UpiPaymentSection from "../../Payments/UpiPaymentSection";
 import "../css/registrationTab.css";
 
@@ -24,6 +25,7 @@ const PAYMENT_STEPS = [
 
 const CheckoutStep = () => {
   const { setIsNavigationLocked } = useAuth();
+  const { paymentAccount } = usePaymentAccount();
   const navigate = useNavigate();
 
   const [screenshot, setScreenshot] = useState(null);
@@ -37,6 +39,7 @@ const CheckoutStep = () => {
 
   // Checkout & QR state
   const [checkoutData, setCheckoutData] = useState(null);
+  const [freshYatra, setFreshYatra] = useState(null);
 
   const [stepsVisible, setStepsVisible] = useState(false);
 
@@ -74,6 +77,16 @@ const CheckoutStep = () => {
       navigate(-1);
     }
   }, []);
+
+  useEffect(() => {
+    if (!checkoutData?.yatra_id) return;
+    API.get("/yatra/list/")
+      .then(({ data }) => {
+        const current = data.find((item) => String(item.id) === String(checkoutData.yatra_id));
+        if (current) setFreshYatra(current);
+      })
+      .catch((err) => console.error("Failed to refresh Yatra payment account", err));
+  }, [checkoutData]);
 
   //lock navigation
   useEffect(() => {
@@ -137,8 +150,18 @@ const CheckoutStep = () => {
     );
   }
 
-  const { selected, registrations, yatra_id } =
+  const { selected, registrations, yatra_id, yatra } =
     checkoutData;
+  const configuredAccount = freshYatra ? freshYatra.payment_account : yatra?.payment_account;
+  const configuredPaymentDetails = {
+    payment_account_id: configuredAccount?.id,
+    payment_account_name: configuredAccount?.account_name,
+    payment_account_number: configuredAccount?.account_number,
+    payment_ifsc: configuredAccount?.ifsc,
+    payment_bank_name: configuredAccount?.bank_name,
+    payment_upi_id: configuredAccount?.upi_id,
+  };
+  const paymentDetails = configuredAccount ? configuredPaymentDetails : (paymentAccount || {});
 
   // ---- Calculate total
   const registrationInstallments = selected
@@ -179,7 +202,7 @@ const CheckoutStep = () => {
 
   const verifyAmountFromText = (text) => matchesAmount(text, totalAmount);
   const verifyUTRFromText = (text) => matchesTransactionId(text, transactionId);
-  const containsPaymentAccountName = (text) => matchesAccountName(text, PAYMENT_ACCOUNT_NAME);
+  const containsPaymentAccountName = (text) => matchesAccountName(text, paymentDetails.payment_account_name);
   const extractAllOCRText = extractScreenshotText;
 
   // ==========================
@@ -192,6 +215,7 @@ const CheckoutStep = () => {
     formData.append("registration_installments", JSON.stringify(registrationInstallments));
     formData.append("transaction_id", transactionId);
     formData.append("total_amount", String(totalAmount));
+    formData.append("payment_account_snapshot", JSON.stringify(paymentDetails));
 
     await API.post(`/payments/${yatra_id}/checkout/`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -279,7 +303,7 @@ const CheckoutStep = () => {
           recipient: `Account name not found in the screenshot. Please upload a screenshot showing the recipient's account name.`,
         }));
         await sleep();
-        alert(`Account name ${PAYMENT_ACCOUNT_NAME} was not found in the screenshot.`);
+        alert(`Account name ${paymentDetails.payment_account_name || "configured recipient"} was not found in the screenshot.`);
         return;
       }
 
@@ -378,7 +402,7 @@ const CheckoutStep = () => {
         </div>
 
         <div className="qr-section">
-          <AccountDetail />
+          <AccountDetail paymentDetails={paymentDetails} />
 
           <form onSubmit={handleSubmitProof} className="proof-form">
             <div className="form-group">
