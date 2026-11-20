@@ -27,15 +27,33 @@ export function matchesTransactionId(text, transactionId) {
 }
 
 export function matchesAccountName(text, accountName) {
-  const normalize = (value) => value
+  const normalizeWords = (value) => value
     .normalize("NFKC")
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]+/gu, " ")
     .split(/\s+/)
     .filter((token) => token && token !== "mr")
-    .join(" ")
-    .trim();
-  return ` ${normalize(text || "")} `.includes(` ${normalize(accountName)} `);
+    .filter(Boolean);
+
+  const textWords = normalizeWords(text || "");
+  const accountWords = normalizeWords(accountName || "");
+  if (!textWords.length || !accountWords.length) return false;
+
+  const textNormalized = ` ${textWords.join(" ")} `;
+  const accountNormalized = ` ${accountWords.join(" ")} `;
+  if (textNormalized.includes(accountNormalized)) return true;
+
+  // Some banking apps truncate the displayed name. Try the full name first,
+  // then remove one trailing character at a time, down to the full first name.
+  // This accepts "Abhishek Vijaykumar Bhand..." or just "Abhishek", but not
+  // an arbitrary one-letter fragment.
+  const accountFullName = accountWords.join(" ");
+  const firstName = accountWords[0];
+  for (let end = accountFullName.length - 1; end >= firstName.length; end -= 1) {
+    const prefix = accountFullName.slice(0, end).trim();
+    if (prefix.length >= firstName.length && textNormalized.includes(` ${prefix}`)) return true;
+  }
+  return textWords.includes(firstName);
 }
 
 export async function extractScreenshotText(imageFile) {
