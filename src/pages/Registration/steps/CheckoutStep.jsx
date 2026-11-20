@@ -95,7 +95,7 @@ const CheckoutStep = () => {
     setIsNavigationLocked(true);
 
     const blockMessage =
-      "You have not submitted the Payment Proof. Are you sure you want to leave?";
+      "Your registration has not been submitted. Are you sure you want to leave?";
     //  If you have made the payment on account number and cancel without submitting screenshot, your payment wll not be tracked . You wont get chance to resubmit the payment.
 
     // 1. Block browser back/forward navigation
@@ -185,6 +185,8 @@ const CheckoutStep = () => {
       return null;
     })
     .filter(Boolean);
+  const complimentaryIds = selected.filter((id) => registrations[id]?.is_complimentary);
+  const requiresPayment = registrationInstallments.length > 0;
 
   const totalAmount = selected.reduce((sum, profileId) => {
     const regData = registrations[profileId];
@@ -210,9 +212,10 @@ const CheckoutStep = () => {
   // ==========================
   const submitCheckout = async () => {
     const formData = new FormData();
-    formData.append("screenshot", screenshot);
-    formData.append("registrations", JSON.stringify(registrations));
+    if (screenshot) formData.append("screenshot", screenshot);
+    formData.append("registrations", JSON.stringify(Object.fromEntries(selected.map((id) => [id, registrations[id]]))));
     formData.append("registration_installments", JSON.stringify(registrationInstallments));
+    formData.append("complimentary_profile_ids", JSON.stringify(complimentaryIds));
     formData.append("transaction_id", transactionId);
     formData.append("total_amount", String(totalAmount));
     formData.append("payment_account_snapshot", JSON.stringify(paymentDetails));
@@ -224,6 +227,19 @@ const CheckoutStep = () => {
 
   const handleSubmitProof = async (e) => {
     e.preventDefault();
+    if (!requiresPayment) {
+      setLoadingCheckout(true);
+      try {
+        await submitCheckout();
+        clearCheckoutSession();
+        alert("Registration confirmed successfully.");
+      } catch (err) {
+        alert(getApiErrorMessage(err, "Could not submit the registration."));
+      } finally {
+        setLoadingCheckout(false);
+      }
+      return;
+    }
     if (!screenshot || !transactionId) {
       alert("❌ Screenshot and Transaction ID are required");
       return;
@@ -402,9 +418,10 @@ const CheckoutStep = () => {
         </div>
 
         <div className="qr-section">
-          <AccountDetail paymentDetails={paymentDetails} />
+          {requiresPayment && <AccountDetail paymentDetails={paymentDetails} />}
 
           <form onSubmit={handleSubmitProof} className="proof-form">
+            {requiresPayment && <>
             <div className="form-group">
               <label>Payment Screenshot *</label>
               <input
@@ -474,6 +491,7 @@ const CheckoutStep = () => {
               </div>
             )}
 
+            </>}
             <div
               style={{
                 display: "flex",
@@ -493,14 +511,15 @@ const CheckoutStep = () => {
                     ? "Verifying..."
                     : loadingCheckout
                     ? "Submitting..."
-                    : "Submit All & Pay"}
+                    : requiresPayment ? "Submit All & Pay" : "Confirm Registration"}
                 </span>
               </button>
               <button
+                type="button"
                 onClick={() => {
                   if (
                     confirm(
-                      "Cancel payment?Your payment can be lost if screenshot not submitted."
+                      requiresPayment ? "Cancel payment? Your payment may be untracked if proof is not submitted." : "Cancel this registration?"
                     )
                   ) {
                     clearCheckoutSession();
@@ -514,7 +533,7 @@ const CheckoutStep = () => {
                 }}
                 disabled={loadingCheckout || verifying}
               >
-                Cancel Payment
+                {requiresPayment ? "Cancel Payment" : "Cancel"}
               </button>
             </div>
           </form>

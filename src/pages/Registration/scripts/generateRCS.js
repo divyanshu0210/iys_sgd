@@ -215,7 +215,7 @@ export async function generateRCS(profile,authProfile, yatra) {
     ["Registration ID", profile.registration_id],
     [
       "Status",
-      profile.is_substitution ? "Substituted" : profile.registration_status,
+      profile.is_substitution ? "Substituted" : profile.is_complimentary && profile.registration_status === "paid" ? "Confirmed (B)" : profile.registration_status,
     ],
   ];
   if (profile.is_substitution && profile.pending_substitution_fees) {

@@ -27,6 +27,12 @@
   align-items: center;
   width: 100%;
 }
+
+.complimentary-card-message {
+  color: #64748b;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
 .whatsapp-card-with-register-btn {
   display: flex;
   align-items: center;

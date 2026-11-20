@@ -22,6 +22,7 @@ function RegistrationFormModal({ profile, onClose }) {
 
   const profileId = profile.id || profile.profile_id;
   const existing = registrations[profileId];
+  const complimentary = Boolean(registerData.can_register_complimentary && profile.marital_status === "brahmachari_temple" && !profile.is_registered);
 
   const initialFormFields = existing?.form_fields || {};
   const [formFields, setFormFields] = useState(initialFormFields);
@@ -211,7 +212,8 @@ function RegistrationFormModal({ profile, onClose }) {
           installments_paid: installments_paid || [],
           installments_info: installments,
           installments_details: installments,
-          amount,
+          amount: complimentary ? 0 : amount,
+          is_complimentary: complimentary,
           registration_id: profileObj.registration_id,
           phase: prev[profileId]?.phase || registrationPhase,
           phase_id: prev[profileId]?.phase_id || registrationPhase?.id || null,
@@ -241,7 +243,7 @@ function RegistrationFormModal({ profile, onClose }) {
       return;
     }
 
-    if (installmentsSelected.length === 0) {
+    if (!complimentary && installmentsSelected.length === 0) {
       alert("Select at least one installment to proceed.");
       return;
     }
@@ -257,7 +259,7 @@ function RegistrationFormModal({ profile, onClose }) {
     try {
       await handleFormSave(profileId, {
         form_fields: formFields,
-        installments_selected: installmentsSelected,
+        installments_selected: complimentary ? [] : installmentsSelected,
         installments_paid: installmentsPaid,
         amount,
       });
@@ -389,7 +391,8 @@ function RegistrationFormModal({ profile, onClose }) {
           )}
 
           {/* --- Installments Section --- */}
-          <div className="form-section">
+          {complimentary && <p className="complimentary-message">No payment needed to register brahmacharis.</p>}
+          {!complimentary && <div className="form-section">
             {installments.length > 0 && (
               <h3 className="section-title">
                 Choose Installments (multiple allowed)
@@ -529,7 +532,7 @@ function RegistrationFormModal({ profile, onClose }) {
                 );
               })}
             </div>
-          </div>
+          </div>}
 
           {/* --- Actions --- */}
           <div className="form-actions-modern">
@@ -539,8 +542,8 @@ function RegistrationFormModal({ profile, onClose }) {
               className="btn-primary"
               disabled={
                 isSubmitting ||
-                unpaidInstallmentsSelected.some((label) => blockedReason(installments.findIndex((item) => item.label === label))) ||
-                unpaidInstallmentsSelected.length === 0
+                (!complimentary && (unpaidInstallmentsSelected.some((label) => blockedReason(installments.findIndex((item) => item.label === label))) ||
+                unpaidInstallmentsSelected.length === 0))
               }
             >
               {isSubmitting ? "Saving..." : "Save & Continue"}

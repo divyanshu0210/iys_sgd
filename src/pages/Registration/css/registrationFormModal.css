@@ -75,6 +75,12 @@
   color: #b45309;
 }
 
+.complimentary-message {
+  color: #475569;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
 .form-body {
   display: flex;
   flex-direction: column;

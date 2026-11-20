@@ -19,6 +19,7 @@ import { Clock3, MapPin } from "lucide-react";
 const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable = false, selected: isCardSelected = false, onSelect, hideEligibilityActions = false }) => {
   const {
     yatra,
+    registerData,
     selected,
     setSelected,
     registrations,
@@ -46,6 +47,11 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
   const isSelfRequesting = loading?.selfRequest && profile.is_self;
   const regData = registrations[profileId];
   const hasPaid = hasPaidInstallments(profile);
+  const hideInstallments = profile.is_complimentary || (
+    registerData.can_register_complimentary &&
+    profile.marital_status === "brahmachari_temple" &&
+    !profile.is_registered
+  );
 
   // Check if this profile has existing registration data
   const hasExistingData =
@@ -59,7 +65,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
     ) || [];
 
   const hasSelectableInstallments =
-    regData?.installments_selected?.some((instLabel) =>
+    regData?.is_complimentary || regData?.installments_selected?.some((instLabel) =>
       selectableInstallments.some((inst) => inst.label === instLabel)
     ) || false;
 
@@ -316,13 +322,17 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
               }}
             >
               {statusStyle.icon}
-              {" " + statusStyle.text}
+              {" " + statusStyle.text}{profile.is_complimentary && registrationStatus === "paid" ? " (B)" : ""}
             </span>
           )}
 
           {!isEligibilityCard && <div className="installmet-edit">
+            {hideInstallments && !isFinalStatus && (
+              <div className="installments-div complimentary-card-message">No payment needed to register brahmacharis.</div>
+            )}
             {/* === Installments List === */}
             {!isEligibilityCard &&
+              !hideInstallments &&
               !hasSelectableInstallments &&
               !isFinalStatus &&
               profile?.installments_info && (
@@ -385,6 +395,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
 
             <div className="installment-badge-collection">
               {!isEligibilityCard &&
+                !hideInstallments &&
                 regData?.installments_selected
                   ?.map((instLabel) =>
                     selectableInstallments.find(
@@ -400,7 +411,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
         </div>
         {!isEligibilityCard &&
           !hasSelectableInstallments &&
-          ["refunded", "cancelled"].includes(registrationStatus) && (
+          !profile.is_complimentary && ["refunded", "cancelled"].includes(registrationStatus) && (
             <p
               style={{
                 fontSize: "13px",
@@ -452,7 +463,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
               marginTop: "10px",
             }}
           >
-            {!yatra.is_rcs_download_open && (
+            {!yatra.is_rcs_download_open && !profile.is_complimentary && (
               <button
                 onClick={() => toggleSelect(profile)}
                 className={`action-btn ${hasExistingData ? "edit" : "open"}`}
@@ -514,7 +525,7 @@ const WhatsAppCard = ({ profile, isEligibilityCard = false, loading, selectable 
                 Yatra Resources 
               </button>
             )}
-            {["paid", "partial"].includes(registrationStatus) && (
+            {!profile.is_complimentary && ["paid", "partial"].includes(registrationStatus) && (
               <>
                 {(yatra.is_substitution_open || yatra.is_cancellation_open) && (
                   <MoreActionsMenu

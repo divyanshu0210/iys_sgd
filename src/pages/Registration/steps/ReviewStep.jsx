@@ -36,7 +36,7 @@ const ReviewStep = () => {
 
   selected.forEach((profileId) => {
     const regData = registrations[profileId];
-    if (regData?.installments_selected?.length > 0) {
+    if (regData?.installments_selected?.length > 0 || regData?.is_complimentary) {
       registrationInstallments[regData.registration_id || profileId] =
         regData.installments_selected;
       totalAmount += regData.amount || 0;
@@ -232,9 +232,9 @@ const ReviewStep = () => {
               handleProceedToCheckout();
             }}
             className="bulk-connect"
-            disabled={totalAmount === 0}
+            disabled={selected.length === 0 || (totalAmount === 0 && !selected.some((id) => registrations[id]?.is_complimentary))}
           >
-            Proceed to Pay <span>(Total ₹{totalAmount})</span>
+            {totalAmount > 0 ? "Proceed to Pay" : "Proceed"} <span>(Total ₹{totalAmount})</span>
           </button>
           </div>
         </div>

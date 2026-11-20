@@ -70,11 +70,11 @@ const RegistrationTab = ({
           <>
             {showBanner && (
               <div className="rt-banner">
-                <strong>1. </strong> Registration will be complete after payment
+                <strong>1. </strong> Paid registrations are complete after payment
                 & verification of all installments.
                 <br />
                 <strong>2. </strong>Accomodation and travel bookings will be
-                made available only after full payment is received.
+                made available after registration is confirmed.
                 <br />
               </div>
             )}
